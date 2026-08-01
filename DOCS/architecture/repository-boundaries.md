@@ -281,17 +281,17 @@ cannot depend on it.
 
 ## Dependency matrix
 
-| From | Allowed dependencies | Prohibited dependencies |
-|---|---|---|
-| `frontend` presentation | contracts, design tokens, frontend-local code | backend, DB, agents, Expo |
-| `frontend` route adapters | contracts, backend public server facade, adapter utilities | backend internals/deep imports |
-| `client-frontend` | contracts, design tokens, client-local code | backend, frontend, DB, server configuration |
-| backend domain | contracts only where a stable value schema is shared; preferably local values | application, infrastructure, frameworks, I/O |
-| backend application | domain, application ports, contracts | concrete DB/model adapters, HTTP/Next |
-| backend infrastructure | application ports, domain, contracts, approved SDKs | React, Expo, route adapters |
-| backend composition | all backend layers | frontend/client presentation |
-| contracts | Zod | applications, DB, model SDK, UI frameworks |
-| testkit | contracts and dev-only libraries | production-only runtime assumptions |
+| From                      | Allowed dependencies                                                          | Prohibited dependencies                      |
+| ------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------- |
+| `frontend` presentation   | contracts, design tokens, frontend-local code                                 | backend, DB, agents, Expo                    |
+| `frontend` route adapters | contracts, backend public server facade, adapter utilities                    | backend internals/deep imports               |
+| `client-frontend`         | contracts, design tokens, client-local code                                   | backend, frontend, DB, server configuration  |
+| backend domain            | contracts only where a stable value schema is shared; preferably local values | application, infrastructure, frameworks, I/O |
+| backend application       | domain, application ports, contracts                                          | concrete DB/model adapters, HTTP/Next        |
+| backend infrastructure    | application ports, domain, contracts, approved SDKs                           | React, Expo, route adapters                  |
+| backend composition       | all backend layers                                                            | frontend/client presentation                 |
+| contracts                 | Zod                                                                           | applications, DB, model SDK, UI frameworks   |
+| testkit                   | contracts and dev-only libraries                                              | production-only runtime assumptions          |
 
 Cycles are forbidden at package and backend-module levels. CI must run an architecture graph check
 and fail on forbidden imports (`BND-001`, `BND-003`, `BND-007`).
@@ -304,4 +304,3 @@ and fail on forbidden imports (`BND-001`, `BND-003`, `BND-007`).
 - `backend` receives validated server configuration through the composition root.
 - No module reads `process.env` outside its designated configuration adapter.
 - Server secrets never cross a contract schema or appear in public runtime variables.
-

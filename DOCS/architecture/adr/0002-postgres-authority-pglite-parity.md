@@ -19,4 +19,3 @@ repository ports and a defined parity suite.
 - Contributors retain a Docker-free demo.
 - Release verification requires Docker PostgreSQL.
 - Any adapter difference is explicit; production behavior is never weakened to match PGlite.
-

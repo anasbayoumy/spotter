@@ -75,9 +75,9 @@ draft -> queued -> published -> superseded
           └──────-> rejected
 ```
 
-Only a coach action crosses `queued -> published`. `blocked` is a review band, not a lifecycle state;
-it crosses only through override with a reason. Client reads require `status=published`, approval
-fields, current/non-superseded state, and effective validity (`FLOW-001`, `FLOW-006`).
+Only a coach action crosses `queued -> published`. `blocked` is a review band, not a lifecycle
+state; it crosses only through override with a reason. Client reads require `status=published`,
+approval fields, current/non-superseded state, and effective validity (`FLOW-001`, `FLOW-006`).
 
 ## Loop B: daily adjustment
 
@@ -120,13 +120,13 @@ are captured with each score. The agent cannot choose the score or tier.
 
 ### State machine
 
-| Tier | Deterministic trigger | Action | Owner |
-|---|---|---|---|
-| 0 | On track | Silence | none |
-| 1 | One missed session | Contextual in-app nudge when cap permits | automation |
-| 2 | Two misses or check-in latency doubling | Draft reduced-plan offer for approval | coach review |
-| 3 | Adherence below 50% over 14 days or 7 days silent | Coach brief, plan pause, automated silence | coach |
-| 4 | 21 days silent | Churn flag; no automated contact | coach |
+| Tier | Deterministic trigger                             | Action                                     | Owner        |
+| ---- | ------------------------------------------------- | ------------------------------------------ | ------------ |
+| 0    | On track                                          | Silence                                    | none         |
+| 1    | One missed session                                | Contextual in-app nudge when cap permits   | automation   |
+| 2    | Two misses or check-in latency doubling           | Draft reduced-plan offer for approval      | coach review |
+| 3    | Adherence below 50% over 14 days or 7 days silent | Coach brief, plan pause, automated silence | coach        |
+| 4    | 21 days silent                                    | Churn flag; no automated contact           | coach        |
 
 Transitions are monotonic toward human ownership. New better signals may change the computed tier,
 but a coach-owned state does not return to automation without an explicit coach action. Missing or
@@ -136,8 +136,8 @@ sparse inputs degrade conservatively and never invent engagement evidence (`FLOW
 
 The 48-hour window is rolling and uses the attempted send time from the injected clock. Exactly 48
 hours after the prior automated send is eligible; any earlier instant is suppressed. Concurrent
-signals lock the same per-client guard, so only one message can win. Suppression is recorded with its
-reason for scorecard/diagnostic use (`FLOW-005`).
+signals lock the same per-client guard, so only one message can win. Suppression is recorded with
+its reason for scorecard/diagnostic use (`FLOW-005`).
 
 The accountability agent may draft:
 
@@ -199,7 +199,8 @@ generation version.
 - Provider SDKs remain inside the live gateway adapter.
 - Calls use explicit deadline/abort behavior and bounded retry for retry-safe transport/rate-limit
   failures only.
-- Each attempt records trace, prompt hash, provider/model, usage, estimated cost, latency, and error.
+- Each attempt records trace, prompt hash, provider/model, usage, estimated cost, latency, and
+  error.
 - Live evaluation is never silently substituted for deterministic acceptance.
 
 ## Job invocation
@@ -235,4 +236,3 @@ Stable application error codes include at least:
 
 Messages are safe and actionable; raw provider/database errors and stack traces never enter the API
 envelope (`PRV-004`).
-

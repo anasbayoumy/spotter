@@ -3,33 +3,33 @@
 ## Objective
 
 Verification must prove that one seeded coach can operate the complete Plan, Adjust, and
-Accountability loops without unsafe or unapproved output reaching a selected synthetic client.
-It must also prove the less visible properties: current context is temporally correct, retries are
-idempotent, concurrent requests preserve invariants, failures leave audit evidence, and the
-no-auth build cannot accidentally expose real data.
+Accountability loops without unsafe or unapproved output reaching a selected synthetic client. It
+must also prove the less visible properties: current context is temporally correct, retries are
+idempotent, concurrent requests preserve invariants, failures leave audit evidence, and the no-auth
+build cannot accidentally expose real data.
 
 ## Test layers
 
-| Layer | Primary responsibility | Runtime | Gate |
-|---|---|---|---|
-| Static/architecture | Types, dependency direction, forbidden patterns, build shape | Host Node | Every change |
-| Unit | Pure domain rules, state machines, value validation, render logic | Vitest | Every change |
-| Component | Coach and RN surface behavior without a browser/device | Vitest + Testing Library | Every change |
-| Contract | Zod schemas, HTTP envelope, clients against provider contract | Vitest | Every change |
-| PGlite parity | Fast repository behavior and deterministic demo path | PGlite | Every change |
-| Safety | Fixed fixtures and property tests, no model/network | Vitest/custom runner | Every change/PR |
-| PostgreSQL integration | Migrations, queries, constraints, transactions, pgvector | Docker | Pool/release |
-| Concurrency | Duplicate requests, publication races, job/nudge races | Docker PostgreSQL | Pool/release |
-| E2E | Real browser journeys through HTTP and persistence | Playwright + Docker | Pool/release |
-| Mobile | RN components, Expo checks/exports, Expo-web browser journeys | Host + Playwright | Pool/release |
-| Accessibility | Automated axe plus keyboard/focus assertions | Playwright | Pool/release |
-| Performance | HTTP, batch jobs, rendering, query and resource budgets | k6/Lighthouse/Docker | Release |
-| Resilience | Dependency outage, timeout, restart, malformed output, recovery | Docker/Toxiproxy | Release |
-| Security | Threat-driven source, HTTP, dependency, secret and image checks | Host + Docker | Release |
-| Live evaluation | Independent generator/judge quality and cost observations | External model | Non-blocking unless enabled |
+| Layer                  | Primary responsibility                                            | Runtime                  | Gate                        |
+| ---------------------- | ----------------------------------------------------------------- | ------------------------ | --------------------------- |
+| Static/architecture    | Types, dependency direction, forbidden patterns, build shape      | Host Node                | Every change                |
+| Unit                   | Pure domain rules, state machines, value validation, render logic | Vitest                   | Every change                |
+| Component              | Coach and RN surface behavior without a browser/device            | Vitest + Testing Library | Every change                |
+| Contract               | Zod schemas, HTTP envelope, clients against provider contract     | Vitest                   | Every change                |
+| PGlite parity          | Fast repository behavior and deterministic demo path              | PGlite                   | Every change                |
+| Safety                 | Fixed fixtures and property tests, no model/network               | Vitest/custom runner     | Every change/PR             |
+| PostgreSQL integration | Migrations, queries, constraints, transactions, pgvector          | Docker                   | Pool/release                |
+| Concurrency            | Duplicate requests, publication races, job/nudge races            | Docker PostgreSQL        | Pool/release                |
+| E2E                    | Real browser journeys through HTTP and persistence                | Playwright + Docker      | Pool/release                |
+| Mobile                 | RN components, Expo checks/exports, Expo-web browser journeys     | Host + Playwright        | Pool/release                |
+| Accessibility          | Automated axe plus keyboard/focus assertions                      | Playwright               | Pool/release                |
+| Performance            | HTTP, batch jobs, rendering, query and resource budgets           | k6/Lighthouse/Docker     | Release                     |
+| Resilience             | Dependency outage, timeout, restart, malformed output, recovery   | Docker/Toxiproxy         | Release                     |
+| Security               | Threat-driven source, HTTP, dependency, secret and image checks   | Host + Docker            | Release                     |
+| Live evaluation        | Independent generator/judge quality and cost observations         | External model           | Non-blocking unless enabled |
 
-Test counts in discovery documents are planning floors, not targets. Coverage is accepted by
-risk and behavior, not by manufacturing tests to reach a count.
+Test counts in discovery documents are planning floors, not targets. Coverage is accepted by risk
+and behavior, not by manufacturing tests to reach a count.
 
 ## Environments and data
 
@@ -86,8 +86,8 @@ implementation paths are subject to mutation testing.
 
 ### Tier B — release-critical
 
-All documented user journeys, API contracts, audit records, accessibility, data integrity,
-Docker health, production builds, security gates, and approved performance budgets.
+All documented user journeys, API contracts, audit records, accessibility, data integrity, Docker
+health, production builds, security gates, and approved performance budgets.
 
 ### Tier C — observational
 
@@ -113,8 +113,8 @@ the affected NFR/security scenarios. Retain evidence for the pool.
 ### Release loop
 
 Run the clean-room Docker protocol, `pnpm verify:full`, evidence validation, then an independent
-adversarial review. Any defect re-enters the fix loop in `09-evidence-and-fix-loop.md`; after the fix,
-the targeted test, blast-radius suites, and complete release gate run again.
+adversarial review. Any defect re-enters the fix loop in `09-evidence-and-fix-loop.md`; after the
+fix, the targeted test, blast-radius suites, and complete release gate run again.
 
 ## Test ownership and independence
 
@@ -127,13 +127,13 @@ the targeted test, blast-radius suites, and complete release gate run again.
 
 ## QA strategy requirements
 
-| ID | Requirement | Verification |
-|---|---|---|
-| `QA-STR-001` | The fast deterministic suite requires no network, AI key, or Docker. | `pnpm verify` |
-| `QA-STR-002` | Authoritative integration/release evidence uses Docker PostgreSQL/pgvector. | `pnpm test:docker` |
-| `QA-STR-003` | Every release requirement maps to implementation, test, and evidence. | `pnpm evidence:verify` |
-| `QA-STR-004` | Tier A gates run without retry and fail closed. | `pnpm verify:full` |
-| `QA-STR-005` | Randomized tests preserve failing seeds. | `pnpm test:unit` |
-| `QA-STR-006` | Recorded model fixtures are schema-versioned and deterministic. | `pnpm test:contract` |
-| `QA-STR-007` | Live evaluation cannot override deterministic acceptance. | `pnpm evidence:verify` |
-| `QA-STR-008` | The mobile environmental exception is explicit and accurately reported. | `pnpm test:mobile && pnpm evidence:verify` |
+| ID           | Requirement                                                                 | Verification                               |
+| ------------ | --------------------------------------------------------------------------- | ------------------------------------------ |
+| `QA-STR-001` | The fast deterministic suite requires no network, AI key, or Docker.        | `pnpm verify`                              |
+| `QA-STR-002` | Authoritative integration/release evidence uses Docker PostgreSQL/pgvector. | `pnpm test:docker`                         |
+| `QA-STR-003` | Every release requirement maps to implementation, test, and evidence.       | `pnpm evidence:verify`                     |
+| `QA-STR-004` | Tier A gates run without retry and fail closed.                             | `pnpm verify:full`                         |
+| `QA-STR-005` | Randomized tests preserve failing seeds.                                    | `pnpm test:unit`                           |
+| `QA-STR-006` | Recorded model fixtures are schema-versioned and deterministic.             | `pnpm test:contract`                       |
+| `QA-STR-007` | Live evaluation cannot override deterministic acceptance.                   | `pnpm evidence:verify`                     |
+| `QA-STR-008` | The mobile environmental exception is explicit and accurately reported.     | `pnpm test:mobile && pnpm evidence:verify` |

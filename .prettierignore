@@ -1,0 +1,14 @@
+.git
+.turbo
+.next
+.expo
+node_modules
+dist
+build
+coverage
+artifacts
+playwright-report
+test-results
+pnpm-lock.yaml
+*.min.js
+*.snap

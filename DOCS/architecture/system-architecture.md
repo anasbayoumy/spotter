@@ -10,8 +10,8 @@ The V1 architecture optimizes for five outcomes:
 
 1. **Safety:** hard constraints cannot disappear through retrieval or token pressure.
 2. **Trust:** every generated item has gates, judge evidence, a review band, and a trace.
-3. **Auditability:** the exact inputs, prompt version, output, usage, evaluation, and coach action are
-   reconstructable.
+3. **Auditability:** the exact inputs, prompt version, output, usage, evaluation, and coach action
+   are reconstructable.
 4. **Review economics:** blocked and attention work is prioritized; trustworthy clear work is fast.
 5. **Operational simplicity:** one server deployable, one database, one repository, and no broker.
 
@@ -85,9 +85,9 @@ type ApiEnvelope<T> = {
 };
 ```
 
-Error details are allow-listed for the public contract. Raw database/model errors remain in
-redacted server logs. Mutation request IDs, idempotency keys, actor identity, and clock are passed in
-an application `ExecutionContext`; use cases never read them from framework globals.
+Error details are allow-listed for the public contract. Raw database/model errors remain in redacted
+server logs. Mutation request IDs, idempotency keys, actor identity, and clock are passed in an
+application `ExecutionContext`; use cases never read them from framework globals.
 
 ## Architectural layers
 
@@ -126,8 +126,8 @@ behind `ModelGateway`.
 ### Delivery
 
 Ultra-thin Next route adapters and scheduled job adapters are the delivery mechanism. They validate
-Zod input, construct `ExecutionContext`, call one facade/use case, and map known errors. They contain
-no SQL, transactions, prompts, gates, or review-band logic.
+Zod input, construct `ExecutionContext`, call one facade/use case, and map known errors. They
+contain no SQL, transactions, prompts, gates, or review-band logic.
 
 ## Composition and lifecycle
 
@@ -171,9 +171,9 @@ database pool or model client at import time.
 
 ### Observability
 
-Structured Pino logs include request/job ID, client handle, use case, duration, outcome, and trace ID.
-They exclude contact identity, free-text context, secrets, and raw model prompts. Exact model context
-is stored in the protected trace table and displayed through a deliberate trace endpoint.
+Structured Pino logs include request/job ID, client handle, use case, duration, outcome, and trace
+ID. They exclude contact identity, free-text context, secrets, and raw model prompts. Exact model
+context is stored in the protected trace table and displayed through a deliberate trace endpoint.
 
 Every model attempt records prompt version hash, model ID, trace ID, token usage, cost, latency, and
 failure. Every evaluation refers to its agent run, and every coach action refers to the affected
@@ -188,4 +188,3 @@ version.
 - No autonomous plan publication or V1 adjustment auto-application.
 - No general autonomous multi-agent runtime; intent is known from the command/event.
 - No independently deployed backend, queue, broker, or worker.
-

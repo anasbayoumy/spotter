@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spotter.local/schemas/evidence-manifest-v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "revision",
+    "startedAt",
+    "finishedAt",
+    "environment",
+    "sourceContracts",
+    "commands",
+    "requirements",
+    "exceptions",
+    "verdict"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "runId": { "type": "string", "pattern": "^[A-Za-z0-9-]+$" },
+    "revision": { "type": "object" },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "finishedAt": { "type": "string", "format": "date-time" },
+    "environment": { "type": "object" },
+    "sourceContracts": { "type": "array", "items": { "type": "string" } },
+    "commands": { "type": "array", "items": { "type": "object" } },
+    "requirements": { "type": "array", "items": { "type": "object" } },
+    "exceptions": { "type": "array", "items": { "type": "object" } },
+    "verdict": { "enum": ["fail", "fast-pass", "candidate", "pass"] }
+  }
+}

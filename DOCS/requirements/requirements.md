@@ -9,8 +9,8 @@ acceptance tests or the traceability matrix.
 - **SCP-001** — The implementation must live entirely under `/Users/anas/franz-agents/app`.
 - **SCP-002** — V1 must provide `frontend`, server-only modular `backend`, and `client-frontend`
   boundaries in one pnpm TypeScript workspace.
-- **SCP-003** — V1 must have no login, signup, user session, password, role, permission, organisation,
-  billing, or production-notification feature.
+- **SCP-003** — V1 must have no login, signup, user session, password, role, permission,
+  organisation, billing, or production-notification feature.
 - **SCP-004** — The coach web/API must remain one deployable; the backend modules must not become a
   separately networked service.
 - **SCP-005** — Frontends must call versioned REST contracts and must not query the database or call
@@ -22,11 +22,12 @@ acceptance tests or the traceability matrix.
 
 ## Demo actors and data
 
-- **DEM-001** — The server must resolve one seeded coach from `DEMO_COACH_ID` for every coach action.
+- **DEM-001** — The server must resolve one seeded coach from `DEMO_COACH_ID` for every coach
+  action.
 - **DEM-002** — The client selector must expose only seeded synthetic active clients and must be
   described as demo selection, not authentication.
-- **DEM-003** — Committed fixtures, traces, recordings, logs, screenshots, and databases must contain
-  no real client identity, contact, health, or training data.
+- **DEM-003** — Committed fixtures, traces, recordings, logs, screenshots, and databases must
+  contain no real client identity, contact, health, or training data.
 - **DEM-004** — `pnpm demo` must migrate, idempotently seed, and run the functional system with
   PGlite, recorded AI, no Docker, and no model key.
 - **DEM-005** — Recorded and live model modes must implement the same structured gateway contract;
@@ -40,12 +41,12 @@ acceptance tests or the traceability matrix.
 
 - **DAT-001** — All persisted identifiers must be UUIDs, all instants UTC `timestamptz`, and local
   scheduling must use the client's validated IANA timezone.
-- **DAT-002** — Validity windows must use half-open semantics: active at `valid_from` and inactive at
-  `valid_until`.
+- **DAT-002** — Validity windows must use half-open semantics: active at `valid_from` and inactive
+  at `valid_until`.
 - **DAT-003** — Current retrieval must exclude expired and superseded records before relevance or
   recency ranking.
-- **DAT-004** — Programme, note, score, trace, run, evaluation, coach-action, and job evidence must be
-  versioned/append-only or superseded, not destructively overwritten.
+- **DAT-004** — Programme, note, score, trace, run, evaluation, coach-action, and job evidence must
+  be versioned/append-only or superseded, not destructively overwritten.
 - **DAT-005** — Database constraints/transactions must enforce one current published programme per
   client/week and human approval on every published programme.
 - **DAT-006** — Publishing must atomically approve the new version, supersede the prior current
@@ -103,12 +104,12 @@ acceptance tests or the traceability matrix.
 
 ## Plan loop
 
-- **PLN-001** — A valid demo command/job must generate one idempotent programme proposal for
-  an active client/target week through trace, model, validation, gates, judges, band, and queue.
+- **PLN-001** — A valid demo command/job must generate one idempotent programme proposal for an
+  active client/target week through trace, model, validation, gates, judges, band, and queue.
 - **PLN-002** — Queue ordering must be blocked, attention, clear; within a band it must be oldest
   queued first with a stable tie-breaker.
-- **PLN-003** — Programme review must show payload, lifecycle, gate results, judge results, citations,
-  run metadata, and a trace link.
+- **PLN-003** — Programme review must show payload, lifecycle, gate results, judge results,
+  citations, run metadata, and a trace link.
 - **PLN-004** — Editing a proposal must record a structured diff and rerun structured validation and
   deterministic gates before approval.
 - **PLN-005** — Rejecting a programme must record the action, make the proposal non-actionable, and
@@ -148,8 +149,8 @@ acceptance tests or the traceability matrix.
 - **ACC-002** — Tier 0 must produce no message or task.
 - **ACC-003** — Tier 1 must require exactly one missed due session in seven days and must create a
   contextual in-app nudge only when suppression permits.
-- **ACC-004** — Tier 2 must require at least two missed due sessions in 14 days or check-in latency at
-  least twice a valid baseline and must create a reduced-plan offer for coach approval.
+- **ACC-004** — Tier 2 must require at least two missed due sessions in 14 days or check-in latency
+  at least twice a valid baseline and must create a reduced-plan offer for coach approval.
 - **ACC-005** — Tier 3 must require at least seven full days silent or adherence below 50% over 14
   days with at least two due sessions; it must assign coach ownership and pause automation.
 - **ACC-006** — Tier 4 must require at least 21 full days silent; it must create a churn flag and
@@ -202,7 +203,8 @@ acceptance tests or the traceability matrix.
 
 - **OPS-001** — Every API endpoint listed in `api-and-errors.md` must exist and use shared validated
   input/output contracts and the common `{data,error,meta}` envelope.
-- **OPS-002** — Every response must include a request ID; safe UI errors must expose it where useful.
+- **OPS-002** — Every response must include a request ID; safe UI errors must expose it where
+  useful.
 - **OPS-003** — API errors must use the documented status/code categories and must not leak stacks,
   SQL, prompt internals, hidden reasoning, provider bodies, or secrets.
 - **OPS-004** — Job endpoints must require `CRON_SECRET` outside demo mode and must be idempotent by
@@ -212,12 +214,12 @@ acceptance tests or the traceability matrix.
 - **OPS-006** — Scorecard aggregation must calculate safety rate by gate, judge distributions,
   calibration, band accuracy, cost per published plan, and p50/p95 latency without presenting absent
   data as zero.
-- **OPS-007** — PGlite and Docker PostgreSQL 16/pgvector must apply the same committed migrations and
-  preserve equivalent domain invariants.
+- **OPS-007** — PGlite and Docker PostgreSQL 16/pgvector must apply the same committed migrations
+  and preserve equivalent domain invariants.
 - **OPS-008** — Environment variables must be parsed once through a strict schema and server secrets
   must never be exported through public-prefixed variables.
 - **OPS-009** — All bounded text, numeric, array, pagination, and date-range inputs must reject
   invalid or resource-exhausting values before domain execution.
 - **OPS-010** — The final implementation must provide executable commands for install, demo,
-  migrate, seed, format, lint, typecheck, unit/integration tests, safety tests, web/mobile acceptance,
-  evaluation/calibration, and builds.
+  migrate, seed, format, lint, typecheck, unit/integration tests, safety tests, web/mobile
+  acceptance, evaluation/calibration, and builds.

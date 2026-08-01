@@ -1,0 +1,6 @@
+{
+  "developmentProject": "spotter-v1",
+  "qaProjectPrefix": "spotter-qa-",
+  "services": ["migrate", "postgres", "seed", "test-postgres", "web"],
+  "forbiddenServices": ["backend", "broker", "queue", "redis", "worker"]
+}

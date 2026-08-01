@@ -135,13 +135,13 @@ The client selector and coach console may expose handles and synthetic labels, b
 
 Tiering uses the highest matching rule:
 
-| Tier | Deterministic trigger | Required result |
-|---|---|---|
-| 4 | At least 21 full days since the last app activity | Churn flag; human-owned; no automated contact. |
-| 3 | At least 7 full days since activity, or adherence below 50% over 14 days with at least two due sessions | Coach-owned outreach task/context brief; automated messages paused. |
-| 2 | At least two missed due sessions in 14 days, or current check-in latency at least twice a valid historical baseline | Draft a reduced-plan offer for coach review; do not send it automatically. |
-| 1 | Exactly one missed due session in the rolling 7-day window and no higher trigger | Create one contextual in-app nudge if the suppression rule allows. |
-| 0 | No trigger above | Do nothing. |
+| Tier | Deterministic trigger                                                                                               | Required result                                                            |
+| ---- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| 4    | At least 21 full days since the last app activity                                                                   | Churn flag; human-owned; no automated contact.                             |
+| 3    | At least 7 full days since activity, or adherence below 50% over 14 days with at least two due sessions             | Coach-owned outreach task/context brief; automated messages paused.        |
+| 2    | At least two missed due sessions in 14 days, or current check-in latency at least twice a valid historical baseline | Draft a reduced-plan offer for coach review; do not send it automatically. |
+| 1    | Exactly one missed due session in the rolling 7-day window and no higher trigger                                    | Create one contextual in-app nudge if the suppression rule allows.         |
+| 0    | No trigger above                                                                                                    | Do nothing.                                                                |
 
 Boundary rules:
 
@@ -151,8 +151,8 @@ Boundary rules:
 - Latency doubling needs at least two previous completed check-ins; otherwise that signal is absent.
 - Missing app history degrades conservatively and does not fabricate a number of silent days.
 - Exactly 48 elapsed hours permits another automated message; less than 48 hours suppresses it.
-- A Tier 3/4 state remains human-owned even when a later sweep computes a lower tier, until a recorded
-  coach action releases ownership.
+- A Tier 3/4 state remains human-owned even when a later sweep computes a lower tier, until a
+  recorded coach action releases ownership.
 
 These rules make underspecified thresholds explicit without delegating risk selection to a model.
 
@@ -170,4 +170,3 @@ symptoms bypass adjustment generation and create a coach escalation. Proposals c
 operations. V1 supports only load reduction, volume reduction, or a documented equivalent movement
 swap; increases and unknown operations are rejected. Even supported reductions wait for coach
 approval.
-

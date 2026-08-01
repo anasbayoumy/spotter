@@ -13,13 +13,13 @@
 
 The root `compose.yaml` defines:
 
-| Service | Lifecycle | Responsibility |
-|---|---|---|
-| `postgres` | long-running | `pgvector/pgvector:pg16`, authoritative local database, named volume, health check |
-| `migrate` | one-shot | applies committed Drizzle SQL migrations after PostgreSQL is healthy |
-| `seed` | one-shot/demo profile | inserts idempotent synthetic fixtures only |
-| `web` | long-running | builds/runs `frontend/`, including `/api/v1` adapters and imported `backend/` modules |
-| `test-postgres` | test profile | isolated ephemeral pgvector database for concurrency/release suites |
+| Service         | Lifecycle             | Responsibility                                                                        |
+| --------------- | --------------------- | ------------------------------------------------------------------------------------- |
+| `postgres`      | long-running          | `pgvector/pgvector:pg16`, authoritative local database, named volume, health check    |
+| `migrate`       | one-shot              | applies committed Drizzle SQL migrations after PostgreSQL is healthy                  |
+| `seed`          | one-shot/demo profile | inserts idempotent synthetic fixtures only                                            |
+| `web`           | long-running          | builds/runs `frontend/`, including `/api/v1` adapters and imported `backend/` modules |
+| `test-postgres` | test profile          | isolated ephemeral pgvector database for concurrency/release suites                   |
 
 There is no `backend`, Redis, broker, worker, or production notification service. Optional tooling
 cannot be required by the main stack.
@@ -48,13 +48,13 @@ through environment injection, never baked images or Compose files.
 
 ## Runtime modes
 
-| Mode | Database | Model | Purpose |
-|---|---|---|---|
-| fast test | isolated PGlite | recorded | units, repository parity subset, deterministic iteration |
-| keyless demo | persistent/local PGlite | recorded | `pnpm demo`, no Docker or AI key |
-| Docker demo | PostgreSQL pgvector | recorded | full production-parity coaching loop |
-| integration/release | ephemeral PostgreSQL pgvector | recorded | authoritative deterministic acceptance |
-| live evaluation | PostgreSQL branch/test DB | live generator + distinct live judge | conditional quality/cost evaluation |
+| Mode                | Database                      | Model                                | Purpose                                                  |
+| ------------------- | ----------------------------- | ------------------------------------ | -------------------------------------------------------- |
+| fast test           | isolated PGlite               | recorded                             | units, repository parity subset, deterministic iteration |
+| keyless demo        | persistent/local PGlite       | recorded                             | `pnpm demo`, no Docker or AI key                         |
+| Docker demo         | PostgreSQL pgvector           | recorded                             | full production-parity coaching loop                     |
+| integration/release | ephemeral PostgreSQL pgvector | recorded                             | authoritative deterministic acceptance                   |
+| live evaluation     | PostgreSQL branch/test DB     | live generator + distinct live judge | conditional quality/cost evaluation                      |
 
 Recorded/live and PostgreSQL/PGlite are independent choices. “Keyless” means no model credential; it
 does not weaken validation, gates, traces, approval, or audit behavior.
@@ -72,8 +72,8 @@ The build context is `app/` because Next must bundle `backend/` and shared packa
 excludes `.git`, local data, coverage, test artifacts, Expo build output, caches, secrets, and host
 `node_modules`.
 
-Migration and seed commands use the same lockfile/code revision as `web`; running an unrelated global
-Drizzle version is prohibited.
+Migration and seed commands use the same lockfile/code revision as `web`; running an unrelated
+global Drizzle version is prohibited.
 
 ## Verification
 
@@ -101,4 +101,3 @@ runtime is not an implicit target.
 A no-auth production process fails startup unless the explicit synthetic-only guard succeeds. No
 production image or migration embeds demo records; synthetic seed execution is a deliberate
 deployment step (`PRV-002`, `PRV-003`).
-

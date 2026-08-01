@@ -160,17 +160,16 @@ The approval use case opens one transaction and:
 8. inserts the append-only coach action; and
 9. completes the idempotency record with the stable response reference.
 
-Any failure rolls back all nine operations. A concurrent publisher receives the existing
-idempotent result or a typed conflict; it cannot create two current programmes (`DAT-005`,
-`DAT-006`).
+Any failure rolls back all nine operations. A concurrent publisher receives the existing idempotent
+result or a typed conflict; it cannot create two current programmes (`DAT-005`, `DAT-006`).
 
 Override uses the same transaction after requiring `review_band=blocked` and a trimmed non-empty
 reason. The reason and failed gates remain visible; override does not rewrite evaluation history.
 
 ### Edit
 
-- Editing a draft creates a new immutable programme version or a formally versioned replacement;
-  it never destroys the generated payload used by its trace/evaluations.
+- Editing a draft creates a new immutable programme version or a formally versioned replacement; it
+  never destroys the generated payload used by its trace/evaluations.
 - Editing a published programme always creates a new candidate version, evaluates it where required,
   and sends it through approval. The currently published version remains client-visible until the
   replacement transaction commits (`DAT-008`).
@@ -245,4 +244,3 @@ right to retain personal data. V1 public deployments are synthetic-only. A futur
 must add a documented privacy deletion/redaction design before changing that guard. Operational
 cleanup may remove expired idempotency payload caches or disposable local/test databases, but not
 the audit references required to reconstruct coaching decisions.
-

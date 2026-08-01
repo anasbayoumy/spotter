@@ -20,4 +20,3 @@ routes retain an infrastructure `CRON_SECRET`; this is not user authentication.
 - Public demos may contain synthetic data only, including traces, recordings, and artifacts.
 - Real Client 001 data cannot be deployed through this V1 surface.
 - Authentication/tenancy requires a future ADR and threat/privacy review; IDs preserve the seam.
-

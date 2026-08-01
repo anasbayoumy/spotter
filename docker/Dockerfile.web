@@ -1,0 +1,45 @@
+FROM node:24.11.1-bookworm-slim AS toolchain
+
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+
+RUN npm install --global corepack@0.34.2 \
+  && corepack enable \
+  && corepack prepare pnpm@10.20.0 --activate
+
+WORKDIR /workspace
+
+FROM toolchain AS dependencies
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY frontend/package.json frontend/package.json
+COPY backend/package.json backend/package.json
+COPY client-frontend/package.json client-frontend/package.json
+COPY packages/contracts/package.json packages/contracts/package.json
+COPY packages/config/package.json packages/config/package.json
+COPY packages/design-tokens/package.json packages/design-tokens/package.json
+COPY packages/testkit/package.json packages/testkit/package.json
+
+RUN pnpm install --frozen-lockfile
+
+FROM dependencies AS build
+
+COPY . .
+RUN pnpm --filter @spotter/frontend build
+
+FROM node:24.11.1-bookworm-slim AS runtime
+
+ENV HOSTNAME=0.0.0.0
+ENV NODE_ENV=production
+ENV PORT=3000
+
+WORKDIR /app
+
+COPY --from=build --chown=node:node /workspace/frontend/.next/standalone ./
+COPY --from=build --chown=node:node /workspace/frontend/.next/static ./frontend/.next/static
+COPY --from=build --chown=node:node /workspace/frontend/public ./frontend/public
+
+USER node
+EXPOSE 3000
+
+CMD ["node", "frontend/server.js"]

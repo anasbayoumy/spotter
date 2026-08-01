@@ -1,0 +1,25 @@
+{
+  "name": "@spotter/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:unit": "vitest run src/contracts.test.ts",
+    "test:contract": "vitest run src/contracts.test.ts"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  }
+}

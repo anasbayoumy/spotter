@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "anchor": "2026-08-03T06:00:00.000Z",
+  "classification": "synthetic",
+  "scenarios": [
+    "healthy-clear",
+    "active-hard-constraint-blocked",
+    "expired-constraint-no-longer-binding",
+    "superseded-note-and-programme-excluded",
+    "sparse-history-attention",
+    "disengaged-human-owned",
+    "session-and-check-in-adjustment-trigger"
+  ]
+}

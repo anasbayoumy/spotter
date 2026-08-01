@@ -24,8 +24,18 @@ are versioned. Evidence is retained before a failing environment is torn down.
   "finishedAt": "2026-08-02T02:20:00Z",
   "environment": { "node": "...", "pnpm": "...", "docker": "...", "os": "..." },
   "sourceContracts": [{ "path": "DOCS/architecture/requirements.md", "sha256": "..." }],
-  "commands": [{ "id": "cmd-001", "command": "pnpm verify", "exitCode": 0, "durationMs": 1, "log": "logs/cmd-001.log" }],
-  "requirements": [{ "id": "AI-002", "status": "passed", "evidence": ["reports/safety/results.json"] }],
+  "commands": [
+    {
+      "id": "cmd-001",
+      "command": "pnpm verify",
+      "exitCode": 0,
+      "durationMs": 1,
+      "log": "logs/cmd-001.log"
+    }
+  ],
+  "requirements": [
+    { "id": "AI-002", "status": "passed", "evidence": ["reports/safety/results.json"] }
+  ],
   "exceptions": [{ "id": "ENV-MOB-001", "status": "not-run", "reason": "No native runner" }],
   "verdict": "pass"
 }
@@ -68,17 +78,17 @@ retries, and exit status. Evidence links use relative paths and checksums.
 
 ## Evidence requirements
 
-| ID | Requirement | Command |
-|---|---|---|
-| `QA-EVD-001` | Manifest validates against a committed schema and references existing artifacts. | `pnpm evidence:verify` |
-| `QA-EVD-002` | Tested revision/content hash and source-contract hashes are exact. | `pnpm evidence:verify` |
-| `QA-EVD-003` | Every architecture and QA/NFR/SEC requirement has pass/fail/not-applicable evidence. | `pnpm evidence:verify` |
-| `QA-EVD-004` | Discovered/executed/skipped/retried counts are present; blocking skip/retry cannot yield pass. | `pnpm evidence:verify` |
-| `QA-EVD-005` | Artifacts pass secret, identity/PII, and prohibited real-data scans. | `pnpm evidence:verify && pnpm test:security` |
-| `QA-EVD-006` | Logs and reports are checksummed; broken/missing links fail validation. | `pnpm evidence:verify` |
-| `QA-EVD-007` | Failures retain pre-fix evidence and reference the defect/fix attempt that superseded them. | `pnpm evidence:verify` |
-| `QA-EVD-008` | `ENV-MOB-001` is explicit; native proof is never fabricated. | `pnpm evidence:verify` |
-| `QA-EVD-009` | Final report distinguishes deterministic acceptance, live observations, and not-run checks. | `pnpm evidence:verify` |
+| ID           | Requirement                                                                                    | Command                                      |
+| ------------ | ---------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `QA-EVD-001` | Manifest validates against a committed schema and references existing artifacts.               | `pnpm evidence:verify`                       |
+| `QA-EVD-002` | Tested revision/content hash and source-contract hashes are exact.                             | `pnpm evidence:verify`                       |
+| `QA-EVD-003` | Every architecture and QA/NFR/SEC requirement has pass/fail/not-applicable evidence.           | `pnpm evidence:verify`                       |
+| `QA-EVD-004` | Discovered/executed/skipped/retried counts are present; blocking skip/retry cannot yield pass. | `pnpm evidence:verify`                       |
+| `QA-EVD-005` | Artifacts pass secret, identity/PII, and prohibited real-data scans.                           | `pnpm evidence:verify && pnpm test:security` |
+| `QA-EVD-006` | Logs and reports are checksummed; broken/missing links fail validation.                        | `pnpm evidence:verify`                       |
+| `QA-EVD-007` | Failures retain pre-fix evidence and reference the defect/fix attempt that superseded them.    | `pnpm evidence:verify`                       |
+| `QA-EVD-008` | `ENV-MOB-001` is explicit; native proof is never fabricated.                                   | `pnpm evidence:verify`                       |
+| `QA-EVD-009` | Final report distinguishes deterministic acceptance, live observations, and not-run checks.    | `pnpm evidence:verify`                       |
 
 ## Autonomous defect loop
 
@@ -86,7 +96,8 @@ For every failure:
 
 1. Freeze the failing output, command, environment, request/trace IDs, seed, and durable DB state.
 2. Reproduce with the smallest stable command; never change code before confirming when feasible.
-3. Classify: `product`, `test`, `fixture/contract`, `environment`, `performance`, `security`, or `flake`.
+3. Classify: `product`, `test`, `fixture/contract`, `environment`, `performance`, `security`, or
+   `flake`.
 4. Trace the failure to requirement IDs and diagnose the first violated invariant/root cause.
 5. Add or preserve a regression test that fails for the diagnosed behavior.
 6. Apply the smallest correct fix without weakening boundaries or adjacent invariants.
@@ -110,4 +121,5 @@ cause, and require a clean no-retry acceptance run.
 After three unsuccessful distinct fixes for the same root cause, an independent reviewer reopens
 diagnosis from the requirement/evidence without inheriting the current hypothesis. Autonomous work
 continues with a different approach. It stops as blocked only for a genuine external limitation or
-irreconcilable approved-contract conflict, reported with exact evidence; difficulty is not a blocker.
+irreconcilable approved-contract conflict, reported with exact evidence; difficulty is not a
+blocker.

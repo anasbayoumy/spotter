@@ -20,4 +20,3 @@ IDs. Both modes execute the same schemas, gates, review-band rules, persistence,
 - Deterministic acceptance never depends on network/model variance.
 - Live quality/calibration is a separate conditional suite and honestly reported.
 - Recordings are versioned synthetic fixtures, not permission to bypass the real pipeline.
-

@@ -1,0 +1,26 @@
+FROM node:24.11.1-bookworm-slim
+
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+
+RUN npm install --global corepack@0.34.2 \
+  && corepack enable \
+  && corepack prepare pnpm@10.20.0 --activate
+
+WORKDIR /workspace
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY frontend/package.json frontend/package.json
+COPY backend/package.json backend/package.json
+COPY client-frontend/package.json client-frontend/package.json
+COPY packages/contracts/package.json packages/contracts/package.json
+COPY packages/config/package.json packages/config/package.json
+COPY packages/design-tokens/package.json packages/design-tokens/package.json
+COPY packages/testkit/package.json packages/testkit/package.json
+RUN pnpm install --frozen-lockfile
+
+COPY backend backend
+COPY packages packages
+
+USER node
+CMD ["pnpm", "--filter", "@spotter/backend", "db:migrate"]
