@@ -1,6 +1,6 @@
 import type { ApiErrorCode } from "@spotter/contracts";
 
-import { DomainError } from "../domain/index.js";
+import { DomainError } from "../domain/index";
 
 export interface ExecutionContext {
   readonly requestId: string;

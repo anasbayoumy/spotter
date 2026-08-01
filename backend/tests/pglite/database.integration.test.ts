@@ -15,11 +15,11 @@ import {
   seedDemoDatabase,
 } from "../../src/infrastructure/database/index.js";
 
-const COACH_ID = "00000000-0000-0000-0000-000000000001";
-const BLOCKED_CLIENT_ID = "00000000-0000-0000-0000-000000000102";
-const EXPIRED_CLIENT_ID = "00000000-0000-0000-0000-000000000103";
-const SUPERSEDED_CLIENT_ID = "00000000-0000-0000-0000-000000000104";
-const BLOCKED_PROGRAMME_ID = "00000000-0000-0000-0000-000000000602";
+const COACH_ID = "00000000-0000-4000-8000-000000000001";
+const BLOCKED_CLIENT_ID = "00000000-0000-4000-8000-000000000102";
+const EXPIRED_CLIENT_ID = "00000000-0000-4000-8000-000000000103";
+const SUPERSEDED_CLIENT_ID = "00000000-0000-4000-8000-000000000104";
+const BLOCKED_PROGRAMME_ID = "00000000-0000-4000-8000-000000000602";
 
 async function expectDatabaseError(
   operation: Promise<unknown>,
@@ -81,12 +81,12 @@ describe("PGlite database parity foundation", () => {
   it("requires an explicit reasoned override for a blocked publication and replays safely", async () => {
     const publisher = new PublishProgrammeTransaction(new DrizzleUnitOfWork(adapter));
     const baseCommand = {
-      actionId: "00000000-0000-0000-0000-000000009001",
+      actionId: "00000000-0000-4000-8000-000000009001",
       approvedAt: DEMO_ANCHOR,
       candidateProgrammeId: BLOCKED_PROGRAMME_ID,
       coachId: COACH_ID,
       idempotencyKey: "publish-blocked-standard",
-      idempotencyRecordId: "00000000-0000-0000-0000-000000009002",
+      idempotencyRecordId: "00000000-0000-4000-8000-000000009002",
       requestHash: "sha256:blocked-standard",
       requestId: "request-blocked-standard",
       sessions: [],
@@ -99,10 +99,10 @@ describe("PGlite database parity foundation", () => {
 
     const overrideCommand = {
       ...baseCommand,
-      actionId: "00000000-0000-0000-0000-000000009003",
+      actionId: "00000000-0000-4000-8000-000000009003",
       approval: "override" as const,
       idempotencyKey: "publish-blocked-override",
-      idempotencyRecordId: "00000000-0000-0000-0000-000000009004",
+      idempotencyRecordId: "00000000-0000-4000-8000-000000009004",
       reason: "Coach reviewed the synthetic exception and accepts the constrained alternative.",
       requestHash: "sha256:blocked-override",
       requestId: "request-blocked-override",
@@ -119,7 +119,7 @@ describe("PGlite database parity foundation", () => {
   });
 
   it("keeps context trace evidence append-only", async () => {
-    const traceId = "00000000-0000-0000-0000-000000000201";
+    const traceId = "00000000-0000-4000-8000-000000000201";
     const before = await adapter.database.query.contextTraces.findFirst({
       where: eq(contextTraces.id, traceId),
     });

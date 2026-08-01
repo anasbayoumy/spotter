@@ -1,10 +1,10 @@
 import { contextSectionSchema } from "@spotter/contracts";
 
-import { AgentRuntimeError } from "../errors.js";
-import { filterCurrentRecords, rankEligibleNotes } from "./filter-rank.js";
-import { renderContext } from "./render.js";
-import { stableStringify } from "./stable-json.js";
-import { Utf8TokenEstimator, type TokenEstimator } from "./token-estimator.js";
+import { AgentRuntimeError } from "../errors";
+import { filterCurrentRecords, rankEligibleNotes } from "./filter-rank";
+import { renderContext } from "./render";
+import { stableStringify } from "./stable-json";
+import { Utf8TokenEstimator, type TokenEstimator } from "./token-estimator";
 import {
   contextAssemblyRequestSchema,
   type ContextAssemblyRequest,
@@ -13,7 +13,7 @@ import {
   type ContextRecord,
   type ContextSection,
   type ContextTraceAttempt,
-} from "./types.js";
+} from "./types";
 
 const sectionDefinitions = [
   ["hardConstraints", "hard_constraints", "ctx-01-hard-constraints", true],

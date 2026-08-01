@@ -1,9 +1,9 @@
-import type { ContextSourceInput } from "../context/types.js";
-import type { DeterministicContextAssembler } from "../context/assemble.js";
-import { AgentRuntimeError, toAgentRuntimeError } from "../errors.js";
-import type { ModelGateway } from "../gateway/model-gateway.js";
-import type { PromptRegistry } from "../prompts/registry.js";
-import type { AgentClock, AgentIdGenerator, AgentRunPort, ContextTracePort } from "./ports.js";
+import type { ContextSourceInput } from "../context/types";
+import type { DeterministicContextAssembler } from "../context/assemble";
+import { AgentRuntimeError, toAgentRuntimeError } from "../errors";
+import type { ModelGateway } from "../gateway/model-gateway";
+import type { PromptRegistry } from "../prompts/registry";
+import type { AgentClock, AgentIdGenerator, AgentRunPort, ContextTracePort } from "./ports";
 
 export interface AgentExecutionRequest {
   readonly intent: "programme" | "adjustment" | "accountability";

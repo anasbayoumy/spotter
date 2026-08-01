@@ -28,7 +28,7 @@ describe("authoritative PostgreSQL database", () => {
     await adapter.close();
   });
 
-  it("is healthy with pgvector and exactly one applied migration", async () => {
+  it("is healthy with pgvector and every committed migration applied", async () => {
     const health = await adapter.healthCheck();
     const migrationRows = await adapter.client<{ total: number }[]>`
       SELECT count(*)::int AS total FROM drizzle.__drizzle_migrations
@@ -42,7 +42,7 @@ describe("authoritative PostgreSQL database", () => {
     expect(health.ok).toBe(true);
     expect(health.dialect).toBe("postgres");
     expect(health.vectorVersion).not.toBeNull();
-    expect(migrationRows[0]?.total).toBe(1);
+    expect(migrationRows[0]?.total).toBe(2);
     expect(vectorIndexes[0]?.total).toBe(1);
   });
 
@@ -59,9 +59,9 @@ describe("authoritative PostgreSQL database", () => {
   it("enforces publication approval metadata in PostgreSQL", async () => {
     await expect(
       adapter.database.insert(programmes).values({
-        clientId: "00000000-0000-0000-0000-000000000105",
-        generatedBy: "00000000-0000-0000-0000-000000000215",
-        id: "00000000-0000-0000-0000-000000009101",
+        clientId: "00000000-0000-4000-8000-000000000105",
+        generatedBy: "00000000-0000-4000-8000-000000000215",
+        id: "00000000-0000-4000-8000-000000009101",
         mesocycle: 2,
         payload: { days: [] },
         reviewBand: "clear",
@@ -74,7 +74,7 @@ describe("authoritative PostgreSQL database", () => {
   });
 
   it("rolls back partial writes and protects append-only evidence", async () => {
-    const temporaryCoach = "00000000-0000-0000-0000-000000009201";
+    const temporaryCoach = "00000000-0000-4000-8000-000000009201";
     await expect(
       adapter.transaction(async (database) => {
         await database.insert(coaches).values({ handle: "rollback_probe", id: temporaryCoach });
@@ -86,7 +86,7 @@ describe("authoritative PostgreSQL database", () => {
       await adapter.database.query.coaches.findFirst({ where: eq(coaches.id, temporaryCoach) }),
     ).toBeUndefined();
 
-    const traceId = "00000000-0000-0000-0000-000000000201";
+    const traceId = "00000000-0000-4000-8000-000000000201";
     const before = await adapter.database.query.contextTraces.findFirst({
       where: eq(contextTraces.id, traceId),
     });

@@ -1,4 +1,4 @@
-import type { AgentIntent } from "../context/types.js";
+import type { AgentIntent } from "../context/types";
 
 export type ModelMode = "recorded" | "live";
 

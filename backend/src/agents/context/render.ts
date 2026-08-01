@@ -1,4 +1,4 @@
-import type { ContextSection } from "./types.js";
+import type { ContextSection } from "./types";
 
 export function renderContext(sections: readonly ContextSection[]): string {
   return sections

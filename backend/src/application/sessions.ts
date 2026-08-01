@@ -6,9 +6,9 @@ import {
   type Session,
 } from "@spotter/contracts";
 
-import type { ExecutionContext, FingerprintPort, IdempotencyPort } from "./core.js";
-import { executeIdempotently } from "./core.js";
-import type { AdjustmentTriggerPort, CheckInPort, RedFlagPort, SessionPort } from "./ports.js";
+import type { ExecutionContext, FingerprintPort, IdempotencyPort } from "./core";
+import { executeIdempotently } from "./core";
+import type { AdjustmentTriggerPort, CheckInPort, RedFlagPort, SessionPort } from "./ports";
 
 interface IdempotentDependencies {
   readonly idempotency: IdempotencyPort;

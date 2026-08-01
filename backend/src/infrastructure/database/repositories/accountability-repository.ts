@@ -1,7 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 
-import type { UnitOfWork } from "../unit-of-work.js";
-import { accountabilityStates, messageGuards, messages } from "../schema.js";
+import type { UnitOfWork } from "../unit-of-work";
+import { accountabilityStates, messageGuards, messages } from "../schema";
 
 const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000;
 

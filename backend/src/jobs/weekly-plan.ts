@@ -1,7 +1,7 @@
-import type { ExecutionContext } from "../application/core.js";
-import { ApplicationError } from "../application/core.js";
-import type { GenerateProgramme } from "../application/programmes.js";
-import type { ClientReadPort, JobPort } from "../application/ports.js";
+import type { ExecutionContext } from "../application/core";
+import { ApplicationError } from "../application/core";
+import type { GenerateProgramme } from "../application/programmes";
+import type { ClientReadPort, JobPort } from "../application/ports";
 
 export interface JobSummary {
   readonly runKey: string;

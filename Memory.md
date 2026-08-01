@@ -24,3 +24,15 @@
 - 2026-08-02: Coverage testing exposed and fixed a production error-mapping defect: wrapped Drizzle
   PostgreSQL `23505` errors are now detected through a bounded, cycle-safe cause chain, preserving
   the `publication_conflict` contract and transactional rollback.
+- 2026-08-02: Pool 3 delivered one public server facade, all 25 `/api/v1` adapters, process liveness
+  plus DB/schema readiness, the complete coach console, and the Expo client journey. A forward-only
+  second migration aligned persisted sessions, check-ins, adjustments, triggers, and accountability
+  state with shared contracts.
+- 2026-08-02: Pool 3 root verification passed formatting, lint/boundaries, strict types, 285 backend
+  unit tests, 21 coach tests, 39 Expo tests, 19 API contract tests, 93 safety tests, 13 PGlite
+  tests, 5 isolated Docker PostgreSQL tests, 19 resilience tests, warning-free Next production
+  build, and Expo iOS/Android/Web exports. Coach coverage is 97.56/94.11/96.77/98.57 and Expo
+  coverage is 100/98.29/100/100 for statements/branches/functions/lines.
+- 2026-08-02: Integration testing found and fixed a missing Drizzle journal entry for migration
+  `0001_api_runtime_contract`; PGlite had applied filename-sorted SQL, while authoritative
+  PostgreSQL correctly proved the metadata omission before the fix.

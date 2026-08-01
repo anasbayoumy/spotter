@@ -1,8 +1,8 @@
 import { and, eq } from "drizzle-orm";
 
-import { DatabaseInvariantError } from "../database-error.js";
-import type { DatabaseSession } from "../database-types.js";
-import { idempotencyRecords, type JsonObject } from "../schema.js";
+import { DatabaseInvariantError } from "../database-error";
+import type { DatabaseSession } from "../database-types";
+import { idempotencyRecords, type JsonObject } from "../schema";
 
 export interface ClaimIdempotencyInput {
   readonly id: string;

@@ -1,9 +1,10 @@
 import type { InferInsertModel } from "drizzle-orm";
 
-import type { DatabaseSession } from "./database-types.js";
+import type { DatabaseSession } from "./database-types";
 import {
   accountabilityStates,
   adjustments,
+  adjustmentTriggers,
   agentRuns,
   appEvents,
   checkIns,
@@ -19,11 +20,12 @@ import {
   messages,
   programmes,
   sessions,
-} from "./schema.js";
+} from "./schema";
 
 export interface DemoSeedDataset {
   readonly accountabilityStates: readonly InferInsertModel<typeof accountabilityStates>[];
   readonly adjustments: readonly InferInsertModel<typeof adjustments>[];
+  readonly adjustmentTriggers: readonly InferInsertModel<typeof adjustmentTriggers>[];
   readonly agentRuns: readonly InferInsertModel<typeof agentRuns>[];
   readonly appEvents: readonly InferInsertModel<typeof appEvents>[];
   readonly checkIns: readonly InferInsertModel<typeof checkIns>[];
@@ -112,6 +114,11 @@ export async function seedDemoDatabase(
       await transaction
         .insert(adjustments)
         .values([...dataset.adjustments])
+        .onConflictDoNothing();
+    if (dataset.adjustmentTriggers.length > 0)
+      await transaction
+        .insert(adjustmentTriggers)
+        .values([...dataset.adjustmentTriggers])
         .onConflictDoNothing();
     if (dataset.engagementScores.length > 0)
       await transaction

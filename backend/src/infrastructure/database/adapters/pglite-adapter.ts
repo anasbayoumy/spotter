@@ -9,8 +9,8 @@ import type {
   DatabaseHealth,
   DatabaseSession,
   DemoDatabase,
-} from "../database-types.js";
-import { schema } from "../schema.js";
+} from "../database-types";
+import { schema } from "../schema";
 
 interface VersionRow extends Record<string, unknown> {
   readonly pg_version: string;

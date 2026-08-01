@@ -4,8 +4,8 @@ import type {
   JudgeResult,
   ReviewBand,
   SafetyEvaluation,
-} from "./types.js";
-import { requiredJudgeNames } from "./judges/judge.js";
+} from "./types";
+import { requiredJudgeNames } from "./judges/judge";
 
 export function calculateReviewBand(
   safety: SafetyEvaluation,

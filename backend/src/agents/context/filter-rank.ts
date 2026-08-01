@@ -1,4 +1,4 @@
-import type { ContextEviction, ContextRecord, ContextSection } from "./types.js";
+import type { ContextEviction, ContextRecord, ContextSection } from "./types";
 
 const millisecondsPerDay = 86_400_000;
 

@@ -8,6 +8,13 @@
       "when": 1785632400000,
       "tag": "0000_spotter_v1",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1785632401000,
+      "tag": "0001_api_runtime_contract",
+      "breakpoints": true
     }
   ]
 }

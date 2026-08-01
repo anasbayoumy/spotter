@@ -1,4 +1,4 @@
-import type { ContextRecord } from "./types.js";
+import type { ContextRecord } from "./types";
 
 type JsonValue = ContextRecord["content"];
 

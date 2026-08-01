@@ -1,8 +1,8 @@
-import { canSendAutomatedMessage } from "../../../domain/accountability.js";
-import { isCurrentAt } from "../../../domain/temporal.js";
-import type { GateFinding, GateName, GateResult } from "../../types.js";
-import type { SafetyConstraint, SafetyInput } from "../contracts.js";
-import { resolveMovementFamily } from "../movement-taxonomy.js";
+import { canSendAutomatedMessage } from "../../../domain/accountability";
+import { isCurrentAt } from "../../../domain/temporal";
+import type { GateFinding, GateName, GateResult } from "../../types";
+import type { SafetyConstraint, SafetyInput } from "../contracts";
+import { resolveMovementFamily } from "../movement-taxonomy";
 
 type Gate = (input: SafetyInput) => GateResult;
 

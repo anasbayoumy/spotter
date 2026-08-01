@@ -1,5 +1,5 @@
-import type { AgentIntent, ContextTraceAttempt } from "../context/types.js";
-import type { ModelMode, ModelUsage } from "../gateway/model-gateway.js";
+import type { AgentIntent, ContextTraceAttempt } from "../context/types";
+import type { ModelMode, ModelUsage } from "../gateway/model-gateway";
 
 export interface AgentClock {
   now(): Date;

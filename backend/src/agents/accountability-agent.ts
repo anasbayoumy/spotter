@@ -3,9 +3,9 @@ import {
   type AccountabilityModelOutput,
 } from "@spotter/contracts";
 
-import { AgentRuntimeError } from "./errors.js";
-import type { AgentExecutionRequest } from "./runtime/runner.js";
-import type { AgentRunner } from "./runtime/runner.js";
+import { AgentRuntimeError } from "./errors";
+import type { AgentExecutionRequest } from "./runtime/runner";
+import type { AgentRunner } from "./runtime/runner";
 
 type DraftableTier = 1 | 2 | 3;
 type AccountabilityAgentRequest = Omit<AgentExecutionRequest, "intent"> & {

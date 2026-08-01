@@ -10,14 +10,14 @@ import {
   AccountabilityState,
   calculateAccountabilityTier,
   canSendAutomatedMessage,
-} from "../domain/index.js";
+} from "../domain/index";
 import {
   ApplicationError,
   executeIdempotently,
   type ExecutionContext,
   type FingerprintPort,
   type IdempotencyPort,
-} from "./core.js";
+} from "./core";
 import type {
   AccountabilityPort,
   AgentAuditPort,
@@ -25,8 +25,8 @@ import type {
   EvaluationPort,
   ModelGatewayPort,
   TracePort,
-} from "./ports.js";
-import type { AccountabilityDetail } from "./read-models.js";
+} from "./ports";
+import type { AccountabilityDetail } from "./read-models";
 
 interface Dependencies {
   readonly accountability: AccountabilityPort;

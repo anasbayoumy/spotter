@@ -1,6 +1,6 @@
-import type { EvaluationIntent, JudgeResult } from "../types.js";
-import { judgeInputSchema, requiredJudgeNames, type Judge, type JudgeInput } from "./judge.js";
-import { recordedJudges } from "./recorded-judges.js";
+import type { EvaluationIntent, JudgeResult } from "../types";
+import { judgeInputSchema, requiredJudgeNames, type Judge, type JudgeInput } from "./judge";
+import { recordedJudges } from "./recorded-judges";
 
 export async function runRecordedJudges(
   intent: EvaluationIntent,

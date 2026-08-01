@@ -4,13 +4,13 @@ import {
   calculateAccountabilityTier,
   type AccountabilityTier,
   type EngagementInputs,
-} from "../domain/accountability.js";
-import { isCurrentAt } from "../domain/temporal.js";
-import { runRecordedJudges } from "./judges/run-judges.js";
-import { combineEvaluation } from "./review-band.js";
-import { safetyInputSchema, safetyExerciseSchema } from "./safety/contracts.js";
-import { maximumAutomatedMessages, runDeterministicSafety } from "./safety/run-gates.js";
-import type { GateName, ReviewBand } from "./types.js";
+} from "../domain/accountability";
+import { isCurrentAt } from "../domain/temporal";
+import { runRecordedJudges } from "./judges/run-judges";
+import { combineEvaluation } from "./review-band";
+import { safetyInputSchema, safetyExerciseSchema } from "./safety/contracts";
+import { maximumAutomatedMessages, runDeterministicSafety } from "./safety/run-gates";
+import type { GateName, ReviewBand } from "./types";
 
 const instant = z.coerce.date();
 const safetyPatchSchema = safetyInputSchema.omit({ asOf: true, intent: true }).partial().strict();

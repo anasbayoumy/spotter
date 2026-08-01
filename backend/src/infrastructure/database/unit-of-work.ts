@@ -1,4 +1,4 @@
-import type { DatabaseAdapter, DatabaseCapabilities, DatabaseSession } from "./database-types.js";
+import type { DatabaseAdapter, DatabaseCapabilities, DatabaseSession } from "./database-types";
 
 export interface UnitOfWork {
   readonly capabilities: DatabaseCapabilities;

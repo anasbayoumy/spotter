@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { EvaluationIntent, JudgeName, JudgeResult } from "../types.js";
+import type { EvaluationIntent, JudgeName, JudgeResult } from "../types";
 
 export const judgeInputSchema = z
   .object({

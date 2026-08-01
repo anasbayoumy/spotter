@@ -18,9 +18,9 @@ import type {
   Session,
 } from "@spotter/contracts";
 
-import type { AccountabilityStateValue, AccountabilityTier } from "../domain/index.js";
-import type { ExecutionContext } from "./core.js";
-import type { AccountabilityDetail, InAppMessage, Scorecard, Today } from "./read-models.js";
+import type { AccountabilityStateValue, AccountabilityTier } from "../domain/index";
+import type { ExecutionContext } from "./core";
+import type { AccountabilityDetail, InAppMessage, Scorecard, Today } from "./read-models";
 
 export type AgentKind = "programme" | "adjustment" | "accountability";
 export type EvaluatedOutput =

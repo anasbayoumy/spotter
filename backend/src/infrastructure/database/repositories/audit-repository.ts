@@ -1,7 +1,7 @@
 import type { InferInsertModel } from "drizzle-orm";
 
-import type { DatabaseSession } from "../database-types.js";
-import { agentRuns, contextTraces, evalResults, type JsonObject } from "../schema.js";
+import type { DatabaseSession } from "../database-types";
+import { agentRuns, contextTraces, evalResults, type JsonObject } from "../schema";
 
 export class AuditRepository {
   constructor(private readonly database: DatabaseSession) {}

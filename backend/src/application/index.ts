@@ -1,9 +1,9 @@
-export * from "./accountability.js";
-export * from "./adjustments.js";
-export * from "./core.js";
-export * from "./evaluation.js";
-export type * from "./ports.js";
-export * from "./programmes.js";
-export * from "./queries.js";
-export type * from "./read-models.js";
-export * from "./sessions.js";
+export * from "./accountability";
+export * from "./adjustments";
+export * from "./core";
+export * from "./evaluation";
+export type * from "./ports";
+export * from "./programmes";
+export * from "./queries";
+export type * from "./read-models";
+export * from "./sessions";

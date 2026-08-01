@@ -1,7 +1,7 @@
 import { adjustmentModelOutputSchema, type AdjustmentModelOutput } from "@spotter/contracts";
 
-import type { AgentExecutionRequest } from "./runtime/runner.js";
-import type { AgentRunner } from "./runtime/runner.js";
+import type { AgentExecutionRequest } from "./runtime/runner";
+import type { AgentRunner } from "./runtime/runner";
 
 export type AdjustmentAgentRequest = Omit<AgentExecutionRequest, "intent">;
 

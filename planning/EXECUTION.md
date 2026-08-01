@@ -24,4 +24,6 @@ There is no arbitrary retry cap for code defects.
 - Pool 1: typed workspace, contracts/domain, database adapters/migrations/seed — complete
   (`827f5a3`).
 - Pool 2: intelligence runtime, evaluations, application workflows, jobs, and critical coverage —
-  complete locally; checkpoint publication in progress.
+  complete (`dd46af4`).
+- Pool 3: public backend facade, REST/health adapters, contract-valid migrations/seed, coach
+  console, and Expo client — complete locally; checkpoint publication in progress.

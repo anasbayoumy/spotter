@@ -11,7 +11,8 @@
     "./domain": "./src/domain/index.ts",
     "./database": "./src/infrastructure/database/index.ts",
     "./evals": "./src/evals/index.ts",
-    "./jobs": "./src/jobs/index.ts"
+    "./jobs": "./src/jobs/index.ts",
+    "./server": "./src/composition/index.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",
@@ -29,7 +30,9 @@
     "@electric-sql/pglite": "0.3.15",
     "@spotter/config": "workspace:*",
     "@spotter/contracts": "workspace:*",
+    "ai": "6.0.240",
     "drizzle-orm": "0.45.2",
+    "pino": "10.3.1",
     "postgres": "3.4.9",
     "zod": "catalog:"
   },

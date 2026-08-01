@@ -1,6 +1,6 @@
 import type { Scorecard } from "@spotter/contracts";
 
-import type { GateResult, JudgeResult, JudgeName, ReviewBand } from "../types.js";
+import type { GateResult, JudgeResult, JudgeName, ReviewBand } from "../types";
 
 export interface ScorecardRun {
   readonly costUsd: number;

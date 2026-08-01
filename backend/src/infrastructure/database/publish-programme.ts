@@ -1,15 +1,15 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
 
-import { DatabaseInvariantError, isUniqueViolation } from "./database-error.js";
-import type { UnitOfWork } from "./unit-of-work.js";
-import { coachActions, programmes, sessions, type JsonObject } from "./schema.js";
-import { IdempotencyRepository } from "./repositories/idempotency-repository.js";
+import { DatabaseInvariantError, isUniqueViolation } from "./database-error";
+import type { UnitOfWork } from "./unit-of-work";
+import { coachActions, programmes, sessions, type JsonObject, type JsonValue } from "./schema";
+import { IdempotencyRepository } from "./repositories/idempotency-repository";
 
 export interface ProgrammeSessionMaterialization {
   readonly id: string;
   readonly sessionKey: string;
   readonly scheduledFor: string;
-  readonly planned: JsonObject;
+  readonly planned: JsonValue;
 }
 
 export interface PublishProgrammeCommand {

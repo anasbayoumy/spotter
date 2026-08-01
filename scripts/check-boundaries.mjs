@@ -50,8 +50,19 @@ for (const file of files) {
     ) {
       reject(file, specifier, "client application crossed the server boundary");
     }
-    if (file.startsWith("frontend/") && importsBackend && !file.includes("/src/app/api/v1/")) {
-      reject(file, specifier, "backend imports are restricted to /api/v1 route adapters");
+    if (
+      file.startsWith("frontend/") &&
+      importsBackend &&
+      !file.includes("/src/app/api/v1/") &&
+      !file.includes("/src/app/health/") &&
+      !file.includes("/src/server/") &&
+      !file.includes("/tests/contract/")
+    ) {
+      reject(
+        file,
+        specifier,
+        "backend imports are restricted to server composition and API adapters",
+      );
     }
     if (
       file.includes("backend/src/domain/") &&

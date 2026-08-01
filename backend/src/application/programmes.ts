@@ -11,14 +11,14 @@ import {
 } from "@spotter/contracts";
 import { z } from "zod";
 
-import { DomainError } from "../domain/index.js";
+import { DomainError } from "../domain/index";
 import {
   ApplicationError,
   executeIdempotently,
   type ExecutionContext,
   type FingerprintPort,
   type IdempotencyPort,
-} from "./core.js";
+} from "./core";
 import type {
   AgentAuditPort,
   ContextAssemblerPort,
@@ -26,8 +26,8 @@ import type {
   ModelGatewayPort,
   ProgrammePort,
   TracePort,
-} from "./ports.js";
-import { reviewBandFromResults } from "./evaluation.js";
+} from "./ports";
+import { reviewBandFromResults } from "./evaluation";
 
 interface IdempotentDependencies {
   readonly idempotency: IdempotencyPort;

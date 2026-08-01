@@ -1,5 +1,5 @@
-import { AgentRuntimeError } from "../errors.js";
-import type { ModelGateway, ModelGatewayRequest, ModelGatewayResponse } from "./model-gateway.js";
+import { AgentRuntimeError } from "../errors";
+import type { ModelGateway, ModelGatewayRequest, ModelGatewayResponse } from "./model-gateway";
 
 export interface LiveModelTransportRequest {
   readonly model: string;

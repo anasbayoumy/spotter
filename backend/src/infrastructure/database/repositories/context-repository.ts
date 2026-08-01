@@ -1,7 +1,7 @@
 import { and, desc, eq, gt, isNull, lte, or } from "drizzle-orm";
 
-import type { DatabaseSession } from "../database-types.js";
-import { clientConstraints, clientNotes, programmes } from "../schema.js";
+import type { DatabaseSession } from "../database-types";
+import { clientConstraints, clientNotes, programmes } from "../schema";
 
 export type ClientConstraintRecord = typeof clientConstraints.$inferSelect;
 export type ClientNoteRecord = typeof clientNotes.$inferSelect;

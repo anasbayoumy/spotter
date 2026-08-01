@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import type { AgentIntent } from "../context/types.js";
+import type { AgentIntent } from "../context/types";
 
 const prompts = {
   programme: `You draft one weekly coaching programme from the supplied context only.

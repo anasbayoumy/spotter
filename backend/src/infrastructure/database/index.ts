@@ -1,6 +1,6 @@
-export * from "./adapters/pglite-adapter.js";
-export * from "./adapters/postgres-adapter.js";
-export * from "./database-error.js";
+export * from "./adapters/pglite-adapter";
+export * from "./adapters/postgres-adapter";
+export * from "./database-error";
 export type {
   DatabaseAdapter,
   DatabaseCapabilities,
@@ -8,16 +8,17 @@ export type {
   DatabaseSession,
   DemoDatabase,
   PostgresDatabase,
-} from "./database-types.js";
-export * from "./health.js";
-export * from "./migrate.js";
-export * from "./publish-programme.js";
-export * from "./schema.js";
-export * from "./seed.js";
-export * from "./unit-of-work.js";
-export * from "./repositories/accountability-repository.js";
-export * from "./repositories/audit-repository.js";
-export * from "./repositories/client-repository.js";
-export * from "./repositories/context-repository.js";
-export * from "./repositories/idempotency-repository.js";
-export * from "./repositories/programme-repository.js";
+} from "./database-types";
+export * from "./health";
+export * from "./migrate";
+export * from "./publish-programme";
+export * from "./schema";
+export * from "./seed";
+export * from "./unit-of-work";
+export * from "./repositories/accountability-repository";
+export * from "./repositories/application-repositories";
+export * from "./repositories/audit-repository";
+export * from "./repositories/client-repository";
+export * from "./repositories/context-repository";
+export * from "./repositories/idempotency-repository";
+export * from "./repositories/programme-repository";

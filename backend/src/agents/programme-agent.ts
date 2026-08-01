@@ -1,7 +1,7 @@
 import { programmeModelOutputSchema, type ProgrammeModelOutput } from "@spotter/contracts";
 
-import type { AgentExecutionRequest } from "./runtime/runner.js";
-import type { AgentRunner } from "./runtime/runner.js";
+import type { AgentExecutionRequest } from "./runtime/runner";
+import type { AgentRunner } from "./runtime/runner";
 
 export type ProgrammeAgentRequest = Omit<AgentExecutionRequest, "intent">;
 

@@ -1,4 +1,4 @@
-import type { DatabaseAdapter, DatabaseHealth } from "./database-types.js";
+import type { DatabaseAdapter, DatabaseHealth } from "./database-types";
 
 export async function checkDatabaseHealth(adapter: DatabaseAdapter): Promise<DatabaseHealth> {
   return adapter.healthCheck();

@@ -1,7 +1,7 @@
-import type { GateResult, SafetyEvaluation } from "../types.js";
-import { safetyInputSchema } from "./contracts.js";
-import { deterministicGates } from "./gates/gates.js";
-import { detectRedFlags } from "./red-flags.js";
+import type { GateResult, SafetyEvaluation } from "../types";
+import { safetyInputSchema } from "./contracts";
+import { deterministicGates } from "./gates/gates";
+import { detectRedFlags } from "./red-flags";
 
 export function runDeterministicSafety(rawInput: unknown): SafetyEvaluation {
   const input = safetyInputSchema.parse(rawInput);

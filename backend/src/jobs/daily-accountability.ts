@@ -1,7 +1,7 @@
-import type { RunAccountabilityForClient } from "../application/accountability.js";
-import { ApplicationError, type ExecutionContext } from "../application/core.js";
-import type { ClientReadPort, JobPort } from "../application/ports.js";
-import type { JobSummary } from "./weekly-plan.js";
+import type { RunAccountabilityForClient } from "../application/accountability";
+import { ApplicationError, type ExecutionContext } from "../application/core";
+import type { ClientReadPort, JobPort } from "../application/ports";
+import type { JobSummary } from "./weekly-plan";
 
 export function dailyAccountabilityRunKey(effectiveAt: Date): string {
   return `daily-accountability:${effectiveAt.toISOString().slice(0, 10)}`;

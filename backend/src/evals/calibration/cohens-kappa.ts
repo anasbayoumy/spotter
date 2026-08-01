@@ -1,4 +1,4 @@
-import type { JudgeScore } from "../types.js";
+import type { JudgeScore } from "../types";
 
 export interface CalibrationLabel {
   readonly human: JudgeScore;

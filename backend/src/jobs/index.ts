@@ -1,2 +1,2 @@
-export * from "./daily-accountability.js";
-export * from "./weekly-plan.js";
+export * from "./daily-accountability";
+export * from "./weekly-plan";

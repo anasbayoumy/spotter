@@ -1,5 +1,5 @@
-import type { JudgeResult, JudgeScore } from "../types.js";
-import type { Judge, JudgeInput } from "./judge.js";
+import type { JudgeResult, JudgeScore } from "../types";
+import type { Judge, JudgeInput } from "./judge";
 
 abstract class RecordedJudge implements Judge {
   abstract readonly name: JudgeResult["name"];

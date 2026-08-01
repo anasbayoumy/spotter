@@ -1,7 +1,7 @@
 import type { PgliteDatabase } from "drizzle-orm/pglite";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
-import type { Schema } from "./schema.js";
+import type { Schema } from "./schema";
 
 export type PostgresDatabase = PostgresJsDatabase<Schema>;
 export type DemoDatabase = PgliteDatabase<Schema>;

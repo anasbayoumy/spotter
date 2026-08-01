@@ -1,1 +1,1 @@
-export * from "./server-environment.js";
+export * from "./server-environment";

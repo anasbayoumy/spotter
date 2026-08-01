@@ -2,8 +2,8 @@ import { z } from "zod";
 
 import { agentIntentSchema, modelUsageSchema } from "@spotter/contracts";
 
-import { AgentRuntimeError } from "../errors.js";
-import type { ModelGateway, ModelGatewayRequest, ModelGatewayResponse } from "./model-gateway.js";
+import { AgentRuntimeError } from "../errors";
+import type { ModelGateway, ModelGatewayRequest, ModelGatewayResponse } from "./model-gateway";
 
 export const modelRecordingSchema = z
   .object({

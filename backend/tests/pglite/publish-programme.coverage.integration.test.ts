@@ -20,13 +20,13 @@ import {
   type UnitOfWork,
 } from "../../src/infrastructure/database/index.js";
 
-const COACH_ID = "00000000-0000-0000-0000-000000000001";
-const HEALTHY_CLIENT_ID = "00000000-0000-0000-0000-000000000101";
-const BLOCKED_PROGRAMME_ID = "00000000-0000-0000-0000-000000000602";
-const ATTENTION_PROGRAMME_ID = "00000000-0000-0000-0000-000000000606";
-const PUBLISHED_PROGRAMME_ID = "00000000-0000-0000-0000-000000000601";
-const CANDIDATE_ID = "00000000-0000-0000-0000-000000009101";
-const SESSION_ID = "00000000-0000-0000-0000-000000009102";
+const COACH_ID = "00000000-0000-4000-8000-000000000001";
+const HEALTHY_CLIENT_ID = "00000000-0000-4000-8000-000000000101";
+const BLOCKED_PROGRAMME_ID = "00000000-0000-4000-8000-000000000602";
+const ATTENTION_PROGRAMME_ID = "00000000-0000-4000-8000-000000000606";
+const PUBLISHED_PROGRAMME_ID = "00000000-0000-4000-8000-000000000601";
+const CANDIDATE_ID = "00000000-0000-4000-8000-000000009101";
+const SESSION_ID = "00000000-0000-4000-8000-000000009102";
 
 interface CauseNode {
   cause?: unknown;
@@ -52,13 +52,13 @@ async function expectDatabaseError(
 
 function command(overrides: Partial<PublishProgrammeCommand> = {}): PublishProgrammeCommand {
   return {
-    actionId: "00000000-0000-0000-0000-000000009201",
+    actionId: "00000000-0000-4000-8000-000000009201",
     approval: "standard",
     approvedAt: DEMO_ANCHOR,
     candidateProgrammeId: BLOCKED_PROGRAMME_ID,
     coachId: COACH_ID,
     idempotencyKey: "publish-coverage",
-    idempotencyRecordId: "00000000-0000-0000-0000-000000009202",
+    idempotencyRecordId: "00000000-0000-4000-8000-000000009202",
     requestHash: "sha256:publish-coverage",
     requestId: "request-publish-coverage",
     sessions: [],
@@ -134,12 +134,12 @@ describe("PGlite programme publication coverage", () => {
     const publisher = new PublishProgrammeTransaction(new DrizzleUnitOfWork(adapter));
     const records = [
       {
-        id: "00000000-0000-0000-0000-000000009211",
+        id: "00000000-0000-4000-8000-000000009211",
         key: "missing-programme-id",
         response: { status: "published" },
       },
       {
-        id: "00000000-0000-0000-0000-000000009212",
+        id: "00000000-0000-4000-8000-000000009212",
         key: "wrong-status",
         response: { programmeId: BLOCKED_PROGRAMME_ID, status: "failed" },
       },
@@ -173,7 +173,7 @@ describe("PGlite programme publication coverage", () => {
 
   it("rolls back the idempotency claim for a missing candidate", async () => {
     const publisher = new PublishProgrammeTransaction(new DrizzleUnitOfWork(adapter));
-    const missingId = "00000000-0000-0000-0000-000000009299";
+    const missingId = "00000000-0000-4000-8000-000000009299";
 
     await expectDatabaseError(
       publisher.execute(command({ candidateProgrammeId: missingId })),
@@ -202,11 +202,11 @@ describe("PGlite programme publication coverage", () => {
     await expectDatabaseError(
       publisher.execute(
         command({
-          actionId: "00000000-0000-0000-0000-000000009221",
+          actionId: "00000000-0000-4000-8000-000000009221",
           approval: "override",
           candidateProgrammeId: ATTENTION_PROGRAMME_ID,
           idempotencyKey: "override-attention",
-          idempotencyRecordId: "00000000-0000-0000-0000-000000009222",
+          idempotencyRecordId: "00000000-0000-4000-8000-000000009222",
           reason: "A reason cannot make a non-blocked override valid.",
           requestHash: "sha256:override-attention",
         }),
@@ -225,10 +225,10 @@ describe("PGlite programme publication coverage", () => {
     await expectDatabaseError(
       publisher.execute(
         command({
-          actionId: "00000000-0000-0000-0000-000000009231",
+          actionId: "00000000-0000-4000-8000-000000009231",
           approval: "override",
           idempotencyKey: "blank-override",
-          idempotencyRecordId: "00000000-0000-0000-0000-000000009232",
+          idempotencyRecordId: "00000000-0000-4000-8000-000000009232",
           reason: "   ",
           requestHash: "sha256:blank-override",
         }),
@@ -316,10 +316,10 @@ describe("PGlite programme publication coverage", () => {
     await insertHealthyCandidate();
     const publisher = new PublishProgrammeTransaction(new DrizzleUnitOfWork(adapter));
     const publish = command({
-      actionId: "00000000-0000-0000-0000-000000001301",
+      actionId: "00000000-0000-4000-8000-000000001301",
       candidateProgrammeId: CANDIDATE_ID,
       idempotencyKey: "rollback-on-audit-conflict",
-      idempotencyRecordId: "00000000-0000-0000-0000-000000009242",
+      idempotencyRecordId: "00000000-0000-4000-8000-000000009242",
       requestHash: "sha256:rollback-on-audit-conflict",
       sessions: [
         {

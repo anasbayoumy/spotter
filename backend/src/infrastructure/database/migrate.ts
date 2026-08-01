@@ -4,8 +4,8 @@ import path from "node:path";
 
 import { migrate as migratePostgres } from "drizzle-orm/postgres-js/migrator";
 
-import type { PgliteDatabaseAdapter } from "./adapters/pglite-adapter.js";
-import type { PostgresDatabaseAdapter } from "./adapters/postgres-adapter.js";
+import type { PgliteDatabaseAdapter } from "./adapters/pglite-adapter";
+import type { PostgresDatabaseAdapter } from "./adapters/postgres-adapter";
 
 export async function migratePostgresDatabase(
   adapter: PostgresDatabaseAdapter,

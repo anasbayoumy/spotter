@@ -1,7 +1,7 @@
 import { and, asc, eq } from "drizzle-orm";
 
-import type { DatabaseSession } from "../database-types.js";
-import { clients } from "../schema.js";
+import type { DatabaseSession } from "../database-types";
+import { clients } from "../schema";
 
 export type ClientRecord = typeof clients.$inferSelect;
 

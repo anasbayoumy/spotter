@@ -15,7 +15,7 @@ import {
   type ExecutionContext,
   type FingerprintPort,
   type IdempotencyPort,
-} from "./core.js";
+} from "./core";
 import type {
   AdjustmentPort,
   AgentAuditPort,
@@ -23,8 +23,8 @@ import type {
   EvaluationPort,
   ModelGatewayPort,
   TracePort,
-} from "./ports.js";
-import { reviewBandFromResults } from "./evaluation.js";
+} from "./ports";
+import { reviewBandFromResults } from "./evaluation";
 
 interface IdempotentDependencies {
   readonly idempotency: IdempotencyPort;

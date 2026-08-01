@@ -59,8 +59,10 @@ export const adjustmentStatusEnum = pgEnum("adjustment_status", [
   "approved",
   "rejected",
   "applied",
+  "stale",
   "superseded",
 ]);
+export const sessionStatusEnum = pgEnum("session_status", ["scheduled", "completed", "missed"]);
 export const accountabilityOwnerEnum = pgEnum("accountability_owner", [
   "none",
   "automation",
@@ -334,8 +336,9 @@ export const sessions = pgTable(
       .references(() => programmes.id, { onDelete: "restrict" }),
     sessionKey: text("session_key").notNull(),
     scheduledFor: date("scheduled_for", { mode: "string" }).notNull(),
-    planned: jsonb("planned").$type<JsonObject>().notNull(),
-    actual: jsonb("actual").$type<JsonObject>(),
+    status: sessionStatusEnum("status").notNull().default("scheduled"),
+    planned: jsonb("planned").$type<JsonValue>().notNull(),
+    actual: jsonb("actual").$type<JsonValue>(),
     performedAt: timestamp("performed_at", { withTimezone: true, mode: "date" }),
     rpe: real("rpe"),
     notes: text("notes"),
@@ -369,6 +372,7 @@ export const checkIns = pgTable(
     sentiment: real("sentiment"),
     respondedAt: timestamp("responded_at", { withTimezone: true, mode: "date" }).notNull(),
     latencyHours: real("latency_hours"),
+    requiresHumanEscalation: boolean("requires_human_escalation").notNull().default(false),
     createdAt: createdAt(),
   },
   (table) => [
@@ -426,6 +430,7 @@ export const adjustments = pgTable(
       .notNull()
       .references(() => programmes.id, { onDelete: "restrict" }),
     sourceEventKey: text("source_event_key").notNull(),
+    trigger: jsonb("trigger").$type<JsonObject>().notNull(),
     operations: jsonb("operations").$type<JsonValue[]>().notNull(),
     status: adjustmentStatusEnum("status").notNull().default("draft"),
     reviewBand: reviewBandEnum("review_band"),
@@ -435,6 +440,7 @@ export const adjustments = pgTable(
     appliedProgrammeId: uuid("applied_programme_id").references(() => programmes.id, {
       onDelete: "restrict",
     }),
+    version: integer("version").notNull().default(1),
     createdAt: createdAt(),
   },
   (table) => [
@@ -452,6 +458,24 @@ export const adjustments = pgTable(
       "adjustments_applied_programme_ck",
       sql`${table.status} <> 'applied' OR ${table.appliedProgrammeId} IS NOT NULL`,
     ),
+    check("adjustments_version_ck", sql`${table.version} > 0`),
+  ],
+);
+
+export const adjustmentTriggers = pgTable(
+  "adjustment_triggers",
+  {
+    id: uuid("id").primaryKey(),
+    clientId: uuid("client_id")
+      .notNull()
+      .references(() => clients.id, { onDelete: "restrict" }),
+    sourceEventKey: text("source_event_key").notNull(),
+    trigger: jsonb("trigger").$type<JsonObject>().notNull(),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    uniqueIndex("adjustment_triggers_source_uq").on(table.clientId, table.sourceEventKey),
+    index("adjustment_triggers_client_created_idx").on(table.clientId, table.createdAt),
   ],
 );
 
@@ -497,6 +521,8 @@ export const accountabilityStates = pgTable(
     latestScoreId: uuid("latest_score_id").references(() => engagementScores.id, {
       onDelete: "restrict",
     }),
+    automationPaused: boolean("automation_paused").notNull().default(false),
+    churnFlagged: boolean("churn_flagged").notNull().default(false),
     transitionedAt: timestamp("transitioned_at", { withTimezone: true, mode: "date" }).notNull(),
     version: integer("version").notNull().default(1),
   },
@@ -504,6 +530,10 @@ export const accountabilityStates = pgTable(
     check("accountability_states_tier_ck", sql`${table.tier} BETWEEN 0 AND 4`),
     check("accountability_states_version_ck", sql`${table.version} > 0`),
     check("accountability_states_owner_ck", sql`(${table.tier} < 3) OR ${table.owner} = 'coach'`),
+    check(
+      "accountability_states_escalation_ck",
+      sql`(${table.tier} < 3 OR ${table.automationPaused}) AND (${table.tier} <> 4 OR ${table.churnFlagged})`,
+    ),
   ],
 );
 
@@ -667,6 +697,7 @@ export const jobRuns = pgTable(
 export const schema = {
   accountabilityStates,
   adjustments,
+  adjustmentTriggers,
   agentRuns,
   appEvents,
   checkIns,

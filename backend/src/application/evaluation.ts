@@ -1,7 +1,7 @@
 import type { GateResult, JudgeResult, ReviewBand } from "@spotter/contracts";
 
-import { calculateReviewBand } from "../domain/index.js";
-import { ApplicationError } from "./core.js";
+import { calculateReviewBand } from "../domain/index";
+import { ApplicationError } from "./core";
 
 function judgeScore(score: number): 1 | 2 | 3 | 4 | 5 {
   if (score === 1 || score === 2 || score === 3 || score === 4 || score === 5) return score;

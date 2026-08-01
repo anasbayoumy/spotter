@@ -11,9 +11,9 @@ import type {
   Scorecard,
   Session,
   Today,
-} from "./read-models.js";
+} from "./read-models";
 
-import { ApplicationError } from "./core.js";
+import { ApplicationError } from "./core";
 import type {
   AccountabilityPort,
   AdjustmentPort,
@@ -22,7 +22,7 @@ import type {
   ScorecardPort,
   SessionPort,
   TracePort,
-} from "./ports.js";
+} from "./ports";
 
 export class ListDemoClients {
   public constructor(private readonly clients: ClientReadPort) {}

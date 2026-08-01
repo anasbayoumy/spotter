@@ -10,10 +10,16 @@
     "vitest.config.ts"
   ],
   "globalEnv": [
+    "ALLOW_NO_AUTH_SYNTHETIC_DEMO",
     "APP_ENV",
     "AI_MODE",
+    "CRON_SECRET",
+    "DATA_POLICY",
     "DATABASE_MODE",
     "DATABASE_URL",
+    "DEMO_CLIENT_ID",
+    "DEMO_COACH_ID",
+    "PGLITE_DATA_DIR",
     "NEXT_PUBLIC_API_BASE_URL",
     "EXPO_PUBLIC_API_BASE_URL"
   ],
