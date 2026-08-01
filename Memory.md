@@ -14,3 +14,13 @@
 - 2026-08-02: Pool 1 passed formatting, lint, strict typecheck, 89 unit/contract/config/testkit
   tests, PGlite migration/seed/vector health, and isolated Docker PostgreSQL migration/seed
   idempotency. Domain coverage reached 100% statements/lines/functions and 98.79% branches.
+- 2026-08-02: Pool 2 implemented deterministic context assembly, recorded/live model gateways,
+  programme/adjustment/accountability agents, eight fail-closed safety gates, independent judges,
+  calibration/scorecard logic, typed application use cases, and scheduled jobs.
+- 2026-08-02: The enforced Pool 2 unit gate passed 285 backend tests at 99.90% statements/lines,
+  99.36% branches, and 100% functions. Context, safety/taxonomy, publication transactions, and
+  accountability critical scopes each reached 100% in all metrics; 93 safety tests and both PGlite
+  and Docker PostgreSQL integration suites passed.
+- 2026-08-02: Coverage testing exposed and fixed a production error-mapping defect: wrapped Drizzle
+  PostgreSQL `23505` errors are now detected through a bounded, cycle-safe cause chain, preserving
+  the `publication_conflict` contract and transactional rollback.

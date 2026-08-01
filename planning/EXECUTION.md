@@ -17,3 +17,11 @@ Pools are sequential. Agents in a pool own disjoint paths. At each boundary, the
 authoritative integration checks and records a Git checkpoint. A failing gate enters reproduce →
 diagnose → regression test → smallest fix → targeted retest → affected suite → full regression.
 There is no arbitrary retry cap for code defects.
+
+## Checkpoints
+
+- Pool 0: canonical requirements, architecture, and testing contract — complete (`9d07d75`).
+- Pool 1: typed workspace, contracts/domain, database adapters/migrations/seed — complete
+  (`827f5a3`).
+- Pool 2: intelligence runtime, evaluations, application workflows, jobs, and critical coverage —
+  complete locally; checkpoint publication in progress.

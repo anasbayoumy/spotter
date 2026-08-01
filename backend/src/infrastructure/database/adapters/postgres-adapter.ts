@@ -58,7 +58,7 @@ export class PostgresDatabaseAdapter implements DatabaseAdapter {
       SELECT
         current_setting('server_version') AS pg_version,
         (SELECT extversion FROM pg_extension WHERE extname = 'vector') AS vector_version,
-        (SELECT hash FROM __drizzle_migrations ORDER BY created_at DESC LIMIT 1) AS migration_version
+        (SELECT hash FROM drizzle.__drizzle_migrations ORDER BY created_at DESC LIMIT 1) AS migration_version
     `);
     const row = result[0];
 

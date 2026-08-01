@@ -5,5 +5,5 @@
     "lib": ["ES2024", "DOM"],
     "types": ["node", "vitest/globals"]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "../fixtures/demo/**/*.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.ts", "vitest.unit.config.ts", "../fixtures/demo/**/*.ts"]
 }

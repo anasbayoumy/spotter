@@ -40,7 +40,7 @@ export class PgliteDatabaseAdapter implements DatabaseAdapter {
     dataDir: string | undefined = undefined,
     options: PGliteOptions = {},
   ): Promise<PgliteDatabaseAdapter> {
-    const client = await PGlite.create(dataDir, {
+    const client = await PGlite.create(dataDir ?? "memory://", {
       ...options,
       extensions: { ...options.extensions, vector },
     });
