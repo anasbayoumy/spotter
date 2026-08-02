@@ -1,4 +1,4 @@
-FROM node:24.11.1-bookworm-slim AS toolchain
+FROM node:26.5.0-bookworm-slim AS toolchain
 
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
@@ -34,7 +34,7 @@ COPY backend/packages/contracts backend/packages/contracts
 RUN backend/node_modules/.bin/tsc -p backend/packages/contracts/tsconfig.build.json \
   && test -s backend/packages/contracts/dist/index.js
 
-FROM node:24.11.1-bookworm-slim AS runtime
+FROM node:26.5.0-bookworm-slim AS runtime
 
 ENV NODE_ENV=production
 

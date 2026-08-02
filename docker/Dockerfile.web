@@ -1,4 +1,4 @@
-FROM node:24.11.1-bookworm-slim AS toolchain
+FROM node:26.5.0-bookworm-slim AS toolchain
 
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
