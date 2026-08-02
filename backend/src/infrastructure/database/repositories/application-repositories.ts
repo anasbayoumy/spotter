@@ -61,6 +61,10 @@ import type {
   Scorecard,
   Today,
 } from "../../../application/read-models";
+import {
+  ModelRunTelemetryStore,
+  type ModelRunTelemetry,
+} from "../../../agents/gateway/model-run-telemetry";
 import { validateDocumentedExerciseSwap } from "../../../domain/exercise-equivalences";
 import { DatabaseInvariantError, isUniqueViolation } from "../database-error";
 import type { DatabaseAdapter, DatabaseSession } from "../database-types";
@@ -82,6 +86,7 @@ import {
   jobRuns,
   messageGuards,
   messages,
+  metrics,
   programmes,
   sessions,
   type JsonObject,
@@ -454,30 +459,45 @@ export class DrizzleTraceRepository implements TracePort {
 
 interface StagedSuccess {
   readonly input: Parameters<AgentAuditPort["recordSuccess"]>[0];
+  readonly telemetry: ModelRunTelemetry;
 }
 
 export class BufferedAgentAuditRepository implements AgentAuditPort {
   readonly #successes = new Map<string, StagedSuccess>();
 
-  public constructor(private readonly database: DatabaseSession) {}
+  public constructor(
+    private readonly database: DatabaseSession,
+    private readonly modelTelemetry = new ModelRunTelemetryStore(),
+  ) {}
 
   public recordSuccess(input: Parameters<AgentAuditPort["recordSuccess"]>[0]): Promise<string> {
     const runId = randomUUID();
-    this.#successes.set(runId, { input });
+    this.#successes.set(runId, { input, telemetry: this.modelTelemetry.take(input.traceId) });
     return Promise.resolve(runId);
   }
 
   public async recordFailure(input: Parameters<AgentAuditPort["recordFailure"]>[0]): Promise<void> {
-    await this.database.insert(agentRuns).values({
-      agent: input.kind,
-      attemptKey: `${input.kind}:${input.context.idempotencyKey}:failed`,
-      errorCode: input.errorCode,
-      id: randomUUID(),
-      latencyMs: 0,
-      model: "recorded/spotter-v1",
-      promptVersion: "application-v1",
-      status: "failed",
-      traceId: input.traceId,
+    const runId = randomUUID();
+    const telemetry = this.modelTelemetry.take(input.traceId);
+    await this.database.transaction(async (database) => {
+      await database.insert(agentRuns).values({
+        agent: input.kind,
+        attemptKey: `${input.kind}:${input.context.idempotencyKey}:failed`,
+        errorCode: input.errorCode,
+        id: runId,
+        latencyMs: 0,
+        model: `${telemetry.mode}/${telemetry.modelId}`,
+        promptVersion: "application-v1",
+        status: "failed",
+        traceId: input.traceId,
+      });
+      await this.persistModelTelemetry(
+        database,
+        input.traceId,
+        runId,
+        input.context.effectiveAt,
+        telemetry,
+      );
     });
   }
 
@@ -491,19 +511,26 @@ export class BufferedAgentAuditRepository implements AgentAuditPort {
         "Agent audit buffer is unavailable.",
       );
     }
-    const { input } = staged;
+    const { input, telemetry } = staged;
     await database.insert(agentRuns).values({
       agent: input.kind,
       attemptKey: `${input.kind}:${input.context.idempotencyKey}:succeeded`,
       errorCode: null,
       id: runId,
       latencyMs: 0,
-      model: "recorded/spotter-v1",
+      model: `${telemetry.mode}/${telemetry.modelId}`,
       output: jsonObject(input.output),
       promptVersion: "application-v1",
       status: "succeeded",
       traceId: input.traceId,
     });
+    await this.persistModelTelemetry(
+      database,
+      input.traceId,
+      runId,
+      input.context.effectiveAt,
+      telemetry,
+    );
     const evaluations = [
       ...input.gates.map((gate) => ({
         agentRunId: runId,
@@ -528,6 +555,39 @@ export class BufferedAgentAuditRepository implements AgentAuditPort {
     ];
     if (evaluations.length > 0) await database.insert(evalResults).values(evaluations);
     this.#successes.delete(runId);
+  }
+
+  private async persistModelTelemetry(
+    database: DatabaseSession,
+    traceId: string,
+    runId: string,
+    measuredAt: Date,
+    telemetry: ModelRunTelemetry,
+  ): Promise<void> {
+    const trace = await database.query.contextTraces.findFirst({
+      where: eq(contextTraces.id, traceId),
+    });
+    if (trace === undefined) {
+      throw new DatabaseInvariantError("dependency_unavailable", "Agent trace is unavailable.");
+    }
+    await database.insert(metrics).values([
+      {
+        clientId: trace.clientId,
+        id: randomUUID(),
+        kind: "model_schema_retry_count",
+        measuredAt,
+        source: runId,
+        value: telemetry.schemaRetryCount,
+      },
+      {
+        clientId: trace.clientId,
+        id: randomUUID(),
+        kind: "model_schema_failure",
+        measuredAt,
+        source: runId,
+        value: telemetry.schemaFailure ? 1 : 0,
+      },
+    ]);
   }
 }
 
@@ -1741,10 +1801,14 @@ export class DrizzleScorecardRepository implements ScorecardPort {
   public constructor(private readonly database: DatabaseSession) {}
 
   public async get(): Promise<Scorecard> {
-    const [evaluationRows, runRows, published] = await Promise.all([
+    const [evaluationRows, runRows, published, modelMetricRows] = await Promise.all([
       this.database.select().from(evalResults),
       this.database.select().from(agentRuns),
       this.database.select().from(programmes).where(eq(programmes.status, "published")),
+      this.database
+        .select()
+        .from(metrics)
+        .where(inArray(metrics.kind, ["model_schema_retry_count", "model_schema_failure"])),
     ]);
     const safetyPassRateByGate: Record<
       string,
@@ -1780,6 +1844,24 @@ export class DrizzleScorecardRepository implements ScorecardPort {
             Math.min(latencies.length - 1, Math.floor((latencies.length - 1) * fraction))
           ] ?? null);
     const totalCost = runRows.reduce((total, run) => total + run.costUsd, 0);
+    const modelTelemetry = new Map<string, { schemaFailure?: number; schemaRetryCount?: number }>();
+    for (const row of modelMetricRows) {
+      const current = modelTelemetry.get(row.source) ?? {};
+      if (row.kind === "model_schema_failure") current.schemaFailure = row.value;
+      if (row.kind === "model_schema_retry_count") current.schemaRetryCount = row.value;
+      modelTelemetry.set(row.source, current);
+    }
+    const completeModelTelemetry = runRows.flatMap((run) => {
+      const telemetry = modelTelemetry.get(run.id);
+      return telemetry?.schemaFailure === undefined || telemetry.schemaRetryCount === undefined
+        ? []
+        : [
+            {
+              schemaFailure: telemetry.schemaFailure,
+              schemaRetryCount: telemetry.schemaRetryCount,
+            },
+          ];
+    });
     const modes = new Set(
       runRows.map((run) => (run.model.startsWith("recorded") ? "recorded" : "live")),
     );
@@ -1801,6 +1883,19 @@ export class DrizzleScorecardRepository implements ScorecardPort {
       latencyP95Ms: metric(percentile(0.95), latencies.length),
       mode: modes.size > 1 ? "mixed" : modes.has("live") ? "live" : "recorded",
       safetyPassRateByGate,
+      schemaFailureRate: metric(
+        completeModelTelemetry.length === 0
+          ? null
+          : completeModelTelemetry.filter((row) => row.schemaFailure === 1).length /
+              completeModelTelemetry.length,
+        completeModelTelemetry.length,
+      ),
+      schemaRetryCount: metric(
+        completeModelTelemetry.length === 0
+          ? null
+          : completeModelTelemetry.reduce((total, row) => total + row.schemaRetryCount, 0),
+        completeModelTelemetry.length,
+      ),
     });
   }
 }

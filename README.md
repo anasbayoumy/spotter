@@ -16,7 +16,8 @@ Backend-owned supporting assets are grouped by responsibility:
 
 - `backend/packages/`: versioned cross-surface contracts, configuration, design tokens, and test
   utilities.
-- `backend/resources/`: committed synthetic demo, model-recording, calibration, and safety data.
+- `backend/resources/`: committed synthetic demo, real-model recordings, pending calibration labels,
+  and deterministic safety data.
 - `backend/infra/`: PostgreSQL initialization and verification schema declarations.
 - `backend/tooling/`: repository verification and operational commands.
 
@@ -28,7 +29,7 @@ the [local and staging playbook](./playbook.md).
 
 ## Product screenshots
 
-These are authentic production-build screens rendered with deterministic synthetic fixtures.
+These are application-build screens rendered with deterministic synthetic fixtures.
 
 ### Coach console
 

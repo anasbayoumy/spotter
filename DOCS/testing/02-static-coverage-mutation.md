@@ -35,8 +35,8 @@ Dependency rules are enforced with ESLint boundaries or dependency-cruiser, not 
 
 The root `pnpm lint` includes `pnpm lint:boundaries`.
 
-The current tracked tree passes the boundary check across 410 source files and the forbidden-pattern
-check across 371 files.
+Run `pnpm lint:boundaries && pnpm lint:forbidden` to reproduce the current file counts and verdict;
+this document does not pin counts that change whenever source files are added.
 
 ## Type-quality rules
 
@@ -81,10 +81,9 @@ integrity guarantee. It does not mutate generated schemas, presentation markup, 
 | `QA-MUT-004` | Engagement tier and 48-hour suppression logic          |                    95% | No surviving time/ownership mutant      | `pnpm test:mutation` |
 | `QA-MUT-005` | Combined selected critical scope                       |                    90% | Every survivor is classified            | `pnpm test:mutation` |
 
-The accepted current-tree run completed all 2,207 generated mutants: 2,193 killed, 9
-reviewed-equivalent survivors, and 5 classified timeouts. Its conservative score is 99.365655%,
-counting every survivor and timeout as not killed; the final release evidence manifest remains
-pending.
+Run `pnpm test:mutation` to produce counts and scores for the current source and lockfile.
+Historical mutation results are not presented here as current-tree evidence after either input
+changes.
 
 The committed scope selectors are:
 

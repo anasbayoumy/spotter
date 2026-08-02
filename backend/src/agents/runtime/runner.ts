@@ -2,6 +2,7 @@ import type { ContextSourceInput } from "../context/types";
 import type { DeterministicContextAssembler } from "../context/assemble";
 import { AgentRuntimeError, toAgentRuntimeError } from "../errors";
 import type { ModelGateway } from "../gateway/model-gateway";
+import type { SchemaTelemetry } from "../gateway/openai-compatible-transport";
 import type { PromptRegistry } from "../prompts/registry";
 import type { AgentClock, AgentIdGenerator, AgentRunPort, ContextTracePort } from "./ports";
 
@@ -17,6 +18,19 @@ export interface AgentRuntimeOptions {
 }
 
 type OutputValidator<Output> = (value: unknown) => Output;
+
+interface SchemaTelemetryGateway extends ModelGateway {
+  takeSchemaTelemetry(traceId: string): SchemaTelemetry;
+}
+
+function schemaTelemetry(gateway: ModelGateway, traceId: string): SchemaTelemetry {
+  if (isSchemaTelemetryGateway(gateway)) return gateway.takeSchemaTelemetry(traceId);
+  return { schemaFailure: false, schemaRetryCount: 0 };
+}
+
+function isSchemaTelemetryGateway(gateway: ModelGateway): gateway is SchemaTelemetryGateway {
+  return "takeSchemaTelemetry" in gateway && typeof gateway.takeSchemaTelemetry === "function";
+}
 
 export class AgentRunner {
   readonly #timeoutMilliseconds: number;
@@ -88,6 +102,7 @@ export class AgentRunner {
         timeoutFailure,
       ]);
       const output = validate(response.output);
+      const validationTelemetry = schemaTelemetry(this.gateway, traceId);
       await this.runPort.create(
         Object.freeze({
           id: runId,
@@ -95,6 +110,8 @@ export class AgentRunner {
           agent: request.intent,
           mode: this.gateway.mode,
           promptVersion: prompt.version,
+          schemaFailure: validationTelemetry.schemaFailure,
+          schemaRetryCount: validationTelemetry.schemaRetryCount,
           model: this.gateway.modelId,
           traceId,
           usage: response.usage,
@@ -107,6 +124,7 @@ export class AgentRunner {
       return output;
     } catch (error) {
       const mapped = toAgentRuntimeError(error);
+      const validationTelemetry = schemaTelemetry(this.gateway, traceId);
       await this.runPort.create(
         Object.freeze({
           id: runId,
@@ -114,6 +132,9 @@ export class AgentRunner {
           agent: request.intent,
           mode: this.gateway.mode,
           promptVersion: prompt.version,
+          schemaFailure:
+            validationTelemetry.schemaFailure || mapped.code === "model_output_invalid",
+          schemaRetryCount: validationTelemetry.schemaRetryCount,
           model: this.gateway.modelId,
           traceId,
           usage: null,

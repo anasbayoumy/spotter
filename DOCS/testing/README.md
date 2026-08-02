@@ -73,6 +73,8 @@ release evidence use these names.
 | `pnpm test:docker`                        | Authoritative Docker protocol in `08-docker-verification.md`                          |
 | `pnpm build`                              | Production builds/exports for every deployable surface                                |
 | `pnpm evidence:verify`                    | Evidence schema, checksums, secret/PII scan, and completeness                         |
+| `pnpm --filter backend calibrate`         | Reports pending human labels; never invents kappa                                     |
+| `pnpm --filter backend record:fixtures`   | Re-captures every model fixture from an explicitly configured live endpoint           |
 
 All mandatory acceptance runs use recorded model mode and require no external AI key. Live-model
 evaluation is informative unless separately approved; it cannot turn a deterministic failure green.

@@ -7,6 +7,14 @@ export async function runRecordedJudges(
   rawInput: unknown,
   judges: readonly Judge[] = recordedJudges,
 ): Promise<readonly JudgeResult[]> {
+  return runJudges(intent, rawInput, judges);
+}
+
+export async function runJudges(
+  intent: EvaluationIntent,
+  rawInput: unknown,
+  judges: readonly Judge[],
+): Promise<readonly JudgeResult[]> {
   const input: JudgeInput = judgeInputSchema.parse(rawInput);
   if (input.intent !== intent)
     throw new Error("Judge input intent does not match evaluation intent.");

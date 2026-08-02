@@ -4,8 +4,10 @@ import type { EvaluationIntent, JudgeName, JudgeResult } from "../types";
 
 export const judgeInputSchema = z
   .object({
+    agentOutput: z.json().optional(),
     citations: z.array(z.string().trim().min(1).max(120)).max(100).default([]),
     claims: z.array(z.string().trim().min(1).max(500)).max(100).default([]),
+    clientFixture: z.json().optional(),
     fixtureId: z.string().trim().min(1).max(120),
     intent: z.enum(["accountability", "adjustment", "programme"]),
     sectionIds: z.array(z.string().trim().min(1).max(120)).max(200).default([]),

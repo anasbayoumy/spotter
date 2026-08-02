@@ -44,16 +44,16 @@ testing specification may add broader coverage.
 
 ## Agent, evaluation, and safety
 
-| ID       | Requirement                                                                                                                                                                             | Verification                                     |
-| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| `AI-001` | Intent selection and context assembly are deterministic code. Agents receive assembled inputs and cannot retrieve arbitrary records.                                                    | Unit tests and gateway contract tests.           |
-| `AI-002` | Every active hard constraint is pinned ahead of budgeted context. If hard constraints exceed the budget, generation fails visibly before a model call; no hard constraint is truncated. | Budget-stress safety tests.                      |
-| `AI-003` | Model outputs are accepted only after Zod validation. Invalid or partial outputs cannot create a reviewable or publishable item.                                                        | Malformed-recording tests.                       |
-| `AI-004` | Deterministic safety gates run before graded judges. Any blocking gate failure sets `review_band=blocked`.                                                                              | Pipeline order and golden safety tests.          |
-| `AI-005` | The generator and judge model identifiers differ in live mode. Judges receive output, trace, and rubric but not generator reasoning.                                                    | Configuration and judge-payload tests.           |
-| `AI-006` | Recorded mode is deterministic, committed, keyless, and the default for tests and demo. Live mode is provider-isolated and records usage, cost, latency, prompt hash, and failures.     | Recorded replay and live-adapter contract tests. |
-| `AI-007` | The programme, adjustment, and accountability agents cannot write to repositories, publish, override, select/lower a tier, or create hard constraints.                                  | Capability/interface boundary tests.             |
-| `AI-008` | Review bands are `blocked` for any blocking failure, `clear` only when all gates pass and every required judge is at least 4, and `attention` otherwise.                                | Decision-table unit tests.                       |
+| ID       | Requirement                                                                                                                                                                             | Verification                                      |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `AI-001` | Intent selection and context assembly are deterministic code. Agents receive assembled inputs and cannot retrieve arbitrary records.                                                    | Unit tests and gateway contract tests.            |
+| `AI-002` | Every active hard constraint is pinned ahead of budgeted context. If hard constraints exceed the budget, generation fails visibly before a model call; no hard constraint is truncated. | Budget-stress safety tests.                       |
+| `AI-003` | Model outputs are accepted only after Zod validation. Invalid or partial outputs cannot create a reviewable or publishable item.                                                        | Malformed-recording tests.                        |
+| `AI-004` | Deterministic safety gates run before graded judges. Any blocking gate failure sets `review_band=blocked`.                                                                              | Pipeline order and golden safety tests.           |
+| `AI-005` | The generator and judge model identifiers differ in live mode. Judges receive output, trace section IDs, client fixture, and one rubric but not the generator prompt or reasoning.      | Configuration guard and judge-adapter inspection. |
+| `AI-006` | Recorded mode is deterministic, committed, keyless, and the default for tests and demo. Live mode is provider-neutral and records model provenance plus schema retry/failure telemetry. | Recorded replay, config, and transport tests.     |
+| `AI-007` | The programme, adjustment, and accountability agents cannot write to repositories, publish, override, select/lower a tier, or create hard constraints.                                  | Capability/interface boundary tests.              |
+| `AI-008` | Review bands are `blocked` for any blocking failure, `clear` only when all gates pass and every required judge is at least 4, and `attention` otherwise.                                | Decision-table unit tests.                        |
 
 ## Coaching flows
 

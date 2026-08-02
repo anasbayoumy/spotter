@@ -114,9 +114,9 @@ must not appear in the V1 UI or add speculative infrastructure.
 
 ## 6. Seeded no-auth demo
 
-The demo must work with `AI_MODE=recorded`, `DATABASE_MODE=pglite`, no model key, and no Docker. A
-clean seed is deterministic: stable actor IDs, stable handles, stable relative scenarios, and
-recorded outputs whose schemas match the live path.
+The demo must work with `SPOTTER_MODEL_MODE=recorded`, `DATABASE_MODE=pglite`, no model key, and no
+Docker. A clean seed is deterministic: stable actor IDs, stable handles, stable relative scenarios,
+and recorded outputs whose schemas match the live path.
 
 The seed must include, without real data:
 

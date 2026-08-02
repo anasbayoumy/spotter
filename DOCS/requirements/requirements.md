@@ -75,8 +75,9 @@ acceptance tests or the traceability matrix.
   contract.
 - **CTX-009** — The accountability agent may draft copy or a brief but must not select tier,
   ownership, recipient, suppression, or delivery.
-- **CTX-010** — Each attempted agent run must record agent, model, prompt version hash, trace ID,
-  usage, cost, latency, output or sanitized error.
+- **CTX-010** — Each attempted agent run must record agent, mode/model provenance, prompt version
+  hash, trace ID, schema retry/failure telemetry, and output or sanitized error. Generic provider
+  cost must not be inferred when the endpoint supplies no pricing data.
 - **CTX-011** — Live configuration must reject identical generator and judge model identifiers
   before either model is called.
 

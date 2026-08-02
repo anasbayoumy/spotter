@@ -17,7 +17,7 @@ Status: approved implementation contract.
 | Persistence            | Drizzle ORM and committed SQL migrations                                               |
 | Authoritative database | PostgreSQL 16 with pgvector in Docker                                                  |
 | Fast/demo database     | PGlite with explicit parity tests; never final release evidence by itself              |
-| Model boundary         | AI SDK 6 behind `ModelGateway`; recorded mode is mandatory and live mode optional      |
+| Model boundary         | AI SDK 6 plus generic OpenAI-compatible transport behind `ModelGateway`                |
 | Scheduling             | Idempotent HTTP job entry points; PostgreSQL locks/constraints, no queue service in V1 |
 | Observability          | Pino JSON logs, request/trace IDs, prompt hashes, latency/token/cost metadata          |
 | Verification           | Vitest, Testing Library, Playwright, axe, Lighthouse, Docker Compose, optional Maestro |
@@ -74,7 +74,8 @@ backend/tooling/
   protection.
 - `composition`: validated clocks/IDs, logging, model/database adapters, use-case wiring, and the
   narrow server facade consumed by thin Next route adapters.
-- `cli`: migration, seed, deterministic demo, and safety-report entry points.
+- `cli`: migration, seed, deterministic demo, fixture recording, calibration-status, and
+  safety-report entry points.
 
 ## API rules
 
@@ -104,10 +105,10 @@ backend/tooling/
 
 ## Runtime modes
 
-- `recorded`: deterministic committed model responses; mandatory for tests, demo, and release
-  certification.
-- `live`: provider-backed generation when compatible credentials already exist; never required to
-  complete V1.
+- `recorded`: deterministic committed model responses; default for tests and demo, with no key or
+  network.
+- `live`: optional provider-backed generation selected only by `SPOTTER_MODEL_MODE=live`; requires
+  an OpenAI-compatible base URL, key, and distinct generator/judge model IDs.
 - `test`: isolated clocks, IDs, databases, and gateways with production-equivalent contracts.
 
 No code path may silently fall back from live to recorded behavior or report a live evaluation when
@@ -119,6 +120,8 @@ only recorded mode ran.
 pnpm install --frozen-lockfile
 pnpm dev
 pnpm demo
+pnpm --filter backend calibrate
+pnpm --filter backend record:fixtures
 pnpm format:check
 pnpm lint
 pnpm typecheck

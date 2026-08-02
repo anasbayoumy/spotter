@@ -15,6 +15,29 @@ const optionalText = z.preprocess(
   (value) => (typeof value === "string" && value.trim().length === 0 ? undefined : value),
   z.string().trim().min(1).max(200).optional(),
 );
+const openAiCompatibleBaseUrl = z.preprocess(
+  (value) => (typeof value === "string" && value.trim().length === 0 ? undefined : value),
+  z
+    .url()
+    .max(500)
+    .superRefine((value, context) => {
+      const url = new URL(value);
+      if (
+        !["http:", "https:"].includes(url.protocol) ||
+        url.username.length > 0 ||
+        url.password.length > 0 ||
+        url.search.length > 0 ||
+        url.hash.length > 0
+      ) {
+        context.addIssue({
+          code: "custom",
+          message: "Model base URL must be an HTTP(S) endpoint without credentials or query data",
+        });
+      }
+    })
+    .transform((value) => value.replace(/\/+$/u, ""))
+    .optional(),
+);
 const providerBaseUrl = z.preprocess(
   (value) => (typeof value === "string" && value.trim().length === 0 ? undefined : value),
   z
@@ -67,11 +90,47 @@ export const serverEnvironmentSchema = z
     LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
     MIGRATIONS_DIR: z.string().min(1).default("migrations"),
     PGLITE_DATA_DIR: z.string().min(1).default("memory://"),
+    SPOTTER_GENERATOR_MODEL: optionalText,
+    SPOTTER_JUDGE_MODEL: optionalText,
+    SPOTTER_MODEL_API_KEY: z.preprocess(
+      (value) => (typeof value === "string" && value.trim().length === 0 ? undefined : value),
+      z.string().trim().min(1).max(512).optional(),
+    ),
+    SPOTTER_MODEL_BASE_URL: openAiCompatibleBaseUrl,
+    SPOTTER_MODEL_MODE: z.enum(["recorded", "live"]).default("recorded"),
     SPOTTER_QA_PROJECT: optionalEnvironmentText.pipe(qaProjectSchema.optional()),
     SPOTTER_QA_RUN_ID: optionalEnvironmentText.pipe(qaRunIdSchema.optional()),
     SPOTTER_RATE_LIMIT_PROFILE: z.enum(["default", "load_test"]).default("default"),
   })
   .superRefine((environment, context) => {
+    if (environment.SPOTTER_MODEL_MODE === "live") {
+      for (const key of [
+        "SPOTTER_MODEL_BASE_URL",
+        "SPOTTER_MODEL_API_KEY",
+        "SPOTTER_GENERATOR_MODEL",
+        "SPOTTER_JUDGE_MODEL",
+      ] as const) {
+        if (environment[key] === undefined) {
+          context.addIssue({
+            code: "custom",
+            message: `${key} is required when SPOTTER_MODEL_MODE=live`,
+            path: [key],
+          });
+        }
+      }
+      if (
+        environment.SPOTTER_GENERATOR_MODEL !== undefined &&
+        environment.SPOTTER_JUDGE_MODEL !== undefined &&
+        environment.SPOTTER_GENERATOR_MODEL.toLowerCase() ===
+          environment.SPOTTER_JUDGE_MODEL.toLowerCase()
+      ) {
+        context.addIssue({
+          code: "custom",
+          message: "SPOTTER_GENERATOR_MODEL and SPOTTER_JUDGE_MODEL must differ",
+          path: ["SPOTTER_JUDGE_MODEL"],
+        });
+      }
+    }
     if (environment.APP_ENV === "production") {
       if (
         !environment.ALLOW_NO_AUTH_SYNTHETIC_DEMO ||
@@ -177,6 +236,34 @@ export const serverEnvironmentSchema = z
   });
 
 export type ServerEnvironment = z.infer<typeof serverEnvironmentSchema>;
+
+export type ModelConfiguration =
+  | Readonly<{ mode: "recorded" }>
+  | Readonly<{
+      mode: "live";
+      apiKey: string;
+      baseUrl: string;
+      generatorModel: string;
+      judgeModel: string;
+    }>;
+
+export function resolveModelConfiguration(environment: ServerEnvironment): ModelConfiguration {
+  if (environment.SPOTTER_MODEL_MODE === "recorded") return { mode: "recorded" };
+  const parsed = z
+    .object({
+      apiKey: z.string().min(1),
+      baseUrl: z.url(),
+      generatorModel: z.string().min(1),
+      judgeModel: z.string().min(1),
+    })
+    .parse({
+      apiKey: environment.SPOTTER_MODEL_API_KEY,
+      baseUrl: environment.SPOTTER_MODEL_BASE_URL,
+      generatorModel: environment.SPOTTER_GENERATOR_MODEL,
+      judgeModel: environment.SPOTTER_JUDGE_MODEL,
+    });
+  return { mode: "live", ...parsed };
+}
 
 export function parseServerEnvironment(
   source: NodeJS.ProcessEnv | Record<string, string | undefined>,

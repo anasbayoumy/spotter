@@ -13,6 +13,7 @@ const measuredMetricSchema = z
     (metric) => (metric.availability === "available") === (metric.value !== null),
     "Availability and value disagree",
   );
+const unavailableMetric = { availability: "unavailable" as const, sampleSize: 0, value: null };
 export const scorecardSchema = z
   .object({
     generatedAt: isoInstantSchema,
@@ -27,6 +28,8 @@ export const scorecardSchema = z
     costPerPublishedPlanUsd: measuredMetricSchema,
     latencyP50Ms: measuredMetricSchema,
     latencyP95Ms: measuredMetricSchema,
+    schemaFailureRate: measuredMetricSchema.default(unavailableMetric),
+    schemaRetryCount: measuredMetricSchema.default(unavailableMetric),
   })
   .strict();
 

@@ -10,6 +10,8 @@ export interface ScorecardRun {
   readonly mode: "live" | "recorded";
   readonly published: boolean;
   readonly reviewBand: ReviewBand;
+  readonly schemaFailure?: boolean;
+  readonly schemaRetryCount?: number;
   readonly wasEdited: boolean;
 }
 
@@ -70,6 +72,11 @@ export function aggregateScorecard(input: ScorecardInput): Scorecard {
   const modes = new Set(input.runs.map((run) => run.mode));
   const mode: Scorecard["mode"] = modes.size > 1 ? "mixed" : (input.runs[0]?.mode ?? "recorded");
   const latencies = input.runs.map((run) => run.latencyMs);
+  const schemaFailures = input.runs.filter((run) => run.schemaFailure === true).length;
+  const schemaRetryCount = input.runs.reduce(
+    (total, run) => total + (run.schemaRetryCount ?? 0),
+    0,
+  );
 
   return {
     bandAccuracy: measured(
@@ -91,5 +98,13 @@ export function aggregateScorecard(input: ScorecardInput): Scorecard {
     latencyP95Ms: measured(percentile(latencies, 0.95), latencies.length),
     mode,
     safetyPassRateByGate,
+    schemaFailureRate: measured(
+      input.runs.length === 0 ? null : schemaFailures / input.runs.length,
+      input.runs.length,
+    ),
+    schemaRetryCount: measured(
+      input.runs.length === 0 ? null : schemaRetryCount,
+      input.runs.length,
+    ),
   };
 }

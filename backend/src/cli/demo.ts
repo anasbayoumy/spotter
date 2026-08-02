@@ -9,7 +9,7 @@ import {
 
 const environment = parseServerEnvironment({
   ...process.env,
-  AI_MODE: "recorded",
+  SPOTTER_MODEL_MODE: "recorded",
   ALLOW_NO_AUTH_SYNTHETIC_DEMO: "true",
   APP_ENV: "demo",
   DATABASE_MODE: "pglite",

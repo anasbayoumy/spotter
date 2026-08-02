@@ -1,36 +1,7 @@
 {
   "schemaVersion": 1,
-  "labelSource": "hand_reviewed_synthetic",
-  "generatorModel": "spotter-recorded-generator-v1",
-  "judgeModel": "spotter-recorded-judge-v1",
-  "labels": [
-    {
-      "id": "cal-programme-grounding-001",
-      "recordingId": "programme-baseline-v1",
-      "judge": "grounding",
-      "score": 5,
-      "rationale": "The schedule and equipment claim cites the exact goal/profile record."
-    },
-    {
-      "id": "cal-programme-coherence-001",
-      "recordingId": "programme-baseline-v1",
-      "judge": "coherence",
-      "score": 4,
-      "rationale": "The recorded baseline is internally coherent for the synthetic schedule."
-    },
-    {
-      "id": "cal-adjustment-grounding-001",
-      "recordingId": "adjustment-low-readiness-v1",
-      "judge": "grounding",
-      "score": 5,
-      "rationale": "The reduction cites the low-readiness check-in and invents no metric."
-    },
-    {
-      "id": "cal-accountability-intervention-001",
-      "recordingId": "accountability-tier-1-v1",
-      "judge": "intervention",
-      "score": 5,
-      "rationale": "The message is proportionate and references the specific missed session and goal."
-    }
-  ]
+  "labelSource": "pending_human_review",
+  "generatorModel": "ollama/qwen3.6:35b-mlx",
+  "judgeModel": null,
+  "labels": []
 }

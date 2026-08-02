@@ -21,7 +21,7 @@ happy-path acceptance journeys.
 | `QA-E2E-011` | Empty, loading, validation, 404, 409/stale, 429, 503, and retry states are actionable and do not lose input.   | `pnpm test:e2e:web` |
 | `QA-E2E-012` | No uncaught browser error, hydration warning, failed asset, or unexpected request occurs.                      | `pnpm test:e2e:web` |
 
-The current committed production coach suite passes all 12 journeys.
+Run `pnpm test:e2e:web` to obtain the current pass/fail result and exact journey count.
 
 Screenshots are captured at 375×812, 768×1024, 1280×800, and 1440×900 for queue, client detail,
 programme review, trace, and scorecard. Visual snapshots detect clipping/overlap, but semantic
@@ -42,9 +42,9 @@ assertions remain the acceptance source.
 | `QA-CLI-009` | Offline/503 states preserve draft input and safe retry behavior.                       | `pnpm test:e2e:client` |
 | `QA-CLI-010` | No uncaught console/runtime error or unexpected network request occurs.                | `pnpm test:e2e:client` |
 
-The committed production suite contains nine Playwright journeys covering all ten IDs;
+Run `pnpm test:e2e:client` to obtain the current pass/fail result and exact journey count.
 `QA-CLI-004/005` deliberately share one idempotent session-logging journey. Temporary screenshot
-capture helpers are not counted as acceptance tests.
+capture helpers are not acceptance tests.
 
 ## Accessibility
 
@@ -59,8 +59,7 @@ capture helpers are not counted as acceptance tests.
 | `QA-A11Y-007` | Status changes such as generate/publish/error use suitable live announcements.           | `pnpm test:a11y`   |
 | `QA-A11Y-008` | RN controls expose roles, labels, states, hints where needed, and >=44×44 touch targets. | `pnpm test:mobile` |
 
-The current production accessibility suite passes 8/8 Playwright tests: five coach tests and three
-client tests.
+Run `pnpm test:a11y` to obtain the current pass/fail result and exact test count.
 
 ## Mobile proof and environmental exception
 
@@ -77,5 +76,5 @@ The release can satisfy the approved V1 environment with `QA-MOB-001..005` green
 disclosed. It may not claim native-device verification. Any later public-store or
 device-distribution release requires `QA-MOB-006` before release.
 
-The current native component and route suite passes 44/44 tests; this does not replace the disclosed
-`ENV-MOB-001` native-device exception.
+Run `pnpm test:mobile` to obtain the current component/route result; it does not replace the
+disclosed `ENV-MOB-001` native-device exception.

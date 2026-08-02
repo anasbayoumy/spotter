@@ -26,6 +26,8 @@ import { DeterministicContextAssembler } from "../agents/context/assemble";
 import type { ContextRecord, ContextSourceInput } from "../agents/context/types";
 import { AgentRuntimeError } from "../agents/errors";
 import type { ModelGateway } from "../agents/gateway/model-gateway";
+import { ModelRunTelemetryStore } from "../agents/gateway/model-run-telemetry";
+import { OpenAICompatibleModelGateway } from "../agents/gateway/openai-compatible-gateway";
 import { RecordedModelGateway } from "../agents/gateway/recorded-gateway";
 import { PromptRegistry } from "../agents/prompts/registry";
 import { ApplicationError, type FingerprintPort } from "../application/core";
@@ -38,7 +40,10 @@ import type {
   ModelGatewayPort,
   RedFlagPort,
 } from "../application/ports";
-import { runRecordedJudges } from "../evals/judges/run-judges";
+import type { Judge } from "../evals/judges/judge";
+import { createLiveJudges } from "../evals/judges/live-judges";
+import { recordedJudges } from "../evals/judges/recorded-judges";
+import { assertIndependentModels, runJudges } from "../evals/judges/run-judges";
 import { detectRedFlags } from "../evals/safety/red-flags";
 import { runDeterministicSafety } from "../evals/safety/run-gates";
 import type { SafetyConstraint, SafetyExercise, SafetyInput } from "../evals/safety/contracts";
@@ -287,7 +292,16 @@ export class DatabaseContextAssembler implements ContextAssemblerPort {
 interface ApplicationModelGatewayOptions {
   readonly mode: "recorded" | "live";
   readonly recordings: readonly unknown[];
+  readonly telemetry?: ModelRunTelemetryStore;
+  readonly live?: Readonly<{
+    apiKey: string;
+    baseUrl: string;
+    generatorModel: string;
+    judgeModel: string;
+  }>;
 }
+
+const liveModelDeadlineMilliseconds = 120_000;
 
 class UnavailableLiveGateway implements ModelGateway {
   public readonly mode = "live" as const;
@@ -307,12 +321,31 @@ class UnavailableLiveGateway implements ModelGateway {
 export class ApplicationModelGateway implements ModelGatewayPort {
   readonly #gateway: ModelGateway;
   readonly #prompts = new PromptRegistry();
+  public readonly judges: readonly Judge[];
+  public readonly telemetry: ModelRunTelemetryStore;
 
   public constructor(options: ApplicationModelGatewayOptions) {
-    this.#gateway =
-      options.mode === "recorded"
-        ? new RecordedModelGateway(options.recordings)
-        : new UnavailableLiveGateway();
+    this.telemetry = options.telemetry ?? new ModelRunTelemetryStore();
+    if (options.mode === "recorded") {
+      this.#gateway = new RecordedModelGateway(options.recordings);
+      this.judges = recordedJudges;
+    } else if (options.live === undefined) {
+      this.#gateway = new UnavailableLiveGateway();
+      this.judges = [];
+    } else {
+      assertIndependentModels(options.live.generatorModel, options.live.judgeModel);
+      this.#gateway = new OpenAICompatibleModelGateway({
+        apiKey: options.live.apiKey,
+        baseUrl: options.live.baseUrl,
+        modelId: options.live.generatorModel,
+        telemetry: this.telemetry,
+      });
+      this.judges = createLiveJudges({
+        apiKey: options.live.apiKey,
+        baseUrl: options.live.baseUrl,
+        modelId: options.live.judgeModel,
+      });
+    }
   }
 
   public async generateProgramme(trace: ContextTrace): Promise<ProgrammeModelOutput> {
@@ -332,7 +365,14 @@ export class ApplicationModelGateway implements ModelGatewayPort {
     tier: 1 | 2 | 3,
   ): Promise<AccountabilityModelOutput> {
     return accountabilityModelOutputSchema.parse(
-      (await this.generate("accountability", `accountability.tier-${String(tier)}`, trace)).output,
+      (
+        await this.generate(
+          "accountability",
+          `accountability.tier-${String(tier)}`,
+          trace,
+          `Deterministic accountability tier selected by code: ${String(tier)}.`,
+        )
+      ).output,
     );
   }
 
@@ -340,14 +380,20 @@ export class ApplicationModelGateway implements ModelGatewayPort {
     intent: AgentKind,
     recordingKey: string,
     trace: ContextTrace,
+    contextSuffix?: string,
   ): ReturnType<ModelGateway["generate"]> {
     const prompt = this.#prompts.get(intent);
+    this.telemetry.begin(trace.id, { mode: this.#gateway.mode, modelId: this.#gateway.modelId });
     return this.#gateway.generate({
-      context: trace.rendered,
+      context:
+        contextSuffix === undefined ? trace.rendered : `${trace.rendered}\n\n${contextSuffix}`,
       intent,
       promptVersion: prompt.version,
       recordingKey,
-      signal: new AbortController().signal,
+      signal:
+        this.#gateway.mode === "live"
+          ? AbortSignal.timeout(liveModelDeadlineMilliseconds)
+          : new AbortController().signal,
       system: prompt.system,
       traceId: trace.id,
     });
@@ -595,6 +641,8 @@ function outputText(output: EvaluatedOutput): string {
 }
 
 export class DeterministicEvaluationAdapter implements EvaluationPort {
+  public constructor(private readonly judges: readonly Judge[] = recordedJudges) {}
+
   public runGates(
     kind: AgentKind,
     trace: ContextTrace,
@@ -664,13 +712,22 @@ export class DeterministicEvaluationAdapter implements EvaluationPort {
     output: EvaluatedOutput,
   ): Promise<readonly ReturnType<typeof judgeResultSchema.parse>[]> {
     const citations = outputCitations(output);
-    const results = await runRecordedJudges(kind, {
-      citations: citations.map((citation) => citation.sectionId),
-      claims: citations.map((citation) => citation.claim),
-      fixtureId: trace.id,
-      intent: kind,
-      sectionIds: trace.sections.map((section) => section.id),
-    });
+    const results = await runJudges(
+      kind,
+      {
+        agentOutput: output,
+        citations: citations.map((citation) => citation.sectionId),
+        clientFixture: {
+          clientId: trace.clientId,
+          sections: trace.sections,
+        },
+        claims: citations.map((citation) => citation.claim),
+        fixtureId: trace.id,
+        intent: kind,
+        sectionIds: trace.sections.map((section) => section.id),
+      },
+      this.judges,
+    );
     return results.map((result) =>
       judgeResultSchema.parse({
         id: randomUUID(),

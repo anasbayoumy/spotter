@@ -1,12 +1,17 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
-import { parseServerEnvironment, type ServerEnvironment } from "@spotter/config";
+import {
+  parseServerEnvironment,
+  resolveModelConfiguration,
+  type ServerEnvironment,
+} from "@spotter/config";
 import { z } from "zod";
 import pino, { type DestinationStream, type Logger, type LoggerOptions } from "pino";
 
 import { demoSeedDataset } from "../../resources/demo/index";
 import { RunAccountabilityForClient } from "../application/accountability";
+import { ModelRunTelemetryStore } from "../agents/gateway/model-run-telemetry";
 import {
   ApproveAdjustment,
   EditAdjustmentProposal,
@@ -103,6 +108,7 @@ export function createApplicationLogger(
       censor: "[REDACTED]",
       paths: [
         "AI_API_KEY",
+        "SPOTTER_MODEL_API_KEY",
         "CRON_SECRET",
         "DATABASE_URL",
         "apiKey",
@@ -181,7 +187,15 @@ export async function createBackend(options: CreateBackendOptions = {}): Promise
     throw new Error("The seeded demo coach is unavailable.");
   }
 
-  const audit = new BufferedAgentAuditRepository(adapter.database);
+  const modelConfiguration = resolveModelConfiguration(environment);
+  const modelTelemetry = new ModelRunTelemetryStore();
+  const gateway = new ApplicationModelGateway({
+    ...(modelConfiguration.mode === "live" ? { live: modelConfiguration } : {}),
+    mode: modelConfiguration.mode,
+    recordings: options.recordings ?? (await recordingsFromDisk()),
+    telemetry: modelTelemetry,
+  });
+  const audit = new BufferedAgentAuditRepository(adapter.database, modelTelemetry);
   const traces = new DrizzleTraceRepository(adapter.database);
   const programmes = new DrizzleProgrammeApplicationRepository(adapter, audit);
   const sessions = new DrizzleSessionRepository(adapter);
@@ -192,11 +206,7 @@ export async function createBackend(options: CreateBackendOptions = {}): Promise
   const idempotency = new DrizzleApplicationIdempotencyRepository(adapter.database);
   const fingerprint = new Sha256Fingerprint();
   const assembler = new DatabaseContextAssembler(adapter.database);
-  const gateway = new ApplicationModelGateway({
-    mode: environment.AI_MODE,
-    recordings: options.recordings ?? (await recordingsFromDisk()),
-  });
-  const evaluation = new DeterministicEvaluationAdapter();
+  const evaluation = new DeterministicEvaluationAdapter(gateway.judges);
   const redFlags = new DeterministicRedFlagAdapter();
   const scorecard = new DrizzleScorecardRepository(adapter.database);
   const jobs = new DrizzleJobRepository(adapter.database);
@@ -270,7 +280,7 @@ export async function createBackend(options: CreateBackendOptions = {}): Promise
   const facade = new ProductionBackendFacade(useCases, coach.id, logger);
   logger.info(
     {
-      aiMode: environment.AI_MODE,
+      aiMode: environment.SPOTTER_MODEL_MODE,
       databaseMode: environment.DATABASE_MODE,
       event: "backend_ready",
       syntheticOnly: environment.DATA_POLICY === "synthetic_only",

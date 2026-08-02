@@ -20,6 +20,8 @@ export interface AgentRunTelemetry {
   readonly agent: AgentIntent;
   readonly mode: ModelMode;
   readonly promptVersion: string;
+  readonly schemaFailure: boolean;
+  readonly schemaRetryCount: 0 | 1;
   readonly model: string;
   readonly traceId: string;
   readonly usage: ModelUsage | null;

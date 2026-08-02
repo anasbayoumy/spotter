@@ -51,6 +51,8 @@ export const agentRunSchema = z
     agent: agentIntentSchema,
     mode: modelModeSchema,
     promptVersion: z.string().trim().min(1).max(128),
+    schemaFailure: z.boolean().default(false),
+    schemaRetryCount: z.number().int().min(0).max(1).default(0),
     model: z.string().trim().min(1).max(200),
     traceId: uuidSchema,
     usage: modelUsageSchema.nullable(),

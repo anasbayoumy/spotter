@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { agentIntentSchema, modelUsageSchema } from "@spotter/contracts";
+import { agentIntentSchema, isoInstantSchema, modelUsageSchema } from "@spotter/contracts";
 
 import { AgentRuntimeError } from "../errors";
 import type { ModelGateway, ModelGatewayRequest, ModelGatewayResponse } from "./model-gateway";
@@ -13,6 +13,8 @@ export const modelRecordingSchema = z
     intent: agentIntentSchema,
     promptVersion: z.string().regex(/^sha256:[a-f0-9]{64}$/u),
     model: z.string().trim().min(1).max(200),
+    recordedAt: isoInstantSchema,
+    rawResponse: z.string().min(1).max(1_000_000),
     output: z.json(),
     usage: modelUsageSchema,
   })

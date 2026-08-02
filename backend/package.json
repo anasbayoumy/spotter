@@ -16,6 +16,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",
+    "calibrate": "tsx src/cli/calibrate.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:unit": "vitest run --config vitest.unit.config.ts src/domain src/agents src/application src/evals src/jobs src/composition/backend-facade.coverage.test.ts src/infrastructure/database/database-error.test.ts tests/property tests/pglite/publish-programme.coverage.integration.test.ts && node --test src/infrastructure/database/database-error.runtime.test.mjs",
     "test:integration:pglite": "vitest run tests/pglite",
@@ -25,9 +26,11 @@
     "test:mutation": "pnpm --dir .. exec stryker run",
     "db:migrate": "tsx src/cli/migrate.ts",
     "db:seed": "tsx src/cli/seed.ts",
-    "demo": "tsx src/cli/demo.ts"
+    "demo": "tsx src/cli/demo.ts",
+    "record:fixtures": "tsx src/cli/record-fixtures.ts"
   },
   "dependencies": {
+    "@ai-sdk/openai-compatible": "2.0.63",
     "@electric-sql/pglite": "0.3.15",
     "@spotter/config": "workspace:*",
     "@spotter/contracts": "workspace:*",

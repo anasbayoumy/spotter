@@ -190,6 +190,19 @@ test("resource bounds require exact stable all-process cluster evidence", () => 
   assert.match(restarted.processTopology.failures.join(" "), /identity changed/u);
 });
 
+test("resource topology accepts the collected primary behind the validated container init", () => {
+  const first = snapshot(40, 80, 20, 8);
+  const second = snapshot(42, 82, 21, 9);
+  for (const entry of [first, second]) {
+    entry.processes[0].pid = 7;
+    entry.processes[0].reportFile = "/tmp/spotter-process-report-primary-pid-7.json";
+  }
+
+  const evidence = analyzeResourceRun([first, second], { webMemoryBytes: 1024 });
+  assert.equal(evidence.processTopology.healthy, true);
+  assert.equal(evidence.processTopology.stableIdentity, "primary:null:7|worker:1:11|worker:2:12");
+});
+
 test("continuous sampling retains a transient in-operation peak", async () => {
   let value = 1;
   const sampled = await sampleOperationContinuously(

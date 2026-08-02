@@ -1,6 +1,7 @@
 export * from "./calibration/cohens-kappa";
 export * from "./golden-fixture";
 export * from "./judges/judge";
+export * from "./judges/live-judges";
 export * from "./judges/recorded-judges";
 export * from "./judges/run-judges";
 export * from "./review-band";

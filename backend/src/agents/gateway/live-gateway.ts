@@ -20,8 +20,9 @@ export class LiveTransportError extends Error {
   public constructor(
     message: string,
     public readonly retryable: boolean,
+    options?: ErrorOptions,
   ) {
-    super(message);
+    super(message, options);
     this.name = "LiveTransportError";
   }
 }

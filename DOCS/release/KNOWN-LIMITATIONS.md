@@ -41,7 +41,19 @@ first-failure artifacts for every future blocking defect.
 
 ## Architectural V1 boundaries
 
-- Authentication and tenancy are intentionally absent. Startup fails unless the deployment is
-  explicitly synthetic-only; real client data is prohibited.
-- Recorded model mode is the deterministic release target. Live provider observations cannot
-  override deterministic gates and are not claimed as V1 acceptance evidence.
+- All bundled clients, traces, screenshots, safety cases, and recordings use synthetic data. No real
+  client has used or reviewed this system, and real client data is prohibited.
+- `backend/resources/calibration/labels.json` is `pending_human_review` and intentionally contains
+  no scores. Kappa is unavailable until a human scores the cases; `pnpm --filter backend calibrate`
+  reports that state and the exact file to update.
+- The five committed generator recordings were captured from `ollama/qwen3.6:35b-mlx`; each entry
+  stores its capture timestamp, prompt-version hash, raw model text, parsed output, and token usage.
+  Reproduce them with `pnpm --filter backend record:fixtures` and explicit live credentials.
+- Recorded mode is always the default and requires no key or network. Live mode is optional and
+  activates only with `SPOTTER_MODEL_MODE=live` plus a base URL, key, and distinct generator/judge
+  model IDs.
+- The supplied endpoint currently advertises only `ollama/qwen3.6:35b-mlx`. Generator recording was
+  verified against it; an independent live-judge run was not possible because no second model ID was
+  available. The equality guard rejects using that model as its own judge.
+- Authentication and tenancy are intentionally absent. Startup fails unless a production-mode
+  deployment is explicitly synthetic-only; public or real-data deployment is prohibited.

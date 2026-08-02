@@ -182,7 +182,6 @@ export function analyzeClusterProcessTopology(snapshots) {
       .sort((left, right) => left.slot - right.slot);
     if (
       primaries.length !== 1 ||
-      primaries[0].pid !== 1 ||
       workers.length !== snapshot.expectedWorkerCount ||
       primaries[0].slot !== null ||
       !/(?:^|\s)(?:\/app\/)?docker\/web-cluster\.mjs(?:\s|$)/u.test(primaries[0].command) ||

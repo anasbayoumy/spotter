@@ -63,7 +63,8 @@ approved product includes a complete keyless recorded path.
 - Tests may not depend on execution order or data left by another test.
 - Each test owns its database schema/database or rolls back a dedicated transaction.
 - Random/property tests record their seed; a failing seed is retained as a regression fixture.
-- Recorded AI fixtures are committed, schema-versioned, and content-addressed.
+- Recorded AI fixtures are committed, schema-versioned, prompt-hash-bound captures with model and
+  timestamp provenance.
 - Network access is denied by default in deterministic suites.
 
 ## Risk tiers
@@ -134,6 +135,6 @@ fix, the targeted test, blast-radius suites, and complete release gate run again
 | `QA-STR-003` | Every release requirement maps to implementation, test, and evidence.       | `pnpm evidence:verify`                     |
 | `QA-STR-004` | Tier A gates run without retry and fail closed.                             | `pnpm verify:full`                         |
 | `QA-STR-005` | Randomized tests preserve failing seeds.                                    | `pnpm test:unit`                           |
-| `QA-STR-006` | Recorded model fixtures are schema-versioned and deterministic.             | `pnpm test:contract`                       |
+| `QA-STR-006` | Recorded model fixtures are schema-versioned and deterministic.             | `pnpm --filter backend test:unit`          |
 | `QA-STR-007` | Live evaluation cannot override deterministic acceptance.                   | `pnpm evidence:verify`                     |
 | `QA-STR-008` | The mobile environmental exception is explicit and accurately reported.     | `pnpm test:mobile && pnpm evidence:verify` |

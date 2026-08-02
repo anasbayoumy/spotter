@@ -2,20 +2,18 @@
   "schemaVersion": 1,
   "recordings": [
     {
-      "schemaVersion": 1,
       "id": "programme-baseline-v1",
-      "key": "programme.baseline",
       "intent": "programme",
-      "promptVersion": "sha256:8d817f307e4b3f0f9e2f039084fdf769610cdd77c81ae39e0babf2c92fb7c679",
-      "model": "spotter-recorded-generator-v1",
+      "key": "programme.baseline",
+      "model": "ollama/qwen3.6:35b-mlx",
       "output": {
         "payload": {
-          "summary": "Three sessions balance race preparation with the documented weekly schedule.",
+          "summary": "A three-day weekly training block designed to build aerobic capacity and muscular endurance for a synthetic Hyrox simulation, utilizing the row ergometer across progressive session structures aligned with the client's profile and current programme focus.",
           "days": [
             {
               "dayIndex": 1,
               "scheduledDate": "2026-08-03",
-              "focus": "Aerobic intervals",
+              "focus": "Aerobic intervals & rowing mechanics",
               "exercises": [
                 {
                   "id": "00000000-0000-4000-8000-000000000301",
@@ -24,8 +22,47 @@
                   "muscleGroups": ["back"],
                   "sets": 4,
                   "reps": 8,
+                  "loadKg": 40,
                   "rpe": 7,
                   "restSeconds": 90,
+                  "notes": "Use the available row ergometer."
+                }
+              ]
+            },
+            {
+              "dayIndex": 2,
+              "scheduledDate": "2026-08-05",
+              "focus": "Sustained aerobic power & muscular endurance",
+              "exercises": [
+                {
+                  "id": "00000000-0000-4000-8000-000000000301",
+                  "name": "Row ergometer intervals",
+                  "family": "horizontal_pull",
+                  "muscleGroups": ["back"],
+                  "sets": 5,
+                  "reps": 8,
+                  "loadKg": 40,
+                  "rpe": 8,
+                  "restSeconds": 60,
+                  "notes": "Use the available row ergometer."
+                }
+              ]
+            },
+            {
+              "dayIndex": 3,
+              "scheduledDate": "2026-08-07",
+              "focus": "Synthetic Hyrox simulation pacing",
+              "exercises": [
+                {
+                  "id": "00000000-0000-4000-8000-000000000301",
+                  "name": "Row ergometer intervals",
+                  "family": "horizontal_pull",
+                  "muscleGroups": ["back"],
+                  "sets": 6,
+                  "reps": 8,
+                  "loadKg": 40,
+                  "rpe": 9,
+                  "restSeconds": 75,
                   "notes": "Use the available row ergometer."
                 }
               ]
@@ -35,101 +72,173 @@
         "citations": [
           {
             "sectionId": "ctx-02-goal-profile-equipment-schedule",
-            "recordIds": ["00000000-0000-4000-8000-000000000202"],
-            "claim": "The plan fits the documented goal, equipment, and weekly schedule."
+            "recordIds": ["00000000-0000-4000-8000-000000000101"],
+            "claim": "Programme structure is set to 3 sessions per week targeting a synthetic Hyrox simulation for a client aged 25-34 with 18 months of training age, using available dumbbell and rower equipment."
+          },
+          {
+            "sectionId": "ctx-03-current-programme",
+            "recordIds": ["00000000-0000-4000-8000-000000000601"],
+            "claim": "Existing session structure utilizes the row ergometer for aerobic intervals, which forms the foundation of the weekly progression and matches the stated training age focus."
+          },
+          {
+            "sectionId": "ctx-04-recent-sessions-adherence",
+            "recordIds": [
+              "00000000-0000-4000-8000-000000000701",
+              "00000000-0000-4000-8000-000000000708"
+            ],
+            "claim": "Previous planned sessions for row ergometer intervals inform the pacing and volume adjustments across the 3-session weekly block to improve adherence and simulation readiness."
           }
         ]
       },
-      "usage": { "inputTokens": 420, "outputTokens": 180, "costUsd": 0 }
+      "promptVersion": "sha256:8d817f307e4b3f0f9e2f039084fdf769610cdd77c81ae39e0babf2c92fb7c679",
+      "rawResponse": "{\n  \"payload\": {\n    \"summary\": \"A three-day weekly training block designed to build aerobic capacity and muscular endurance for a synthetic Hyrox simulation, utilizing the row ergometer across progressive session structures aligned with the client's profile and current programme focus.\",\n    \"days\": [\n      {\n        \"dayIndex\": 1,\n        \"scheduledDate\": \"2026-08-03\",\n        \"focus\": \"Aerobic intervals & rowing mechanics\",\n        \"exercises\": [\n          {\n            \"id\": \"00000000-0000-4000-8000-000000000301\",\n            \"name\": \"Row ergometer intervals\",\n            \"family\": \"horizontal_pull\",\n            \"muscleGroups\": [\"back\"],\n            \"sets\": 4,\n            \"reps\": 8,\n            \"loadKg\": 40,\n            \"rpe\": 7,\n            \"restSeconds\": 90,\n            \"notes\": \"Use the available row ergometer.\"\n          }\n        ]\n      },\n      {\n        \"dayIndex\": 2,\n        \"scheduledDate\": \"2026-08-05\",\n        \"focus\": \"Sustained aerobic power & muscular endurance\",\n        \"exercises\": [\n          {\n            \"id\": \"00000000-0000-4000-8000-000000000301\",\n            \"name\": \"Row ergometer intervals\",\n            \"family\": \"horizontal_pull\",\n            \"muscleGroups\": [\"back\"],\n            \"sets\": 5,\n            \"reps\": 8,\n            \"loadKg\": 40,\n            \"rpe\": 8,\n            \"restSeconds\": 60,\n            \"notes\": \"Use the available row ergometer.\"\n          }\n        ]\n      },\n      {\n        \"dayIndex\": 3,\n        \"scheduledDate\": \"2026-08-07\",\n        \"focus\": \"Synthetic Hyrox simulation pacing\",\n        \"exercises\": [\n          {\n            \"id\": \"00000000-0000-4000-8000-000000000301\",\n            \"name\": \"Row ergometer intervals\",\n            \"family\": \"horizontal_pull\",\n            \"muscleGroups\": [\"back\"],\n            \"sets\": 6,\n            \"reps\": 8,\n            \"loadKg\": 40,\n            \"rpe\": 9,\n            \"restSeconds\": 75,\n            \"notes\": \"Use the available row ergometer.\"\n          }\n        ]\n      }\n    ]\n  },\n  \"citations\": [\n    {\n      \"sectionId\": \"ctx-02-goal-profile-equipment-schedule\",\n      \"recordIds\": [\"00000000-0000-4000-8000-000000000101\"],\n      \"claim\": \"Programme structure is set to 3 sessions per week targeting a synthetic Hyrox simulation for a client aged 25-34 with 18 months of training age, using available dumbbell and rower equipment.\"\n    },\n    {\n      \"sectionId\": \"ctx-03-current-programme\",\n      \"recordIds\": [\"00000000-0000-4000-8000-000000000601\"],\n      \"claim\": \"Existing session structure utilizes the row ergometer for aerobic intervals, which forms the foundation of the weekly progression and matches the stated training age focus.\"\n    },\n    {\n      \"sectionId\": \"ctx-04-recent-sessions-adherence\",\n      \"recordIds\": [\"00000000-0000-4000-8000-000000000701\", \"00000000-0000-4000-8000-000000000708\"],\n      \"claim\": \"Previous planned sessions for row ergometer intervals inform the pacing and volume adjustments across the 3-session weekly block to improve adherence and simulation readiness.\"\n    }\n  ]\n}",
+      "recordedAt": "2026-08-02T14:11:34.058Z",
+      "schemaVersion": 1,
+      "usage": {
+        "costUsd": 0,
+        "inputTokens": 1026,
+        "outputTokens": 5364
+      }
     },
     {
-      "schemaVersion": 1,
       "id": "adjustment-low-readiness-v1",
-      "key": "adjustment.low-readiness",
       "intent": "adjustment",
-      "promptVersion": "sha256:5b852567148fd2d6a83ec856c8505fabea12f421f461d283993a60147f35f172",
-      "model": "spotter-recorded-generator-v1",
+      "key": "adjustment.low-readiness",
+      "model": "ollama/qwen3.6:35b-mlx",
       "output": {
         "operations": [
           {
-            "type": "reduce_volume",
+            "type": "swap_exercise",
             "exerciseId": "00000000-0000-4000-8000-000000000301",
-            "setsToRemove": 1,
-            "rationale": "Readiness is below the configured adjustment threshold."
+            "replacementName": "Seated cable row",
+            "replacementFamily": "horizontal_pull",
+            "equivalenceId": "20000000-0000-4000-8000-000000000001",
+            "rationale": "Equipment profile restricts availability to dumbbell and rower, conflicting with ergometer notes. Client readiness was low (2/10), warranting a controlled substitute."
           }
         ],
         "citations": [
           {
             "sectionId": "ctx-05-check-ins-metrics",
-            "recordIds": ["00000000-0000-4000-8000-000000000205"],
-            "claim": "The latest readiness check-in is low."
+            "recordIds": ["00000000-0000-4000-8000-000000000801"],
+            "claim": "Readiness score is 2, indicating low physical readiness for high-intensity ergometer intervals."
+          },
+          {
+            "sectionId": "ctx-03-current-programme",
+            "recordIds": ["00000000-0000-4000-8000-000000000607"],
+            "claim": "Exercise notes specify using a row ergometer, which conflicts with the documented equipment list."
+          },
+          {
+            "sectionId": "ctx-02-goal-profile-equipment-schedule",
+            "recordIds": ["00000000-0000-4000-8000-000000000107"],
+            "claim": "Equipment constraints are limited to dumbbell and rower, requiring a stable horizontal pull alternative."
           }
         ]
       },
-      "usage": { "inputTokens": 310, "outputTokens": 90, "costUsd": 0 }
+      "promptVersion": "sha256:5b852567148fd2d6a83ec856c8505fabea12f421f461d283993a60147f35f172",
+      "rawResponse": "{\"operations\":[{\"type\":\"swap_exercise\",\"exerciseId\":\"00000000-0000-4000-8000-000000000301\",\"replacementName\":\"Seated cable row\",\"replacementFamily\":\"horizontal_pull\",\"equivalenceId\":\"20000000-0000-4000-8000-000000000001\",\"rationale\":\"Equipment profile restricts availability to dumbbell and rower, conflicting with ergometer notes. Client readiness was low (2/10), warranting a controlled substitute.\"}],\"citations\":[{\"sectionId\":\"ctx-05-check-ins-metrics\",\"recordIds\":[\"00000000-0000-4000-8000-000000000801\"],\"claim\":\"Readiness score is 2, indicating low physical readiness for high-intensity ergometer intervals.\"},{\"sectionId\":\"ctx-03-current-programme\",\"recordIds\":[\"00000000-0000-4000-8000-000000000607\"],\"claim\":\"Exercise notes specify using a row ergometer, which conflicts with the documented equipment list.\"},{\"sectionId\":\"ctx-02-goal-profile-equipment-schedule\",\"recordIds\":[\"00000000-0000-4000-8000-000000000107\"],\"claim\":\"Equipment constraints are limited to dumbbell and rower, requiring a stable horizontal pull alternative.\"}]}",
+      "recordedAt": "2026-08-02T14:12:51.097Z",
+      "schemaVersion": 1,
+      "usage": {
+        "costUsd": 0,
+        "inputTokens": 1151,
+        "outputTokens": 3679
+      }
     },
     {
-      "schemaVersion": 1,
       "id": "accountability-tier-1-v1",
-      "key": "accountability.tier-1",
       "intent": "accountability",
-      "promptVersion": "sha256:6e6c9f7574d09d69054ce4f60389056602a1754b486a635166f932abd1807532",
-      "model": "spotter-recorded-generator-v1",
+      "key": "accountability.tier-1",
+      "model": "ollama/qwen3.6:35b-mlx",
       "output": {
         "kind": "client_nudge",
         "tier": 1,
-        "body": "You missed Tuesday's interval session. A short session today still supports your race goal.",
+        "body": "Good morning! I see you opened the app today in Cairo. You're aiming for 3 sessions per week using your dumbbells and rower to build consistent training. With 18 months of training under your belt, let's keep that momentum going. What's your plan for this week's workout?",
         "citations": [
           {
-            "sectionId": "ctx-04-recent-sessions-adherence",
-            "recordIds": ["00000000-0000-4000-8000-000000000204"],
-            "claim": "The scheduled interval session was missed."
+            "sectionId": "ctx-02-goal-profile-equipment-schedule",
+            "recordIds": ["00000000-0000-4000-8000-000000000106"],
+            "claim": "Client primary goal is to build consistent training with a target of 3 sessions per week using dumbbell and rower equipment."
+          },
+          {
+            "sectionId": "ctx-05-check-ins-metrics",
+            "recordIds": ["00000000-0000-4000-8000-000000000901"],
+            "claim": "Client opened the app on 2026-07-26T06:00:00Z."
           }
         ]
       },
-      "usage": { "inputTokens": 260, "outputTokens": 70, "costUsd": 0 }
+      "promptVersion": "sha256:6e6c9f7574d09d69054ce4f60389056602a1754b486a635166f932abd1807532",
+      "rawResponse": "{\"kind\":\"client_nudge\",\"tier\":1,\"body\":\"Good morning! I see you opened the app today in Cairo. You're aiming for 3 sessions per week using your dumbbells and rower to build consistent training. With 18 months of training under your belt, let's keep that momentum going. What's your plan for this week's workout?\",\"citations\":[{\"sectionId\":\"ctx-02-goal-profile-equipment-schedule\",\"recordIds\":[\"00000000-0000-4000-8000-000000000106\"],\"claim\":\"Client primary goal is to build consistent training with a target of 3 sessions per week using dumbbell and rower equipment.\"},{\"sectionId\":\"ctx-05-check-ins-metrics\",\"recordIds\":[\"00000000-0000-4000-8000-000000000901\"],\"claim\":\"Client opened the app on 2026-07-26T06:00:00Z.\"}]}",
+      "recordedAt": "2026-08-02T14:13:16.118Z",
+      "schemaVersion": 1,
+      "usage": {
+        "costUsd": 0,
+        "inputTokens": 497,
+        "outputTokens": 1096
+      }
     },
     {
-      "schemaVersion": 1,
       "id": "accountability-tier-2-v1",
-      "key": "accountability.tier-2",
       "intent": "accountability",
-      "promptVersion": "sha256:6e6c9f7574d09d69054ce4f60389056602a1754b486a635166f932abd1807532",
-      "model": "spotter-recorded-generator-v1",
+      "key": "accountability.tier-2",
+      "model": "ollama/qwen3.6:35b-mlx",
       "output": {
         "kind": "reduced_plan_offer",
         "tier": 2,
-        "body": "Two planned sessions were missed. The coach can review a reduced week that preserves the primary goal.",
+        "body": "You opened the app on July 26th but haven't logged a session for your goal of building consistent training. Let's protect your momentum by scaling back to 2 focused weekly workouts using your dumbbell and rower. We can keep these shorter to ensure you hit them without burnout. Can we lock in two reduced-plan movements this week?",
         "citations": [
           {
-            "sectionId": "ctx-04-recent-sessions-adherence",
-            "recordIds": ["00000000-0000-4000-8000-000000000204"],
-            "claim": "Two due sessions were missed in the current window."
+            "sectionId": "ctx-02-goal-profile-equipment-schedule",
+            "recordIds": ["00000000-0000-4000-8000-000000000106"],
+            "claim": "Client aims to build consistent training with 3 sessions per week using dumbbell and rower equipment."
+          },
+          {
+            "sectionId": "ctx-05-check-ins-metrics",
+            "recordIds": ["00000000-0000-4000-8000-000000000901"],
+            "claim": "App open event recorded on 2026-07-26T06:00:00.000Z with no corresponding workout session logged."
           }
         ]
       },
-      "usage": { "inputTokens": 275, "outputTokens": 76, "costUsd": 0 }
+      "promptVersion": "sha256:6e6c9f7574d09d69054ce4f60389056602a1754b486a635166f932abd1807532",
+      "rawResponse": "{\n  \"kind\": \"reduced_plan_offer\",\n  \"tier\": 2,\n  \"body\": \"You opened the app on July 26th but haven't logged a session for your goal of building consistent training. Let's protect your momentum by scaling back to 2 focused weekly workouts using your dumbbell and rower. We can keep these shorter to ensure you hit them without burnout. Can we lock in two reduced-plan movements this week?\",\n  \"citations\": [\n    {\n      \"sectionId\": \"ctx-02-goal-profile-equipment-schedule\",\n      \"recordIds\": [\"00000000-0000-4000-8000-000000000106\"],\n      \"claim\": \"Client aims to build consistent training with 3 sessions per week using dumbbell and rower equipment.\"\n    },\n    {\n      \"sectionId\": \"ctx-05-check-ins-metrics\",\n      \"recordIds\": [\"00000000-0000-4000-8000-000000000901\"],\n      \"claim\": \"App open event recorded on 2026-07-26T06:00:00.000Z with no corresponding workout session logged.\"\n    }\n  ]\n}",
+      "recordedAt": "2026-08-02T14:14:23.026Z",
+      "schemaVersion": 1,
+      "usage": {
+        "costUsd": 0,
+        "inputTokens": 497,
+        "outputTokens": 3266
+      }
     },
     {
-      "schemaVersion": 1,
       "id": "accountability-tier-3-v1",
-      "key": "accountability.tier-3",
       "intent": "accountability",
-      "promptVersion": "sha256:6e6c9f7574d09d69054ce4f60389056602a1754b486a635166f932abd1807532",
-      "model": "spotter-recorded-generator-v1",
+      "key": "accountability.tier-3",
+      "model": "ollama/qwen3.6:35b-mlx",
       "output": {
         "kind": "coach_context_brief",
         "tier": 3,
-        "body": "Adherence is below half over fourteen days. Automated contact must remain paused while the coach follows up.",
+        "body": "Client context brief for consistency review. Profile shows primary goal 'Build consistent training' targeting 3 sessions/week with dumbbell and rower equipment. Last metric indicates app open at 2026-07-26T06:00:00.000Z. Review required to assess session adherence against frequency target.",
         "citations": [
           {
-            "sectionId": "ctx-04-recent-sessions-adherence",
-            "recordIds": ["00000000-0000-4000-8000-000000000204"],
-            "claim": "Fourteen-day adherence is below the tier-three threshold."
+            "sectionId": "ctx-02-goal-profile-equipment-schedule",
+            "recordIds": ["00000000-0000-4000-8000-000000000106"],
+            "claim": "Client goal is 'Build consistent training' with frequency target of 3 sessions/week using dumbbell and rower equipment."
+          },
+          {
+            "sectionId": "ctx-05-check-ins-metrics",
+            "recordIds": ["00000000-0000-4000-8000-000000000901"],
+            "claim": "App open event recorded at 2026-07-26T06:00:00.000Z indicates client activity without logged session completion."
           }
         ]
       },
-      "usage": { "inputTokens": 290, "outputTokens": 82, "costUsd": 0 }
+      "promptVersion": "sha256:6e6c9f7574d09d69054ce4f60389056602a1754b486a635166f932abd1807532",
+      "rawResponse": "{\"kind\":\"coach_context_brief\",\"tier\":3,\"body\":\"Client context brief for consistency review. Profile shows primary goal 'Build consistent training' targeting 3 sessions/week with dumbbell and rower equipment. Last metric indicates app open at 2026-07-26T06:00:00.000Z. Review required to assess session adherence against frequency target.\",\"citations\":[{\"sectionId\":\"ctx-02-goal-profile-equipment-schedule\",\"recordIds\":[\"00000000-0000-4000-8000-000000000106\"],\"claim\":\"Client goal is 'Build consistent training' with frequency target of 3 sessions/week using dumbbell and rower equipment.\"},{\"sectionId\":\"ctx-05-check-ins-metrics\",\"recordIds\":[\"00000000-0000-4000-8000-000000000901\"],\"claim\":\"App open event recorded at 2026-07-26T06:00:00.000Z indicates client activity without logged session completion.\"}]}",
+      "recordedAt": "2026-08-02T14:15:07.075Z",
+      "schemaVersion": 1,
+      "usage": {
+        "costUsd": 0,
+        "inputTokens": 497,
+        "outputTokens": 2168
+      }
     }
   ]
 }
