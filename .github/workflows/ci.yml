@@ -40,6 +40,8 @@ jobs:
           cache: pnpm
       - name: Install frozen workspace
         run: pnpm install --frozen-lockfile
+      - name: Build workspace type dependencies
+        run: pnpm --filter @spotter/contracts --filter @spotter/design-tokens build
       - name: Verify
         run: pnpm verify
       - name: Retain verification evidence
@@ -72,6 +74,8 @@ jobs:
           cache: pnpm
       - name: Install frozen workspace
         run: pnpm install --frozen-lockfile
+      - name: Build workspace type dependencies
+        run: pnpm --filter @spotter/contracts --filter @spotter/design-tokens build
       - name: Full verification
         run: pnpm verify:full
       - name: Validate evidence
