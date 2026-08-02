@@ -217,8 +217,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@axe-core/playwright':
-        specifier: 4.11.0
-        version: 4.11.0(playwright-core@1.56.1)
+        specifier: 4.12.1
+        version: 4.12.1(playwright-core@1.56.1)
       '@react-native/metro-config':
         specifier: 0.86.2
         version: 0.86.2
@@ -266,7 +266,7 @@ importers:
         version: 1.28.0(react@19.2.8)
       next:
         specifier: 16.2.12
-        version: 16.2.12(@opentelemetry/api@1.9.1)(@playwright/test@1.56.1)(@types/node@24.10.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 16.2.12(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.56.1)(@types/node@24.10.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -281,8 +281,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@axe-core/playwright':
-        specifier: 4.11.0
-        version: 4.11.0(playwright-core@1.56.1)
+        specifier: 4.12.1
+        version: 4.12.1(playwright-core@1.56.1)
       '@tailwindcss/postcss':
         specifier: 4.3.3
         version: 4.3.3
@@ -374,8 +374,8 @@ packages:
   '@asamuzakjp/nwsapi@2.3.9':
     resolution: {integrity: sha512-n8GuYSrI9bF7FFZ/SjhwevlHc8xaVlb/7HmHelnc/PZXBD2ZR49NnN9sMMuDdEGPeeRQ5d0hqlSlEpgCX3Wl0Q==}
 
-  '@axe-core/playwright@4.11.0':
-    resolution: {integrity: sha512-70vBT/Ylqpm65RQz2iCG2o0JJCEG/WCNyefTr2xcOcr1CoSee60gNQYUMZZ7YukoKkFLv26I/jjlsvwwp532oQ==}
+  '@axe-core/playwright@4.12.1':
+    resolution: {integrity: sha512-rMd7xriptqKpP+w5265i4Hdkv2X5kbu6uiBi/B2I7uf3hieRBM3qDCfaKPtxfiYb2mKXfF+yLODJwIx+Jv1GDw==}
     peerDependencies:
       playwright-core: '>= 1.0.0'
 
@@ -2691,10 +2691,6 @@ packages:
 
   atomically@2.1.1:
     resolution: {integrity: sha512-P4w9o2dqARji6P7MHprklbfiArZAWvo07yW7qs3pdljb3BWr12FIB7W+p0zJiuiVsUpRO0iZn1kFFcpPegg0tQ==}
-
-  axe-core@4.11.4:
-    resolution: {integrity: sha512-KunSNx+TVpkAw/6ULfhnx+HWRecjqZGTOyquAoWHYLRSdK1tB5Ihce1ZW+UY3fj33bYAFWPu7W/GRSmmrCGuxA==}
-    engines: {node: '>=4'}
 
   axe-core@4.12.1:
     resolution: {integrity: sha512-s7iGf5GaVMxEG0ENN9x+xTr7GFZCb1ZP/1uATUpCEK2X78nDB3RwbtFCo9pGAf9ru+VwoQ464DkaLEeRM08wJA==}
@@ -5722,9 +5718,9 @@ snapshots:
 
   '@asamuzakjp/nwsapi@2.3.9': {}
 
-  '@axe-core/playwright@4.11.0(playwright-core@1.56.1)':
+  '@axe-core/playwright@4.12.1(playwright-core@1.56.1)':
     dependencies:
-      axe-core: 4.11.4
+      axe-core: 4.12.1
       playwright-core: 1.56.1
 
   '@babel/code-frame@7.29.7':
@@ -8345,8 +8341,6 @@ snapshots:
       stubborn-fs: 2.0.0
       when-exit: 2.1.5
 
-  axe-core@4.11.4: {}
-
   axe-core@4.12.1: {}
 
   babel-plugin-polyfill-corejs2@0.4.17(@babel/core@7.29.7):
@@ -10063,7 +10057,7 @@ snapshots:
 
   negotiator@1.0.0: {}
 
-  next@16.2.12(@opentelemetry/api@1.9.1)(@playwright/test@1.56.1)(@types/node@24.10.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  next@16.2.12(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.56.1)(@types/node@24.10.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       '@next/env': 16.2.12
       '@swc/helpers': 0.5.15
@@ -10072,7 +10066,7 @@ snapshots:
       postcss: 8.5.25
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
-      styled-jsx: 5.1.6(react@19.2.8)
+      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.8)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.2.12
       '@next/swc-darwin-x64': 16.2.12
@@ -10882,10 +10876,12 @@ snapshots:
 
   stubborn-utils@1.0.2: {}
 
-  styled-jsx@5.1.6(react@19.2.8):
+  styled-jsx@5.1.6(@babel/core@7.29.7)(react@19.2.8):
     dependencies:
       client-only: 0.0.1
       react: 19.2.8
+    optionalDependencies:
+      '@babel/core': 7.29.7
 
   styleq@0.1.3: {}
 
