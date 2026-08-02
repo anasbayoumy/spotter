@@ -29,18 +29,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Enable pinned pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.20.0
+          run_install: false
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
           cache: pnpm
-      - name: Enable pinned pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@10.20.0 --activate
       - name: Install frozen workspace
-        run: corepack pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Verify
-        run: corepack pnpm verify
+        run: pnpm verify
       - name: Retain verification evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -60,20 +61,21 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Enable pinned pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.20.0
+          run_install: false
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
           cache: pnpm
-      - name: Enable pinned pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@10.20.0 --activate
       - name: Install frozen workspace
-        run: corepack pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Full verification
-        run: corepack pnpm verify:full
+        run: pnpm verify:full
       - name: Validate evidence
-        run: corepack pnpm evidence:verify
+        run: pnpm evidence:verify
       - name: Retain release evidence
         if: always()
         uses: actions/upload-artifact@v4
