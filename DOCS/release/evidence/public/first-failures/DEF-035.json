@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-035",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Client History journey depended on an earlier test completing its session",
+    "note": "The isolated zero-retry client run retained exact browser and network evidence when History expected session 701 completed even though the API correctly returned it as scheduled.",
+    "diagnosis": "QA-CLI-007 implicitly relied on earlier QA-CLI-004/005 state mutation instead of arranging its own prerequisite, so isolated or first-failure-filtered execution made a correct History view appear defective."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-035",
+        "type": "directory",
+        "digest": "tree-sha256:e14dc14908b70314db0590f3d48c4c69839f827808b21a6c6c530e03cc62e0fb"
+      }
+    ]
+  }
+}

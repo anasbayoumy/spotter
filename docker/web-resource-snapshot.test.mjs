@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { aggregateProcessReports, discoverClusterProcesses } from "./web-resource-snapshot.mjs";
 
-function entry(pid, command, slot) {
+function entry(pid, command, slot, parentPid = pid === 1 ? 0 : 1) {
   return {
     command,
     environment: new Map(
@@ -14,6 +14,7 @@ function entry(pid, command, slot) {
             ["SPOTTER_WEB_WORKER_SLOT", String(slot)],
           ],
     ),
+    parentPid,
     pid,
   };
 }
@@ -38,8 +39,8 @@ test("discovers exactly one primary and contiguous unique worker slots", () => {
   const topology = discoverClusterProcesses(
     [
       entry(1, "/nodejs/bin/node /app/docker/web-cluster.mjs"),
-      entry(12, "next-server (v16.2.12)", 2),
-      entry(11, "next-server (v16.2.12)", 1),
+      entry(12, "next-server (v16.2.12)", 2, 1),
+      entry(11, "next-server (v16.2.12)", 1, 1),
       entry(99, "/nodejs/bin/node -e healthcheck"),
     ],
     2,
@@ -51,6 +52,31 @@ test("discovers exactly one primary and contiguous unique worker slots", () => {
       [1, 11],
       [2, 12],
     ],
+  );
+
+  const initTopology = discoverClusterProcesses(
+    [
+      entry(1, "/sbin/docker-init -- /nodejs/bin/node docker/web-cluster.mjs"),
+      entry(7, "/nodejs/bin/node docker/web-cluster.mjs", undefined, 1),
+      entry(12, "next-server (v16.2.12)", 1, 7),
+      entry(18, "next-server (v16.2.12)", 2, 7),
+    ],
+    2,
+  );
+  assert.equal(initTopology.primary.pid, 7);
+  assert.equal(initTopology.primary.parentPid, 1);
+  assert.throws(
+    () =>
+      discoverClusterProcesses(
+        [
+          entry(1, "/sbin/unrelated-init"),
+          entry(7, "/nodejs/bin/node docker/web-cluster.mjs", undefined, 1),
+          entry(12, "next-server (v16.2.12)", 1, 7),
+          entry(18, "next-server (v16.2.12)", 2, 7),
+        ],
+        2,
+      ),
+    /not supervised by the container init/u,
   );
   assert.throws(
     () =>

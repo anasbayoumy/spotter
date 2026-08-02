@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-013",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Docker smoke expected private approval evidence in the public programme contract",
+    "note": "The cold no-cache protocol passed QA-DKR-001 through QA-DKR-007, then retained QA-DKR-008 and its exact failure message after the smoke flow rejected a contract-valid blocked override response. The older report did not retain a top-level failure object or stack.",
+    "diagnosis": "The public programme schema does not expose approvalKind, but the smoke harness asserted that private database audit field on the API response. The product had persisted override approval and coach-action evidence correctly; the verifier queried the wrong boundary."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-013/docker-protocol-report.json",
+        "type": "file",
+        "digest": "sha256:a36fe2805ed141f27ebf189ae638fa9ece469759155768519baf543bd55fef80"
+      }
+    ]
+  }
+}

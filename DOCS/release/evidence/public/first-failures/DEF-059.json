@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-059",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Frontend tests imported backend internals outside approved adapters",
+    "note": "The retained boundary output names two frontend test files that directly imported backend agent and server packages outside the approved frontend server/API adapter boundary.",
+    "diagnosis": "Gateway resilience and logger-redaction assertions were behaviorally valid but placed in frontend-owned test files, causing presentation tests to cross the documented server-only backend boundary."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-059",
+        "type": "directory",
+        "digest": "tree-sha256:cdb1d2a8dbc50539771706ffc6bb219df07bf2a8c658ccfea781564351dc8f01"
+      }
+    ]
+  }
+}

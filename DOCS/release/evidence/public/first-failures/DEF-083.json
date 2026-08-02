@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-083",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Resource snapshot missed healthy workers after Next rewrote their process titles",
+    "note": "The retained targeted live proof shows /health/live returning HTTP 200, one web-cluster primary, and two workers with exact slots 1 and 2 and runtime titles next-server (v16.2.12). The exact pre-fix image source and repeatable exit-1 stack record Expected exactly 2 web workers, found 0 before any resource report was collected.",
+    "diagnosis": "Worker discovery treated the pre-import docker/spotter-worker.mjs command line as stable process identity. Next rewrites process.title to next-server (v16.2.12) after the worker imports the standalone server, while the SPOTTER_WEB_CLUSTER_WORKER and slot environment markers remain intact. The two healthy workers therefore existed but were removed by the harness predicate."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-083",
+        "type": "directory",
+        "digest": "tree-sha256:5e8a451890dd60e203c4150cd062ec9773229372ffd5aec4af25dad104eba56f"
+      }
+    ]
+  }
+}

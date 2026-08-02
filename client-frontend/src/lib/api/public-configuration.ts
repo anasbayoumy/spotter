@@ -25,6 +25,7 @@ function normalizeAbsoluteHttpUrl(value: string): string {
     (url.protocol !== "http:" && url.protocol !== "https:") ||
     url.username.length > 0 ||
     url.password.length > 0 ||
+    url.pathname !== "/" ||
     url.search.length > 0 ||
     url.hash.length > 0
   ) {

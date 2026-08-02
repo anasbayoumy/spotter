@@ -17,6 +17,23 @@ function processEnvironment(pid) {
   );
 }
 
+function processParentPid(pid) {
+  const status = fs.readFileSync(`/proc/${String(pid)}/status`, "utf8");
+  const match = /^PPid:\s+(\d+)$/mu.exec(status);
+  if (match === null) throw new Error(`Process ${String(pid)} has no parent PID.`);
+  return Number(match[1]);
+}
+
+function isClusterPrimaryCommand(command) {
+  return /^(?:\/nodejs\/bin\/node|node) (?:\/app\/)?docker\/web-cluster\.mjs$/u.test(command);
+}
+
+function isContainerInitCommand(command) {
+  return /^\/sbin\/docker-init -- (?:\/nodejs\/bin\/node|node) (?:\/app\/)?docker\/web-cluster\.mjs$/u.test(
+    command,
+  );
+}
+
 export function discoverClusterProcesses(entries, expectedWorkerCount) {
   if (
     !Number.isSafeInteger(expectedWorkerCount) ||
@@ -25,16 +42,19 @@ export function discoverClusterProcesses(entries, expectedWorkerCount) {
   ) {
     throw new Error("Expected worker count must be between 1 and 2.");
   }
-  const primaries = entries.filter(
-    (entry) =>
-      entry.pid === 1 &&
-      /(?:^|\s)(?:\/app\/)?docker\/web-cluster\.mjs(?:\s|$)/u.test(entry.command),
-  );
+  const primaries = entries.filter((entry) => isClusterPrimaryCommand(entry.command));
   const workerEntries = entries.filter(
     (entry) => entry.environment.get("SPOTTER_WEB_CLUSTER_WORKER") === "true",
   );
   if (primaries.length !== 1) {
     throw new Error(`Expected exactly one web cluster primary, found ${String(primaries.length)}.`);
+  }
+  const primary = primaries[0];
+  if (primary.pid !== 1) {
+    const init = entries.find((entry) => entry.pid === 1);
+    if (primary.parentPid !== 1 || init === undefined || !isContainerInitCommand(init.command)) {
+      throw new Error("The web cluster primary is not supervised by the container init process.");
+    }
   }
   if (workerEntries.length !== expectedWorkerCount) {
     throw new Error(
@@ -53,6 +73,9 @@ export function discoverClusterProcesses(entries, expectedWorkerCount) {
       ) {
         throw new Error(`Worker ${String(entry.pid)} has an invalid runtime command.`);
       }
+      if (entry.parentPid !== primary.pid) {
+        throw new Error(`Worker ${String(entry.pid)} is not a child of the web cluster primary.`);
+      }
       return { ...entry, role: "worker", slot };
     })
     .sort((left, right) => left.slot - right.slot);
@@ -64,7 +87,7 @@ export function discoverClusterProcesses(entries, expectedWorkerCount) {
     if (slots[slot - 1] !== slot) throw new Error("Web worker slots are not contiguous.");
   }
   return {
-    primary: { ...primaries[0], role: "primary", slot: null },
+    primary: { ...primary, role: "primary", slot: null },
     workers,
   };
 }
@@ -161,6 +184,7 @@ async function snapshot() {
           {
             command: fs.readFileSync(`/proc/${entry}/cmdline`, "utf8").replaceAll("\0", " ").trim(),
             environment: processEnvironment(pid),
+            parentPid: processParentPid(pid),
             pid,
           },
         ];

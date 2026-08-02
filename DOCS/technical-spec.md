@@ -35,7 +35,10 @@ transaction management.
 The Expo application and browser code never import backend internals. Their only shared executable
 boundary is `backend/packages/contracts`.
 
-## Required workspaces
+## Required workspaces and backend-owned assets
+
+The pnpm workspace contains the three application packages plus the physically backend-owned shared
+packages:
 
 ```text
 frontend/
@@ -45,6 +48,11 @@ backend/packages/contracts/
 backend/packages/config/
 backend/packages/design-tokens/
 backend/packages/testkit/
+```
+
+Committed non-workspace backend assets remain beside the server package that owns them:
+
+```text
 backend/resources/
 backend/infra/
 backend/tooling/
@@ -56,15 +64,17 @@ backend/tooling/
   engagement calculations. It imports no framework, database, HTTP, UI, or model SDK.
 - `application`: command/query use cases, ports, units of work, authorization-free demo identity
   selection, idempotency, and orchestration.
-- `infrastructure`: Drizzle repositories, database adapters, clocks/IDs, model gateways, logging,
-  and configuration.
+- `infrastructure`: PostgreSQL/PGlite adapters, Drizzle repositories, migrations, and transaction
+  implementations.
 - `agents`: deterministic context assembly, budgeting, prompts, structured generation, citations,
-  and traces.
+  model gateways, and traces.
 - `evals`: blocking safety gates, independent judge adapters, review-band selection, calibration,
   and scorecards.
 - `jobs`: weekly planning and daily accountability entry points with stable run keys and concurrency
   protection.
-- `interfaces`: HTTP-neutral request handlers consumed by thin Next route adapters.
+- `composition`: validated clocks/IDs, logging, model/database adapters, use-case wiring, and the
+  narrow server facade consumed by thin Next route adapters.
+- `cli`: migration, seed, deterministic demo, and safety-report entry points.
 
 ## API rules
 

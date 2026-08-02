@@ -3,6 +3,7 @@ import { EventEmitter } from "node:events";
 import test from "node:test";
 
 import {
+  configureProcessReport,
   createClusterSupervisor,
   parseRateLimitProfile,
   parseWorkerCount,
@@ -86,9 +87,17 @@ test("worker count, profile, and report identities are strictly bounded", () => 
   assert.throws(() => parseRateLimitProfile("expanded"), /SPOTTER_RATE_LIMIT_PROFILE/u);
   assert.equal(
     processReportFilename("worker-2", 41),
-    "/tmp/spotter-process-report-worker-2-pid-41.json",
+    "spotter-process-report-worker-2-pid-41.json",
   );
   assert.throws(() => processReportFilename("worker-0", 41), /identity/u);
+
+  const report = {};
+  configureProcessReport(report, "primary", 1);
+  assert.deepEqual(report, {
+    directory: "/tmp",
+    filename: "spotter-process-report-primary-pid-1.json",
+    reportOnSignal: true,
+  });
 });
 
 test("supervisor starts exact slots, respawns crashes, and never respawns during shutdown", () => {

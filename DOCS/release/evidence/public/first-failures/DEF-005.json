@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-005",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Docker web build did not compile workspace dependencies before Next",
+    "note": "QA-DKR-003 retained the Next module-resolution failures emitted when internal contract/backend packages had not been built first.",
+    "diagnosis": "The web Docker stage invoked next build before compiling the internal workspace packages consumed by route adapters and UI clients."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-005/docker-protocol-report.json",
+        "type": "file",
+        "digest": "sha256:130559f6f56cf7e2b0a53b55f2ce62c2bf3efdd73e6f5acd403609d34bc067c0"
+      },
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-005/clean-production-build.log",
+        "type": "file",
+        "digest": "sha256:7904fdf85cbe019181b49ced19fd04c1124276dc97824e4794c5abf38b172139"
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-078",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Mixed read API deciding p95 exceeded the unchanged latency budget",
+    "note": "The exact report and environment show three real 25-VU runs with 945, 1072, and 1061 contract-valid HTTP 200 samples and zero errors. Their p95 values were 503.815125, 440.584125, and 417.389833 milliseconds; the real median deciding run exceeded 250 milliseconds.",
+    "diagnosis": "The unchanged NFR-PERF-001 gate is genuinely red at 440.584125 milliseconds p95 despite zero request errors. NFR-PERF-006 in the same process proves PostgreSQL execution p95 at 0.10 milliseconds and sequential repository/API p95 at or below 22.593167 milliseconds, isolating concurrency queueing rather than slow SQL. The 25-VU mix shares a ten-connection pool while client detail performs a lookup plus a five-query fanout and today had independent reads serialized. The historical aggregate cannot honestly name one dominant route, so the corrected harness adds per-route attribution for the rerun."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-078",
+        "type": "directory",
+        "digest": "tree-sha256:c3a4372e530f5c67971e53181a2384941495672d3c46b31ee158601300f81591"
+      }
+    ]
+  }
+}

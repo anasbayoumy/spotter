@@ -11,6 +11,7 @@ import {
   sourceState,
   walkFiles,
 } from "./evidence-common.mjs";
+import { validateCompactFirstFailure } from "./defect-evidence.mjs";
 import { validateMutationEvidence } from "./mutation-evidence.mjs";
 
 const suite = process.argv[2];
@@ -45,6 +46,7 @@ const extendedScripts = [
 const scripts = suite === "fast" ? fastScripts : [...fastScripts, ...extendedScripts];
 const startedAt = new Date();
 const sourceBefore = await sourceState();
+const sourceInventory = new Set(sourceBefore.files);
 const shortRevision = sourceBefore.git.slice(0, 8);
 const timePrefix = startedAt
   .toISOString()
@@ -140,6 +142,18 @@ async function prepareDefectEvidence() {
     const artifacts = record?.firstFailure?.artifacts;
     if (!Array.isArray(artifacts)) {
       throw new Error(`Defect ${String(record?.id)} has no first-failure artifact inventory.`);
+    }
+    if (record?.firstFailure?.kind === "runtime-failure") {
+      if (artifacts.length !== 1) {
+        throw new Error(
+          `Defect ${String(record?.id)} must declare one compact first-failure summary.`,
+        );
+      }
+      await validateCompactFirstFailure({
+        artifact: artifacts[0],
+        record,
+        sourceInventory,
+      });
     }
     for (const artifact of artifacts) {
       const artifactSource = resolveRepositorySource(

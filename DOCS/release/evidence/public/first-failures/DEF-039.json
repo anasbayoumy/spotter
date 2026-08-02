@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-039",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Bundled Docker SBOM plugin was incompatible with the current daemon API",
+    "note": "The third focused Docker protocol retained the exact plugin incompatibility transcript and clean teardown after QA-DKR-012 reached SBOM generation with QA-DKR-001 through QA-DKR-011 already passing.",
+    "diagnosis": "Docker Desktop exposed docker-sbom 0.6.0 with Syft 0.43, whose Docker API 1.41 client cannot inspect images on Docker 29 because the daemon requires API 1.44 or newer. The image and application were healthy; the obsolete bundled scanner failed before producing evidence."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-039",
+        "type": "directory",
+        "digest": "tree-sha256:30269a3efdcd0c1cff3e52088a9b5ad45872a18b9ea0e9e24a2c47d4be4dc026"
+      }
+    ]
+  }
+}

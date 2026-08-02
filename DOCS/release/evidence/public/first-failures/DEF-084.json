@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-084",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Concurrent mutation runners stalled the static tail and inflated timeout outcomes",
+    "diagnosis": "Stryker concurrency two began with one checker and one test runner, then converted the released checker token into a second runner. The concurrent Vitest/PGlite processes contended during database setup and full-suite static mutants, causing hook-timeout-only apparent kills, wall-clock timeouts, and an observable sixteen-minute counter stall.",
+    "note": "The rejected full run stopped after 1,994 of 2,207 mutants with 26 provisional timeouts after its counter had remained at 1,985 for sixteen minutes. The exact 18-mutant publication tail then produced 13 kills and five timeouts with dual runners, while the serialized control killed 18 of 18 with zero timeouts. Neither incomplete or contention-affected result was accepted as release evidence."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-084/stalled-full-run",
+        "type": "directory",
+        "digest": "tree-sha256:eff0dc192fb978b90812cc221233235deea7acb50ed2201092b40b274335e88a"
+      },
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-084/dual-runner-tail-events",
+        "type": "directory",
+        "digest": "tree-sha256:c5ac35aff49e0123ca5027c9150668cb41ed991cb55daeb88a04c295f39648e0"
+      },
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-084/single-runner-tail-events",
+        "type": "directory",
+        "digest": "tree-sha256:fe88c9344853c176af61f67cddfbe3cc040e5370ee9cdf460f5c7c89874c3578"
+      },
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-084/red-flags-targeted-mutation.json",
+        "type": "file",
+        "digest": "sha256:386c40f5cf273f90434aeb0b6b47c87ab6308888341042b43ebfc15408f21e8f"
+      },
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-084/red-flags-targeted-events",
+        "type": "directory",
+        "digest": "tree-sha256:8ef8cc4286c7ae826064d29bd680f9b9921b0159426d66e1fbc6528d5db2154b"
+      }
+    ]
+  }
+}

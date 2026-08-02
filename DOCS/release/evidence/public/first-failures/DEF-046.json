@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-046",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Authoritative coverage exposed repository and changed-code behavior gaps",
+    "note": "The retained machine coverage summary records repository branches at 77.39%, changed lines at 86.87%, changed branches at 75.21%, and changed functions at 83.70% after 685 Vitest tests and the Node-native regression passed.",
+    "diagnosis": "Owned presentation, client-runtime, adapter, and edge-state behavior had executable branches without direct assertions. The critical backend domain/application scopes were already complete, but aggregate repository and changed-code gates correctly rejected the uncovered behavior."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-046",
+        "type": "directory",
+        "digest": "tree-sha256:46fd9ed6e5d8083a873dc541a861e77344639e6649ae85973c286a394760ef15"
+      }
+    ]
+  }
+}

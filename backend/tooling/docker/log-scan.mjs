@@ -76,15 +76,56 @@ function expectedPostgresProtocolNoise(line) {
   return expectedPostgresProtocolMessages.some((pattern) => pattern.test(line));
 }
 
+function expectedPostgresControlledRestart(lines, index) {
+  const line = lines[index];
+  const service = /^(test-postgres-\d+\s+\|\s+)/u.exec(line)?.[1];
+  if (service === undefined || !/FATAL:\s+the database system is shutting down$/u.test(line)) {
+    return false;
+  }
+  const belongsToService = (candidate) => candidate.startsWith(service);
+  const before = lines.slice(Math.max(0, index - 10), index);
+  const after = lines.slice(index + 1, index + 12);
+  const completedInitialBootstrap = after.some(
+    (candidate) =>
+      belongsToService(candidate) &&
+      /PostgreSQL init process complete; ready for start up\.$/u.test(candidate),
+  );
+  const completedPersistentRestart =
+    after.some(
+      (candidate) =>
+        belongsToService(candidate) &&
+        /PostgreSQL Database directory appears to contain a database; Skipping initialization$/u.test(
+          candidate,
+        ),
+    ) &&
+    after.some(
+      (candidate) =>
+        belongsToService(candidate) &&
+        /LOG:\s+database system is ready to accept connections$/u.test(candidate),
+    );
+  return (
+    before.some(
+      (candidate) =>
+        belongsToService(candidate) && /LOG:\s+received fast shutdown request$/u.test(candidate),
+    ) &&
+    after.some(
+      (candidate) =>
+        belongsToService(candidate) && /LOG:\s+database system is shut down$/u.test(candidate),
+    ) &&
+    (completedInitialBootstrap || completedPersistentRestart)
+  );
+}
+
 export function scanRuntimeLogs(text, options = {}) {
   const findings = [];
   const expectedWarningRequestIds = new Set(options.expectedWarningRequestIds ?? []);
-  for (const [index, line] of String(text).split(/\r?\n/u).entries()) {
+  const lines = String(text).split(/\r?\n/u);
+  for (const [index, line] of lines.entries()) {
     for (const check of checks) {
       if (check.pattern.test(line)) {
         if (
           ["crash-fatal", "database-raw-error", "unexpected-warning-or-error"].includes(check.id) &&
-          expectedPostgresProtocolNoise(line)
+          (expectedPostgresProtocolNoise(line) || expectedPostgresControlledRestart(lines, index))
         ) {
           continue;
         }

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-041",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Deterministic coach edits were classified as live scorecard runs",
+    "note": "The exact coach Playwright run retained its screenshot, video, trace, DOM error context, HTML report, last-run result, and command summary after QA-E2E-001 through QA-E2E-009 passed and QA-E2E-010 failed with zero retries.",
+    "diagnosis": "DrizzleProgrammeApplicationRepository.edit created a synthetic audit run with model identifier coach-edit. Scorecard provenance deliberately classifies agent runs whose model starts with recorded as recorded and every other identifier as live, so one deterministic human edit changed the aggregate from recorded to mixed and invalidated the honest recorded-mode UI expectation."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-041",
+        "type": "directory",
+        "digest": "tree-sha256:3d53a77da9a5e1464e350f195515c4dd1d1b3d4aafb743767a68bff60858d295"
+      }
+    ]
+  }
+}

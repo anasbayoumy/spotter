@@ -109,16 +109,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-004/docker-protocol-report.json",
-            "releasePath": "reports/defects/first-failures/DEF-004/docker-protocol-report.json",
+            "source": "DOCS/release/evidence/public/first-failures/DEF-004.json",
+            "releasePath": "reports/defects/first-failures/DEF-004.json",
             "type": "file",
-            "sourceSha256": "sha256:454764e9cb976de185bef6a327d2ced0d69c6571fe442b0e4e9e51ffb9f42544"
-          },
-          {
-            "source": "DOCS/release/evidence/first-failures/DEF-004/clean-production-build.log",
-            "releasePath": "reports/defects/first-failures/DEF-004/clean-production-build.log",
-            "type": "file",
-            "sourceSha256": "sha256:ea3a01b14b7e03c85212ae5691f673d631bb347714b5b79d80918b415d999e4e"
+            "sourceSha256": "sha256:5b052542e61548c6ae786974aa023ef31cb61f8a882519f9df3a2901651f685f"
           }
         ],
         "note": "QA-DKR-003 failed because the clean container workspace could not resolve the Next binary; the complete failing protocol report and build log were frozen before changes."
@@ -146,16 +140,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-005/docker-protocol-report.json",
-            "releasePath": "reports/defects/first-failures/DEF-005/docker-protocol-report.json",
+            "source": "DOCS/release/evidence/public/first-failures/DEF-005.json",
+            "releasePath": "reports/defects/first-failures/DEF-005.json",
             "type": "file",
-            "sourceSha256": "sha256:130559f6f56cf7e2b0a53b55f2ce62c2bf3efdd73e6f5acd403609d34bc067c0"
-          },
-          {
-            "source": "DOCS/release/evidence/first-failures/DEF-005/clean-production-build.log",
-            "releasePath": "reports/defects/first-failures/DEF-005/clean-production-build.log",
-            "type": "file",
-            "sourceSha256": "sha256:7904fdf85cbe019181b49ced19fd04c1124276dc97824e4794c5abf38b172139"
+            "sourceSha256": "sha256:146d168b34f18f65c27d5b9f9974310e2bb82c52c3fbd01c0a7586148ff47ec8"
           }
         ],
         "note": "QA-DKR-003 retained the Next module-resolution failures emitted when internal contract/backend packages had not been built first."
@@ -179,16 +167,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-006/docker-protocol-report.json",
-            "releasePath": "reports/defects/first-failures/DEF-006/docker-protocol-report.json",
+            "source": "DOCS/release/evidence/public/first-failures/DEF-006.json",
+            "releasePath": "reports/defects/first-failures/DEF-006.json",
             "type": "file",
-            "sourceSha256": "sha256:e69a73b31ca4655dcdc1dde7b4b485ca503c33da150f5c72fa389d9c9628834d"
-          },
-          {
-            "source": "DOCS/release/evidence/first-failures/DEF-006/compose-image-identities.log",
-            "releasePath": "reports/defects/first-failures/DEF-006/compose-image-identities.log",
-            "type": "file",
-            "sourceSha256": "sha256:879a422d1d67a1f57001db9012c9e557fcc14d85e7a786c63475a3df4f485861"
+            "sourceSha256": "sha256:4242475d7cb8cb6f266685a07c040e274eb34de2f932a613dc279aa86c35d8cf"
           }
         ],
         "note": "After successful image builds, Compose 2.40.3 emitted literal null and the verifier attempted to read Service from it."
@@ -239,16 +221,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-008/client",
-            "releasePath": "reports/defects/first-failures/DEF-008/client",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:ccb9287cbf319748f72b139920e2a197a2845ccb78beaf194f7c765e418ee256"
-          },
-          {
-            "source": "DOCS/release/evidence/first-failures/DEF-008/coach",
-            "releasePath": "reports/defects/first-failures/DEF-008/coach",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:ec7edecc133dbd6e7670cd681caf20751f4cdc858cac46732972ca15fdd99b4d"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-008.json",
+            "releasePath": "reports/defects/first-failures/DEF-008.json",
+            "type": "file",
+            "sourceSha256": "sha256:af18b80baa3d38ced0c1b3b2ab80edb86f1471d011c687b78eb2a65bef30caa8"
           }
         ],
         "note": "The retained Playwright traces show strict locator ambiguity and expected navigation-aborted requests being classified as browser runtime errors. Client-selection leakage was diagnosed in the same fix loop, but is not independently attributed to these retained traces."
@@ -334,10 +310,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-011/coverage-threshold-first-failure.json",
-            "releasePath": "reports/tooling/fix-loop/coverage-threshold-first-failure.json",
+            "source": "DOCS/release/evidence/public/first-failures/DEF-011.json",
+            "releasePath": "reports/defects/first-failures/DEF-011.json",
             "type": "file",
-            "sourceSha256": "sha256:1f35c8ea249f487ee1680871aae5496945e67b7b116a8ceaa5e4af4a5b3785ad"
+            "sourceSha256": "sha256:d568e9b332aacf38cddd560341864412853a94d21357691b779b8db0dc2f053c"
           }
         ],
         "note": "The retained threshold summary records the actual repository and changed-source deficits after honest multi-context attribution; it is still a failing gate, not superseded evidence."
@@ -367,10 +343,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-012/mutation-playwright-cache-first-failure.log",
-            "releasePath": "reports/tooling/fix-loop/mutation-playwright-cache-first-failure.log",
+            "source": "DOCS/release/evidence/public/first-failures/DEF-012.json",
+            "releasePath": "reports/defects/first-failures/DEF-012.json",
             "type": "file",
-            "sourceSha256": "sha256:1ed58213a10e62ab37ed92b0724834a1e337ef7cb5092ac8e9142691ab7837c4"
+            "sourceSha256": "sha256:dda942ba80331eb3534313b0b7f272a45fd67c200aea4685d8c459bf1310258f"
           }
         ],
         "note": "The first mutation attempt instrumented 2,207 mutants but failed before execution while copying a macOS Chromium framework link from the unrelated local browser cache."
@@ -394,10 +370,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-013/docker-protocol-report.json",
-            "releasePath": "reports/defects/first-failures/DEF-013/docker-protocol-report.json",
+            "source": "DOCS/release/evidence/public/first-failures/DEF-013.json",
+            "releasePath": "reports/defects/first-failures/DEF-013.json",
             "type": "file",
-            "sourceSha256": "sha256:a36fe2805ed141f27ebf189ae638fa9ece469759155768519baf543bd55fef80"
+            "sourceSha256": "sha256:943798e1c4465966e4959fdd297cff9de51dce53d888fad90ed3d84f7bf75308"
           }
         ],
         "note": "The cold no-cache protocol passed QA-DKR-001 through QA-DKR-007, then retained QA-DKR-008 and its exact failure message after the smoke flow rejected a contract-valid blocked override response. The older report did not retain a top-level failure object or stack."
@@ -425,10 +401,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-014",
-            "releasePath": "reports/defects/first-failures/DEF-014",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:0e41dec595c89927a4020667678a890819597c12a322fe5b9fa46028064d72e9"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-014.json",
+            "releasePath": "reports/defects/first-failures/DEF-014.json",
+            "type": "file",
+            "sourceSha256": "sha256:3293fb50b186a8d53db46ece31f3cd80bf3bd3c8b5ea6afb10f321908e8281f9"
           }
         ],
         "note": "The client session journey retained its trace and error context after a browser-same-origin POST received HTTP 403 at the reverse-proxied API boundary."
@@ -456,10 +432,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-015",
-            "releasePath": "reports/defects/first-failures/DEF-015",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:83a8c58c56bd372072106ec9d20f36ff175cf485f4f814a43bf32216cfb07c8c"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-015.json",
+            "releasePath": "reports/defects/first-failures/DEF-015.json",
+            "type": "file",
+            "sourceSha256": "sha256:c8dc3a0e364237668067784664ea77500da98275aadb39b41aed633a4ed8f3d4"
           }
         ],
         "note": "The responsive screenshot journey produced all 20 images, then retained a trace showing the next navigation cancel an in-flight queue API read that the strict runtime guard classified as unexpected."
@@ -486,10 +462,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-016/docker-protocol-report.json",
-            "releasePath": "reports/defects/first-failures/DEF-016/docker-protocol-report.json",
+            "source": "DOCS/release/evidence/public/first-failures/DEF-016.json",
+            "releasePath": "reports/defects/first-failures/DEF-016.json",
             "type": "file",
-            "sourceSha256": "sha256:39e6419b420c2e38feed0853e3ca82040150b71504468a990d00079e3b3d5172"
+            "sourceSha256": "sha256:d0a5e2aef7ac85089d17b55460ef39425458d7ad2afa3e11e24d103aefe214e3"
           }
         ],
         "note": "The third cold Docker protocol passed QA-DKR-001 through QA-DKR-008, then retained a structured QA-DKR-009 failure when the isolated authoritative integration suite could not bootstrap vector in its temporary database."
@@ -564,10 +540,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-019/docker-protocol-report.json",
-            "releasePath": "reports/defects/first-failures/DEF-019/docker-protocol-report.json",
+            "source": "DOCS/release/evidence/public/first-failures/DEF-019.json",
+            "releasePath": "reports/defects/first-failures/DEF-019.json",
             "type": "file",
-            "sourceSha256": "sha256:cc85bb7dfffcb17adbdc48ba2c83f2562d83d0b5e297bdb9d5e19b9be916cf54"
+            "sourceSha256": "sha256:3f7791de256b31c60ab1ebd06cae11ed04936a7d67019a3e5aadb37b22e20cc7"
           }
         ],
         "note": "The fourth cold Docker protocol passed QA-DKR-001 through QA-DKR-009, then retained a structured timeout because /health/ready did not return HTTP 200 within 60 seconds after restarting the web service."
@@ -594,10 +570,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-020",
-            "releasePath": "reports/defects/first-failures/DEF-020",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:8c357a5d91b7ca2add5d343377e23c9ff4e1944f9e34aed1e5ae7196f88a61d9"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-020.json",
+            "releasePath": "reports/defects/first-failures/DEF-020.json",
+            "type": "file",
+            "sourceSha256": "sha256:9b2e7858ba3a290d706143bfc338f60331101b3ecb9bb7b2e7d644a323e6d143"
           }
         ],
         "note": "The direct /check-in production-web journey retained a trace and error context after a previously selected synthetic client was redirected to the selector before its persisted selection restored."
@@ -667,7 +643,7 @@
       "title": "Mutation fix loop overwrote intermediate failing reports before freezing them",
       "classification": "test",
       "requirements": ["QA-MUT-003", "QA-MUT-005", "QA-EVD-007", "QA-REL-003"],
-      "status": "fixed-release-validation-pending",
+      "status": "fixed-release-validated",
       "firstFailure": {
         "kind": "unretained-local-run",
         "retention": "gap-disclosed",
@@ -682,8 +658,8 @@
         "backend/tooling/verification/verify-evidence.mjs"
       ],
       "validation": {
-        "status": "release-pending",
-        "note": "Focused tests added during the audit are green; validation remains pending until the final full mutation run, exact classification binding, and clean release suite pass."
+        "status": "release-pass",
+        "note": "The exact final 2,207-mutant report, per-mutant event stream, and classifier are now preserved and cryptographically bound to all 429 tests and execution inputs. The historical intermediate-byte gap remains honestly disclosed and was not reconstructed."
       }
     },
     {
@@ -691,16 +667,16 @@
       "title": "Concurrent mutation workers produced systemic Vitest runtime errors",
       "classification": "test",
       "requirements": ["QA-MUT-001", "QA-MUT-005", "QA-EVD-007", "QA-REL-003"],
-      "status": "fixed-release-validation-pending",
+      "status": "fixed-release-validated",
       "firstFailure": {
         "kind": "runtime-failure",
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-024/mutation-runtime-error-report.json",
-            "releasePath": "reports/defects/first-failures/DEF-024/mutation-runtime-error-report.json",
+            "source": "DOCS/release/evidence/public/first-failures/DEF-024.json",
+            "releasePath": "reports/defects/first-failures/DEF-024.json",
             "type": "file",
-            "sourceSha256": "sha256:78351ba4d75240740ba5a3aed2aa51449517f84cc4455f7e1acdfaef5f6e243f"
+            "sourceSha256": "sha256:f363897999384d3c0697c40e95e2f2c138f9da4d81aa9b76631c2afc7782c3d0"
           }
         ],
         "note": "The quiet-host mutation report contained 1,556 RuntimeError mutants with the same Vitest unhandled Pool.run failure across all 22 mutated source files; 1,554 of them had covering tests."
@@ -714,8 +690,8 @@
         "backend/tooling/verification/mutation-evidence.test.mjs"
       ],
       "validation": {
-        "status": "targeted-pass-release-pending",
-        "note": "The stabilized 2,207-mutant report established zero RuntimeError, CompileError, and NoCoverage outcomes with exact production-source, inventory, score, and expiry review. A participating test changed afterward, so the strengthened complete test-set/execution-input binding correctly rejects that report and a frozen-tree mutation rerun remains pending."
+        "status": "release-pass",
+        "note": "The exact current-tree rerun completed all 2,207 mutants after all 429 dry-run tests with zero RuntimeError, CompileError, and NoCoverage outcomes. The supported concurrency-one harness and immutable classifier binding prevent the earlier systemic runner errors from inflating the score."
       }
     },
     {
@@ -870,16 +846,16 @@
       "title": "Clean mutation audit exposed nine genuine behavioral assertion gaps",
       "classification": "test",
       "requirements": ["QA-MUT-003", "QA-MUT-005", "QA-EVD-007", "QA-REL-003"],
-      "status": "fixed-release-validation-pending",
+      "status": "fixed-release-validated",
       "firstFailure": {
         "kind": "runtime-failure",
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-031/mutation-zero-error-survivor-report.json",
-            "releasePath": "reports/defects/first-failures/DEF-031/mutation-zero-error-survivor-report.json",
+            "source": "DOCS/release/evidence/public/first-failures/DEF-031.json",
+            "releasePath": "reports/defects/first-failures/DEF-031.json",
             "type": "file",
-            "sourceSha256": "sha256:f1e362bb3f2231be1688af6e7ad8c4af5828d0bbd567fff8a27e49f8623e9215"
+            "sourceSha256": "sha256:b72c51640e9623ffdbf2002de1215e80b78c989266308ee44fe04a07792c3d42"
           }
         ],
         "note": "The first harness-clean 2,207-mutant report had zero runtime, compile, and no-coverage errors, but survivor review identified nine behavioral gaps that could not be classified as equivalent."
@@ -893,8 +869,8 @@
         "backend/tooling/verification/mutation-evidence.test.mjs"
       ],
       "validation": {
-        "status": "targeted-pass-release-pending",
-        "note": "The focused regressions and prior 2,207-mutant rerun established 2,195 killed, nine proven-equivalent survivors, three proven bounded-nontermination timeouts, zero runner/coverage errors, and conservative critical-scope scores above threshold. Because a participating test changed afterward, a new frozen-tree report and reviewed binding remain pending."
+        "status": "release-pass",
+        "note": "The exact current-tree run completed 2,207 mutants with 2,193 killed, nine descriptor-bound proven-equivalent survivors, five exact classified timeouts, and zero runtime, compile, or no-coverage errors. Every conservative scope remains above its unchanged threshold."
       }
     },
     {
@@ -933,10 +909,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-033",
-            "releasePath": "reports/defects/first-failures/DEF-033",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:009e0a1aee22c48b48a7f7365a3fc1361253a0bac06c28ec444fb2bb50412793"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-033.json",
+            "releasePath": "reports/defects/first-failures/DEF-033.json",
+            "type": "file",
+            "sourceSha256": "sha256:20d951876ba7e9eda1ea927ad7d902fe1b8d73ab37778c9bbd0800bc251c7875"
           }
         ],
         "note": "The zero-retry client production journey retained its startup report after Node 24 rejected a named PostgresError export that exists in declarations but not in the package ESM module surface."
@@ -965,10 +941,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-034",
-            "releasePath": "reports/defects/first-failures/DEF-034",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:297191dbe8b63c58d318c12f03d7f35b8cc74b58f5ad701802f80b5687ce1175"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-034.json",
+            "releasePath": "reports/defects/first-failures/DEF-034.json",
+            "type": "file",
+            "sourceSha256": "sha256:dbb639b35019e598eb2ecc91c5af75385aaeff12ad664d01df904d54dd4bbb0c"
           }
         ],
         "note": "The zero-retry production client journey retained screenshot, video, trace, HTML, and error context after a successful check-in body failed to appear in the next exact context trace."
@@ -997,10 +973,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-035",
-            "releasePath": "reports/defects/first-failures/DEF-035",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:e14dc14908b70314db0590f3d48c4c69839f827808b21a6c6c530e03cc62e0fb"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-035.json",
+            "releasePath": "reports/defects/first-failures/DEF-035.json",
+            "type": "file",
+            "sourceSha256": "sha256:02afe6c2f0b61398fc09c934c185d351fe2162749622bb5aa76b0583b2141c4e"
           }
         ],
         "note": "The isolated zero-retry client run retained exact browser and network evidence when History expected session 701 completed even though the API correctly returned it as scheduled."
@@ -1024,10 +1000,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-036",
-            "releasePath": "reports/defects/first-failures/DEF-036",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:8d20fc6f7a90e03612461f40c6a493d8341789f9ec809e87cb7e19559c38e744"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-036.json",
+            "releasePath": "reports/defects/first-failures/DEF-036.json",
+            "type": "file",
+            "sourceSha256": "sha256:c63ccaa5b23cc81484864fb72c533047094ff8f9602afc8fdc5dbe4305129577"
           }
         ],
         "note": "The production offline-state journey retained seven exact artifacts after the expected state rendered but a broad text regex matched both its heading and supporting copy under strict locator semantics."
@@ -1051,10 +1027,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-037",
-            "releasePath": "reports/defects/first-failures/DEF-037",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:20762a29fe291a2ea733cd1ecbadb5051790b08c473e1a50887417fc988db480"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-037.json",
+            "releasePath": "reports/defects/first-failures/DEF-037.json",
+            "type": "file",
+            "sourceSha256": "sha256:c7d0b7c28592479542713f7dfcea4983dd53d74f90e41616fa4e306b2b79c6ad"
           }
         ],
         "note": "The first focused Docker protocol retained the exact live response headers and cleanup proof after QA-DKR-009 rejected the documented production CSP despite all required directives and hardening headers being present."
@@ -1064,7 +1040,7 @@
       "regressionEvidence": [
         "backend/tooling/docker/live-project-proof.mjs",
         "backend/tooling/docker/live-project-proof.test.mjs",
-        "DOCS/release/evidence/first-failures/DEF-037"
+        "DOCS/release/evidence/public/first-failures/DEF-037.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1082,10 +1058,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-038",
-            "releasePath": "reports/defects/first-failures/DEF-038",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:6c3050ca7df6b6b70b83f141122e535f0bd507a8214d0648a75d5663486c98da"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-038.json",
+            "releasePath": "reports/defects/first-failures/DEF-038.json",
+            "type": "file",
+            "sourceSha256": "sha256:916baa13b99ff3176c402095abef7251de5f1efb9eef67f1d8a276be1f2bfdff"
           }
         ],
         "note": "The second focused Docker protocol retained eight value-free findings and clean teardown proof after QA-DKR-011 classified exact PostgreSQL initialization, negative-invariant, and intentional stop messages as unexpected runtime failures."
@@ -1095,7 +1071,7 @@
       "regressionEvidence": [
         "backend/tooling/docker/log-scan.mjs",
         "backend/tooling/docker/log-scan.test.mjs",
-        "DOCS/release/evidence/first-failures/DEF-038"
+        "DOCS/release/evidence/public/first-failures/DEF-038.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1113,10 +1089,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-039",
-            "releasePath": "reports/defects/first-failures/DEF-039",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:30269a3efdcd0c1cff3e52088a9b5ad45872a18b9ea0e9e24a2c47d4be4dc026"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-039.json",
+            "releasePath": "reports/defects/first-failures/DEF-039.json",
+            "type": "file",
+            "sourceSha256": "sha256:5a49653d7f9107d703b8f77cfba87bf3cd1cf76f329705c386a4b834e02aac9e"
           }
         ],
         "note": "The third focused Docker protocol retained the exact plugin incompatibility transcript and clean teardown after QA-DKR-012 reached SBOM generation with QA-DKR-001 through QA-DKR-011 already passing."
@@ -1127,7 +1103,7 @@
         "backend/tooling/docker/verify.mjs",
         "backend/tooling/docker/protocol-assertions.mjs",
         "backend/tooling/docker/protocol-assertions.test.mjs",
-        "DOCS/release/evidence/first-failures/DEF-039"
+        "DOCS/release/evidence/public/first-failures/DEF-039.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1145,10 +1121,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-040",
-            "releasePath": "reports/defects/first-failures/DEF-040",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:434ca8a921b876f9eb3e5f426d54d46ae930eb0ab6316d1770316afa54e28ec6"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-040.json",
+            "releasePath": "reports/defects/first-failures/DEF-040.json",
+            "type": "file",
+            "sourceSha256": "sha256:8c8ec1971fd172b86761de245bf776d0e009259bd52a1aa9f500b52fb8331903"
           }
         ],
         "note": "The fourth focused Docker protocol retained the exact pinned-Trivy CLI failure, valid preceding SPDX proof, and clean teardown after QA-DKR-001 through QA-DKR-011 passed."
@@ -1159,7 +1135,7 @@
         "backend/tooling/docker/verify.mjs",
         "backend/tooling/docker/protocol-assertions.mjs",
         "backend/tooling/docker/protocol-assertions.test.mjs",
-        "DOCS/release/evidence/first-failures/DEF-040"
+        "DOCS/release/evidence/public/first-failures/DEF-040.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1177,10 +1153,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-041",
-            "releasePath": "reports/defects/first-failures/DEF-041",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:3d53a77da9a5e1464e350f195515c4dd1d1b3d4aafb743767a68bff60858d295"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-041.json",
+            "releasePath": "reports/defects/first-failures/DEF-041.json",
+            "type": "file",
+            "sourceSha256": "sha256:4d401dfdc87a0252f3136bfc5975c765640a1f53a81bd8339d73737e03cad9d6"
           }
         ],
         "note": "The exact coach Playwright run retained its screenshot, video, trace, DOM error context, HTML report, last-run result, and command summary after QA-E2E-001 through QA-E2E-009 passed and QA-E2E-010 failed with zero retries."
@@ -1190,7 +1166,7 @@
       "regressionEvidence": [
         "backend/src/infrastructure/database/repositories/application-repositories.ts",
         "backend/tests/pglite/infrastructure-coverage.integration.test.ts",
-        "DOCS/release/evidence/first-failures/DEF-041"
+        "DOCS/release/evidence/public/first-failures/DEF-041.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1215,10 +1191,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-042",
-            "releasePath": "reports/defects/first-failures/DEF-042",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:c0ceca95542928ecc458949d14c5fe837d9807e4861f11d9d29282e87cefab6e"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-042.json",
+            "releasePath": "reports/defects/first-failures/DEF-042.json",
+            "type": "file",
+            "sourceSha256": "sha256:729d599141a6e0c44e115287e7e54024c03e9cddc3b3793f435de4545dfa46eb"
           }
         ],
         "note": "The exact one-worker, zero-retry coach accessibility run retained three failing result trees, screenshots, traces, DOM contexts, the HTML report, and last-run result after three tests failed and two passed."
@@ -1228,7 +1204,7 @@
       "regressionEvidence": [
         "frontend/src/features/scorecard/scorecard-page.tsx",
         "frontend/tests/accessibility/coach-accessibility.spec.ts",
-        "DOCS/release/evidence/first-failures/DEF-042"
+        "DOCS/release/evidence/public/first-failures/DEF-042.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1246,10 +1222,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-043",
-            "releasePath": "reports/defects/first-failures/DEF-043",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:2dc9c67d6b22afdce2c88333db0b465e2740ce804e91ffc20ce7460a8b17f4cf"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-043.json",
+            "releasePath": "reports/defects/first-failures/DEF-043.json",
+            "type": "file",
+            "sourceSha256": "sha256:a49ee836f3335c82bd7844a95c19e9861d5ddb0321db4cb6d8f27046f86e25b6"
           }
         ],
         "note": "The exact post-DEF-042 one-worker, zero-retry coach accessibility rerun retained the sole failing keyboard result tree, screenshot, trace, DOM context, HTML report, and last-run result after four tests passed and QA-A11Y-002 failed."
@@ -1258,7 +1234,7 @@
       "fix": "Wait for the queue route to reach network idle after the skip-link focus assertion and before deliberate navigation to the blocked programme. This preserves the strict request-failure guard and proves the keyboard journey without manufacturing navigation-abort noise.",
       "regressionEvidence": [
         "frontend/tests/accessibility/coach-accessibility.spec.ts",
-        "DOCS/release/evidence/first-failures/DEF-043"
+        "DOCS/release/evidence/public/first-failures/DEF-043.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1283,10 +1259,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-044",
-            "releasePath": "reports/defects/first-failures/DEF-044",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:ffcc62079b3e60aeffe94ef665e0d621175ab84fc42fb9d3823dc4d5cc7bdc80"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-044.json",
+            "releasePath": "reports/defects/first-failures/DEF-044.json",
+            "type": "file",
+            "sourceSha256": "sha256:9269885e05796eb06b3a664698fda125da84eb64c8fb8020f694552cb83305c4"
           }
         ],
         "note": "The exact one-worker, zero-retry client accessibility run retained three failing result trees, screenshots, traces, DOM contexts, the HTML report, and last-run result after all three tests failed."
@@ -1297,7 +1273,7 @@
         "client-frontend/src/app/_layout.tsx",
         "client-frontend/src/app/(tabs)/check-in.tsx",
         "client-frontend/tests/accessibility/client-accessibility.spec.ts",
-        "DOCS/release/evidence/first-failures/DEF-044"
+        "DOCS/release/evidence/public/first-failures/DEF-044.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1315,10 +1291,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-045",
-            "releasePath": "reports/defects/first-failures/DEF-045",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:8c63594ec240c9ec5afc6766e6929973b2b0477f3f76a89fd3f449e53577919e"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-045.json",
+            "releasePath": "reports/defects/first-failures/DEF-045.json",
+            "type": "file",
+            "sourceSha256": "sha256:b49b6979d663b9c13aec0ebb97fffac09858dc7f4ec80b011ab030abb5951c46"
           }
         ],
         "note": "The retained configuration, coverage orchestrator, Node-native test, and command summary show Vitest reporting no suite in database-error.runtime.test.mjs after the Node runner had already passed it; 42 Vitest files and 488 tests passed before collection aborted."
@@ -1329,7 +1305,7 @@
         "backend/vitest.coverage.config.ts",
         "backend/tooling/verification/run-coverage.mjs",
         "backend/src/infrastructure/database/database-error.runtime.test.mjs",
-        "DOCS/release/evidence/first-failures/DEF-045"
+        "DOCS/release/evidence/public/first-failures/DEF-045.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1347,10 +1323,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-046",
-            "releasePath": "reports/defects/first-failures/DEF-046",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:46fd9ed6e5d8083a873dc541a861e77344639e6649ae85973c286a394760ef15"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-046.json",
+            "releasePath": "reports/defects/first-failures/DEF-046.json",
+            "type": "file",
+            "sourceSha256": "sha256:24b0d71756cf52816f456426b566dfc61133104f9640faff91a35615da9907d1"
           }
         ],
         "note": "The retained machine coverage summary records repository branches at 77.39%, changed lines at 86.87%, changed branches at 75.21%, and changed functions at 83.70% after 685 Vitest tests and the Node-native regression passed."
@@ -1364,7 +1340,7 @@
         "client-frontend/tests/mobile/route-branches.test.tsx",
         "client-frontend/tests/mobile/selection-provider.test.tsx",
         "client-frontend/src/lib/api/client.test.ts",
-        "DOCS/release/evidence/first-failures/DEF-046"
+        "DOCS/release/evidence/public/first-failures/DEF-046.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1382,10 +1358,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-047",
-            "releasePath": "reports/defects/first-failures/DEF-047",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:7fd8de75c6d2a8ff1628c62d7aca243bbfbcf6890cd6b5b492fc915a30de93ea"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-047.json",
+            "releasePath": "reports/defects/first-failures/DEF-047.json",
+            "type": "file",
+            "sourceSha256": "sha256:4bfae21a59c7c1707dd0230fad3bc48bee901336f438a779547edea35f4b9470"
           }
         ],
         "note": "The retained pre-fix security test and coverage configuration reproduce one failure after 15 passes: invalid load-profile activation returned the generic client-validation status rather than failing the server boundary closed."
@@ -1396,7 +1372,7 @@
         "frontend/src/server/http.ts",
         "frontend/tests/security/http-security.test.ts",
         "backend/packages/config/src/server-environment.test.ts",
-        "DOCS/release/evidence/first-failures/DEF-047"
+        "DOCS/release/evidence/public/first-failures/DEF-047.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1414,10 +1390,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-048",
-            "releasePath": "reports/defects/first-failures/DEF-048",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:bdfbce1c1e5541d66e4343ec0e4130bd29e0de9554d1764e0f8c78c8418eeac8"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-048.json",
+            "releasePath": "reports/defects/first-failures/DEF-048.json",
+            "type": "file",
+            "sourceSha256": "sha256:0e6cda4d7719dc54b9c862ab9d8a197f754ac9c3f26568e9fd8694c7bca78d6f"
           }
         ],
         "note": "The retained pre-fix component and behavior test reproduce TypeError: Cannot read properties of null (reading value) after two related mutation-page checks had passed."
@@ -1427,7 +1403,7 @@
       "regressionEvidence": [
         "frontend/src/features/programme-review/programme-review-page.tsx",
         "frontend/src/features/mutation-pages.coverage.test.tsx",
-        "DOCS/release/evidence/first-failures/DEF-048"
+        "DOCS/release/evidence/public/first-failures/DEF-048.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1445,10 +1421,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-049",
-            "releasePath": "reports/defects/first-failures/DEF-049",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:39cce1060c4bac910109a48a2020ffba8509b7e20e1169ed9c45268c09e32d48"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-049.json",
+            "releasePath": "reports/defects/first-failures/DEF-049.json",
+            "type": "file",
+            "sourceSha256": "sha256:a2b438dd8ec78e9d2578b2ba5833a67a21aaeb7735e7781fe7bb9c1e3c510347"
           }
         ],
         "note": "The retained query test and both harness configurations show a pre-collection Rollup parse failure at React Native's Flow-only import typeof declaration."
@@ -1459,7 +1435,7 @@
         "client-frontend/tests/mobile/query-client.test.ts",
         "client-frontend/tests/mobile/vitest.config.ts",
         "client-frontend/vitest.coverage.config.ts",
-        "DOCS/release/evidence/first-failures/DEF-049"
+        "DOCS/release/evidence/public/first-failures/DEF-049.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1477,10 +1453,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-050",
-            "releasePath": "reports/defects/first-failures/DEF-050",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:c56d03d9582bc33aa4ea4334c65f1976b5087b6b78dbc38dd2f50ab7eb1a9c96"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-050.json",
+            "releasePath": "reports/defects/first-failures/DEF-050.json",
+            "type": "file",
+            "sourceSha256": "sha256:88d66266e69d34aaec7d9bdcca0cf61b5dadb4011c80a63562bdf1aaa60769cc"
           }
         ],
         "note": "The retained first-failing native test shows one pass and one failure because an otherwise retryable ApiClientError was not recognized after the module graph reset."
@@ -1490,7 +1466,7 @@
       "regressionEvidence": [
         "client-frontend/tests/mobile/query-client.test.ts",
         "client-frontend/src/lib/query/client.ts",
-        "DOCS/release/evidence/first-failures/DEF-050"
+        "DOCS/release/evidence/public/first-failures/DEF-050.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1508,10 +1484,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-051",
-            "releasePath": "reports/defects/first-failures/DEF-051",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:40db7a5a6daf12f6f150e604f9feab22034b151c61e64c836e5b295f0a6ef384"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-051.json",
+            "releasePath": "reports/defects/first-failures/DEF-051.json",
+            "type": "file",
+            "sourceSha256": "sha256:b064ab2b4289043475e095ed1e7ee8118486c734592f8fda1f605381d65d8eb9"
           }
         ],
         "note": "The retained pre-fix predicate and regression show one Save and complete session control rendered for a session already returned as completed by the server after nine earlier checks passed."
@@ -1521,7 +1497,7 @@
       "regressionEvidence": [
         "client-frontend/src/app/session/[sessionId].tsx",
         "client-frontend/tests/mobile/forms.test.tsx",
-        "DOCS/release/evidence/first-failures/DEF-051"
+        "DOCS/release/evidence/public/first-failures/DEF-051.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1539,10 +1515,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-052",
-            "releasePath": "reports/defects/first-failures/DEF-052",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:ef9952fdd8de50fe6d5e3a7a2d73ff93a96b730ef473f57867f6a16483091858"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-052.json",
+            "releasePath": "reports/defects/first-failures/DEF-052.json",
+            "type": "file",
+            "sourceSha256": "sha256:db9ee058bf8f973232b8db157f8fdfcedc1957c1dfa8073b5d0f2144774271bb"
           }
         ],
         "note": "The retained component test reached react-native-safe-area-context during collection and failed on unsupported Flow syntax before any test ran."
@@ -1552,7 +1528,7 @@
       "regressionEvidence": [
         "client-frontend/tests/mobile/components.test.tsx",
         "client-frontend/src/components/Screen.tsx",
-        "DOCS/release/evidence/first-failures/DEF-052"
+        "DOCS/release/evidence/public/first-failures/DEF-052.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1570,10 +1546,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-053",
-            "releasePath": "reports/defects/first-failures/DEF-053",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:812fc6213da34a18b762d18795b7122e07e08bdc9f7d33ee293d83f02ea8c798"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-053.json",
+            "releasePath": "reports/defects/first-failures/DEF-053.json",
+            "type": "file",
+            "sourceSha256": "sha256:08300c818622936317c74ed89bc3bfb5c4e5a12e0902e7b87e7c658ebc479748"
           }
         ],
         "note": "The retained exact fixture reproduces the native renderer rejecting raw Body text below a View after four component checks passed."
@@ -1582,7 +1558,7 @@
       "fix": "Wrap the fixture content in the React Native Text component so the test exercises the intended Card state through platform-valid markup.",
       "regressionEvidence": [
         "client-frontend/tests/mobile/components.test.tsx",
-        "DOCS/release/evidence/first-failures/DEF-053"
+        "DOCS/release/evidence/public/first-failures/DEF-053.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1600,10 +1576,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-054",
-            "releasePath": "reports/defects/first-failures/DEF-054",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:f2864aafee3091980ff7ce6cea83e4dab78a329ded7dfa0c80760cd79ab70116"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-054.json",
+            "releasePath": "reports/defects/first-failures/DEF-054.json",
+            "type": "file",
+            "sourceSha256": "sha256:493fca42eabcc1596a86ae3f6c5481ddad858d80721819fba8c597e8127b582f"
           }
         ],
         "note": "The retained Today-state transitions correspond to two TS2698 diagnostics because the shared controllable query slot was typed unknown and then spread directly."
@@ -1612,7 +1588,7 @@
       "fix": "Keep an explicitly inferred Today fixture and derive both transitions from that typed value while continuing to assign results through the generic mock boundary.",
       "regressionEvidence": [
         "client-frontend/tests/mobile/route-branches.test.tsx",
-        "DOCS/release/evidence/first-failures/DEF-054"
+        "DOCS/release/evidence/public/first-failures/DEF-054.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1630,10 +1606,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-055",
-            "releasePath": "reports/defects/first-failures/DEF-055",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:4d603836476740b6d9ccb9247a416ad9e0ee104337bd9c69e179afa163f875ad"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-055.json",
+            "releasePath": "reports/defects/first-failures/DEF-055.json",
+            "type": "file",
+            "sourceSha256": "sha256:a42632f475e70dffd82fa4739dd7239e329fbadce719e9940c90c152a0f8d3e7"
           }
         ],
         "note": "The retained diagnostic summary records one unused import, two missing required nullable sentiment fields, and two obsolete completedAt properties in newly added coach behavior fixtures."
@@ -1644,7 +1620,7 @@
         "frontend/src/features/mutation-pages.coverage.test.tsx",
         "frontend/src/features/primary-pages.coverage.test.tsx",
         "backend/packages/contracts/src/api.ts",
-        "DOCS/release/evidence/first-failures/DEF-055"
+        "DOCS/release/evidence/public/first-failures/DEF-055.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1662,10 +1638,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-056",
-            "releasePath": "reports/defects/first-failures/DEF-056",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:2117701cbcca7c50e1c9750196423fd7e36084b1784f6af4231583ac28b37312"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-056.json",
+            "releasePath": "reports/defects/first-failures/DEF-056.json",
+            "type": "file",
+            "sourceSha256": "sha256:5cf28abb9df8418fd695e49874a1b3df8f1b4ed596635dc12d3dfeb558727492"
           }
         ],
         "note": "The retained two fixture assignments and TS2353 diagnostic show createdAt is not a property of the shared public Session type."
@@ -1675,7 +1651,7 @@
       "regressionEvidence": [
         "frontend/src/features/primary-pages.coverage.test.tsx",
         "backend/packages/contracts/src/api.ts",
-        "DOCS/release/evidence/first-failures/DEF-056"
+        "DOCS/release/evidence/public/first-failures/DEF-056.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1693,10 +1669,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-057",
-            "releasePath": "reports/defects/first-failures/DEF-057",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:167ea47146f66728c8753c5aa28e0e095b1a6767b822c686f2975ab0765e7bd6"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-057.json",
+            "releasePath": "reports/defects/first-failures/DEF-057.json",
+            "type": "file",
+            "sourceSha256": "sha256:f113b584a48eb972f743485b14b197662023c4e91cf708d8ca940daf6c2c21a0"
           }
         ],
         "note": "The retained assignments and TS2353 diagnostic show sessionKey is not exposed by the shared public Session response contract."
@@ -1706,7 +1682,7 @@
       "regressionEvidence": [
         "frontend/src/features/primary-pages.coverage.test.tsx",
         "backend/packages/contracts/src/api.ts",
-        "DOCS/release/evidence/first-failures/DEF-057"
+        "DOCS/release/evidence/public/first-failures/DEF-057.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1724,10 +1700,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-058",
-            "releasePath": "reports/defects/first-failures/DEF-058",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:e9a54870e85c39d5856e3ce295f40b994e199e6d0d45f0073b33fc5c62816f0a"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-058.json",
+            "releasePath": "reports/defects/first-failures/DEF-058.json",
+            "type": "file",
+            "sourceSha256": "sha256:cb826fc489aa76532eefc2f4808060dc1e9f4b8d49bea7eb3d5f2001a318f22f"
           }
         ],
         "note": "The retained summary records 85 errors: 14 project-service parse failures in immutable evidence plus strict callback, hook-global, return-type, and unnecessary-assertion findings in live tests."
@@ -1740,7 +1716,7 @@
         "client-frontend/tests/mobile/route-branches.test.tsx",
         "client-frontend/tests/mobile/selection-provider.test.tsx",
         "frontend/src/features/mutation-pages.coverage.test.tsx",
-        "DOCS/release/evidence/first-failures/DEF-058"
+        "DOCS/release/evidence/public/first-failures/DEF-058.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1758,10 +1734,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-059",
-            "releasePath": "reports/defects/first-failures/DEF-059",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:cdb1d2a8dbc50539771706ffc6bb219df07bf2a8c658ccfea781564351dc8f01"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-059.json",
+            "releasePath": "reports/defects/first-failures/DEF-059.json",
+            "type": "file",
+            "sourceSha256": "sha256:191d4de5d2cf78f1a5deffa850765634faab70c1f4ef9715bb0b910eda44a0c0"
           }
         ],
         "note": "The retained boundary output names two frontend test files that directly imported backend agent and server packages outside the approved frontend server/API adapter boundary."
@@ -1773,7 +1749,7 @@
         "backend/src/composition/logging-security.coverage.test.ts",
         "frontend/tests/resilience/model-and-http-faults.test.ts",
         "frontend/tests/security/config-and-logging-security.test.ts",
-        "DOCS/release/evidence/first-failures/DEF-059"
+        "DOCS/release/evidence/public/first-failures/DEF-059.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1791,10 +1767,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-060",
-            "releasePath": "reports/defects/first-failures/DEF-060",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:658116ad16fe1f8145006f13a5f8e8575f6b21364f83491576e518f1ac723b5d"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-060.json",
+            "releasePath": "reports/defects/first-failures/DEF-060.json",
+            "type": "file",
+            "sourceSha256": "sha256:c6aa7be8a32b931aa297b2c5f18bb99f155b4819497b505c1c40db099cda4a38"
           }
         ],
         "note": "The retained command summary identifies the exact ten live backend, client, frontend, and verification files that failed pnpm format:check after immutable evidence had been correctly removed from the formatter's live-source scope."
@@ -1813,7 +1789,7 @@
         "frontend/src/features/programme-review/programme-review-page.test.tsx",
         "frontend/src/features/programme-review/programme-review-page.tsx",
         "backend/tooling/verification/verify-coverage.mjs",
-        "DOCS/release/evidence/first-failures/DEF-060"
+        "DOCS/release/evidence/public/first-failures/DEF-060.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1838,10 +1814,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-061",
-            "releasePath": "reports/defects/first-failures/DEF-061",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:0c1b14b9258cae0c052263e80ed6e854ceb288571f8b6d1b2de381d6083f73a7"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-061.json",
+            "releasePath": "reports/defects/first-failures/DEF-061.json",
+            "type": "file",
+            "sourceSha256": "sha256:bae0638aa5f16abbca250d8de46743fe1a23f80b5a47b726a4a84b11e45317f2"
           }
         ],
         "note": "The retained responsive CSS and screenshot-review summary record the 768x1024 client-detail failure: the outer content and inner profile remained two columns, leaving coaching-profile values close to one character wide."
@@ -1851,7 +1827,7 @@
       "regressionEvidence": [
         "frontend/src/app/globals.css",
         "frontend/tests/e2e/coach-journeys.spec.ts",
-        "DOCS/release/evidence/first-failures/DEF-061"
+        "DOCS/release/evidence/public/first-failures/DEF-061.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -1869,10 +1845,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-062",
-            "releasePath": "reports/defects/first-failures/DEF-062",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:65f2b001375e028252ed5997ee47cb693c84f239091d4bdff0f3e032959671d3"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-062.json",
+            "releasePath": "reports/defects/first-failures/DEF-062.json",
+            "type": "file",
+            "sourceSha256": "sha256:394ddbc4c84abb25b2b1f32d52146e2afceb564a4b08ba4767674abad3e9434e"
           }
         ],
         "note": "The retained independent ledger review and exact pre-fix expression show that release evidence would reject legitimate digit-bearing requirement families already mapped by the defect history, including QA-E2E-011 and QA-A11Y-005."
@@ -1883,7 +1859,7 @@
         "backend/tooling/verification/evidence-validation.mjs",
         "backend/tooling/verification/evidence-validation.test.mjs",
         "backend/tooling/verification/verify-evidence.mjs",
-        "DOCS/release/evidence/first-failures/DEF-062"
+        "DOCS/release/evidence/public/first-failures/DEF-062.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -2205,10 +2181,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-072",
-            "releasePath": "reports/defects/first-failures/DEF-072",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:f824842c9a0fa0e57ea32d9c8d249235cff8c0d399aa3570fc3ab19e87ba7912"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-072.json",
+            "releasePath": "reports/defects/first-failures/DEF-072.json",
+            "type": "file",
+            "sourceSha256": "sha256:152797eddaf8349c7e750a8ab61e552a9d8746701633615e4f03e8ae5b67e1c6"
           }
         ],
         "note": "The first fresh-owned performance smoke retained its structured HTTP 500 failure, complete environment and corpus identity, teardown transcript, and empty container, volume, and network inventories. Fresh no-cache images and the exact 50-client corpus succeeded before the first client-detail warm-up failed, so no measurement began and cleanup completed exactly."
@@ -2220,7 +2196,7 @@
         "backend/tooling/performance/fixtures.test.mjs",
         "backend/tooling/performance/ownership.test.mjs",
         "backend/tooling/performance/run.mjs",
-        "DOCS/release/evidence/first-failures/DEF-072"
+        "DOCS/release/evidence/public/first-failures/DEF-072.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -2246,10 +2222,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-073",
-            "releasePath": "reports/defects/first-failures/DEF-073",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:ff37449d9b117cc9767869943ff42e56d7b2cba750ab0b76892628620d40c29a"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-073.json",
+            "releasePath": "reports/defects/first-failures/DEF-073.json",
+            "type": "file",
+            "sourceSha256": "sha256:37d406cf14a8367f6bfa96b691ccac24620e8994adad9875b458c06fce57862c"
           }
         ],
         "note": "The second fresh-owned performance smoke retained its 52-row queue validation failure, reserved-prefix and environment cardinalities, redacted service logs, teardown transcript, and empty container, volume, and network inventories. It proved the API returned the two demo queued programmes plus all 50 performance-owned queued programmes before measurement began."
@@ -2265,7 +2241,7 @@
         "backend/tooling/performance/evidence.mjs",
         "backend/tooling/performance/evidence.test.mjs",
         "backend/tooling/performance/ownership.test.mjs",
-        "DOCS/release/evidence/first-failures/DEF-073"
+        "DOCS/release/evidence/public/first-failures/DEF-073.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -2290,10 +2266,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-074",
-            "releasePath": "reports/defects/first-failures/DEF-074",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:7c04d74dbd3219804478a731854a270067aadc071bebeb46fc04c07baeec7513"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-074.json",
+            "releasePath": "reports/defects/first-failures/DEF-074.json",
+            "type": "file",
+            "sourceSha256": "sha256:a060b844ec51533437ce6d4d13d41d85ef16f03c87e56eacf469cd6a71339cd0"
           }
         ],
         "note": "The third fresh-owned smoke retained the unhealthy production-web wait, redacted service logs, structured command failure, safe teardown transcript, and empty container, volume, and network inventories. The no-demo migration succeeded, no performance corpus or measured gate began, and all project resources were removed."
@@ -2304,7 +2280,7 @@
         "backend/tooling/performance/run.mjs",
         "backend/tooling/performance/ownership.test.mjs",
         "DOCS/testing/06-performance-resilience.md",
-        "DOCS/release/evidence/first-failures/DEF-074"
+        "DOCS/release/evidence/public/first-failures/DEF-074.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -2322,10 +2298,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-075",
-            "releasePath": "reports/defects/first-failures/DEF-075",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:1aee143bd42950d65cb5b69d6fbcc39190891d35dfd8f0bced2474aa8a0e2df0"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-075.json",
+            "releasePath": "reports/defects/first-failures/DEF-075.json",
+            "type": "file",
+            "sourceSha256": "sha256:d2b23944d4216a90458bae6a38d998eb40610689cb9a009ac8487ba71066b2a1"
           }
         ],
         "note": "The completed fresh smoke retained the structured queue loaded-state abort, redacted pre-cleanup container log, safe teardown, and exact empty post-teardown inventories. The harness failed before persisting the raw failed Lighthouse report, and that evidence gap is explicitly disclosed rather than reconstructed."
@@ -2336,7 +2312,7 @@
         "backend/tooling/performance/lighthouse-proof.mjs",
         "backend/tooling/performance/lighthouse.mjs",
         "backend/tooling/performance/run.mjs",
-        "DOCS/release/evidence/first-failures/DEF-075"
+        "DOCS/release/evidence/public/first-failures/DEF-075.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -2361,10 +2337,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-076",
-            "releasePath": "reports/defects/first-failures/DEF-076",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:8636dbb58e981c90c5130c07f8226bf62479ec7eb5d3c557de31be9e22b59011"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-076.json",
+            "releasePath": "reports/defects/first-failures/DEF-076.json",
+            "type": "file",
+            "sourceSha256": "sha256:2f2f550d4212a09c5a55389fa8882562dc5ee436a9c92ae7e5a657b8a35e553b"
           }
         ],
         "note": "All three retained single-plan and weekly reports and six exact SQL transcripts show recordedSuccessfulRuns equal to zero while every other required programme, client, trace, evaluation, job, idempotency, retry, and canonical-week count is exact."
@@ -2375,7 +2351,7 @@
         "backend/tooling/performance/run.mjs",
         "backend/tooling/performance/ownership.test.mjs",
         "backend/src/infrastructure/database/repositories/application-repositories.ts",
-        "DOCS/release/evidence/first-failures/DEF-076"
+        "DOCS/release/evidence/public/first-failures/DEF-076.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -2393,10 +2369,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-077",
-            "releasePath": "reports/defects/first-failures/DEF-077",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:6d00cad1c3487c04f72084afb22c00374454f00f650d108152c63ea26ed5b34b"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-077.json",
+            "releasePath": "reports/defects/first-failures/DEF-077.json",
+            "type": "file",
+            "sourceSha256": "sha256:cfcfe68de61aa0b6f8be376cb17c908f2d123a6b5a5e8bf4a471d420dbde9de6"
           }
         ],
         "note": "The complete database gate report retains 25 HTTP 500 validation failures in each 100-request run, all for programme 54000000-0000-4000-8000-000000000112, while the redacted container log records the matching sanitized ZodError request IDs."
@@ -2407,7 +2383,7 @@
         "backend/tooling/performance/fixtures/standard-corpus.sql",
         "backend/tooling/performance/fixtures.test.mjs",
         "backend/packages/contracts/src/programmes.ts",
-        "DOCS/release/evidence/first-failures/DEF-077"
+        "DOCS/release/evidence/public/first-failures/DEF-077.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -2425,10 +2401,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-078",
-            "releasePath": "reports/defects/first-failures/DEF-078",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:c3a4372e530f5c67971e53181a2384941495672d3c46b31ee158601300f81591"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-078.json",
+            "releasePath": "reports/defects/first-failures/DEF-078.json",
+            "type": "file",
+            "sourceSha256": "sha256:66c83e1118527f4f664a1bf379e82684478b944940d9bceca9c0a0c2ceb2247a"
           }
         ],
         "note": "The exact report and environment show three real 25-VU runs with 945, 1072, and 1061 contract-valid HTTP 200 samples and zero errors. Their p95 values were 503.815125, 440.584125, and 417.389833 milliseconds; the real median deciding run exceeded 250 milliseconds."
@@ -2444,7 +2420,7 @@
         "backend/src/infrastructure/database/adapters/postgres-adapter.test.ts",
         "backend/src/infrastructure/database/repositories/application-repositories.ts",
         "backend/tests/pglite/infrastructure-coverage.integration.test.ts",
-        "DOCS/release/evidence/first-failures/DEF-078"
+        "DOCS/release/evidence/public/first-failures/DEF-078.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -2462,10 +2438,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-079",
-            "releasePath": "reports/defects/first-failures/DEF-079",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:03703c8072bbc8b63f2b533a406c880ffd3e18ede0b46eb4ea71d61157feb94d"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-079.json",
+            "releasePath": "reports/defects/first-failures/DEF-079.json",
+            "type": "file",
+            "sourceSha256": "sha256:147247bedc6802c0d7ba89c68118d70cf368d75694c7bd15391660d246875b13"
           }
         ],
         "note": "The exact post-DEF-078 report retains three real 25-VU runs with 1,234, 1,091, and 992 contract-valid HTTP 200 samples, aggregate p95 values of 313.850833, 371.456541, and 404.699125 milliseconds, and zero request or response-validation errors. The median deciding run's route attribution records p95 values of 220.099083 milliseconds for the active-client list, 396.712791 for client detail, 475.676875 for today, 242.197125 for the queued-programme list, and 225.819417 for trace detail."
@@ -2475,7 +2451,7 @@
       "regressionEvidence": [
         "DOCS/testing/06-performance-resilience.md",
         "backend/tooling/performance/run.mjs",
-        "DOCS/release/evidence/first-failures/DEF-079"
+        "DOCS/release/evidence/public/first-failures/DEF-079.json"
       ],
       "validation": {
         "status": "superseded-by-DEF-081",
@@ -2493,10 +2469,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-080",
-            "releasePath": "reports/defects/first-failures/DEF-080",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:a745ad280424b1a272ae03d39caf8f16b5594531d1d439f4a7518e1c1cd58597"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-080.json",
+            "releasePath": "reports/defects/first-failures/DEF-080.json",
+            "type": "file",
+            "sourceSha256": "sha256:7c83f306626e0cc714ef088f07de25464e71e4f489b226fa56afd85df9dcb407"
           }
         ],
         "note": "The recurring /queue loaded-state abort is retained with the complete parseable raw Lighthouse result, an exact normalized diagnostic and stack, the redacted failure container log, safe-teardown log, and empty post-teardown container, volume, and network inventories. The raw result reports performance 0.94, accessibility 1.00, a score-1 spotter-loaded-state audit, and exact visible valid h1 heading proof for Review queue, with no runtime error or run warnings."
@@ -2507,7 +2483,7 @@
         "backend/tooling/performance/lighthouse-proof.mjs",
         "backend/tooling/performance/lighthouse-proof.test.mjs",
         "backend/tooling/performance/lighthouse.mjs",
-        "DOCS/release/evidence/first-failures/DEF-080"
+        "DOCS/release/evidence/public/first-failures/DEF-080.json"
       ],
       "validation": {
         "status": "targeted-pass-release-pending",
@@ -2525,10 +2501,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-081",
-            "releasePath": "reports/defects/first-failures/DEF-081",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:62649e7277b9615bb437e01b1005937f4179256361742a2236c1a85800e6a2c2"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-081.json",
+            "releasePath": "reports/defects/first-failures/DEF-081.json",
+            "type": "file",
+            "sourceSha256": "sha256:bbd619f719cfa525acc1e60594abd1623349c548c41139b0a848c7c186363ebd"
           }
         ],
         "note": "The exact completed-smoke reports retain three 25-VU runs with 1,114, 1,125, and 940 contract-valid HTTP 200 samples, aggregate p95 values of 300.872000, 303.742083, and 347.797291 milliseconds, and zero request or validation errors. The deciding route p95 values were 272.299250 milliseconds for the active-client list, 322.597167 for client detail, 292.526375 for Today, 316.253958 for the queued-programme list, and 301.491375 for trace detail."
@@ -2540,7 +2516,7 @@
         "backend/tooling/performance/run.mjs",
         "backend/tooling/performance/statistics.mjs",
         "backend/src/infrastructure/database/repositories/application-repositories.ts",
-        "DOCS/release/evidence/first-failures/DEF-081"
+        "DOCS/release/evidence/public/first-failures/DEF-081.json"
       ],
       "validation": {
         "status": "failing-thresholds",
@@ -2558,10 +2534,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-082",
-            "releasePath": "reports/defects/first-failures/DEF-082",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:fca6db4577f3a080dccab8e6220802330c762aec5f33809760fb000da323ae3b"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-082.json",
+            "releasePath": "reports/defects/first-failures/DEF-082.json",
+            "type": "file",
+            "sourceSha256": "sha256:5baa2d8468c831b78ec2adb5c7ba06c779c4a4348b20d68aab2856ba00a5e372"
           }
         ],
         "note": "Nine retained production Expo-web Lighthouse reports show Today scores of 84, 82, and 84 and session/check-in scores of 84 in every run, below the unchanged score-85 budget. All nine have accessibility 100, CLS 0, LCP between 1,445.276367 and 1,540.915300 milliseconds, exact valid loaded-state proofs, no runtime errors, and no run warnings."
@@ -2573,7 +2549,7 @@
         "backend/tooling/performance/lighthouse.mjs",
         "backend/tooling/performance/lighthouse-proof.mjs",
         "client-frontend/src/app/_layout.tsx",
-        "DOCS/release/evidence/first-failures/DEF-082"
+        "DOCS/release/evidence/public/first-failures/DEF-082.json"
       ],
       "validation": {
         "status": "failing-thresholds",
@@ -2591,10 +2567,10 @@
         "retention": "retained",
         "artifacts": [
           {
-            "source": "DOCS/release/evidence/first-failures/DEF-083",
-            "releasePath": "reports/defects/first-failures/DEF-083",
-            "type": "directory",
-            "sourceTreeSha256": "tree-sha256:5e8a451890dd60e203c4150cd062ec9773229372ffd5aec4af25dad104eba56f"
+            "source": "DOCS/release/evidence/public/first-failures/DEF-083.json",
+            "releasePath": "reports/defects/first-failures/DEF-083.json",
+            "type": "file",
+            "sourceSha256": "sha256:3990686ab5a7b3db6a4d9f860fc460d5ec341042caa34033810dc3ab4dcd1723"
           }
         ],
         "note": "The retained targeted live proof shows /health/live returning HTTP 200, one web-cluster primary, and two workers with exact slots 1 and 2 and runtime titles next-server (v16.2.12). The exact pre-fix image source and repeatable exit-1 stack record Expected exactly 2 web workers, found 0 before any resource report was collected."
@@ -2606,11 +2582,103 @@
         "docker/web-resource-snapshot.test.mjs",
         "backend/tooling/performance/evidence.mjs",
         "DOCS/architecture/docker-topology.md",
-        "DOCS/release/evidence/first-failures/DEF-083"
+        "DOCS/release/evidence/public/first-failures/DEF-083.json"
       ],
       "validation": {
         "status": "fix-in-progress",
         "note": "This record is a targeted live-image first failure, not release evidence. A source-bound rebuild must prove one primary, two contiguous marked workers, complete aggregated reports, and the unchanged NFR-PERF-009 soak before the defect can close."
+      }
+    },
+    {
+      "id": "DEF-084",
+      "title": "Concurrent mutation runners stalled the static tail and inflated timeout outcomes",
+      "classification": "test",
+      "requirements": ["QA-MUT-001", "QA-MUT-005", "QA-EVD-007", "QA-REL-003"],
+      "status": "fixed-release-validated",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-084.json",
+            "releasePath": "reports/defects/first-failures/DEF-084.json",
+            "type": "file",
+            "sourceSha256": "sha256:52bf4c528262696ccd278cb75c11c97a636e1f474475fdf951aebadb5f42fd1b"
+          }
+        ],
+        "note": "The rejected full run stopped after 1,994 of 2,207 mutants with 26 provisional timeouts after its counter had remained at 1,985 for sixteen minutes. The exact 18-mutant publication tail then produced 13 kills and five timeouts with dual runners, while the serialized control killed 18 of 18 with zero timeouts. Neither incomplete or contention-affected result was accepted as release evidence."
+      },
+      "diagnosis": "Stryker concurrency two began with one checker and one test runner, then converted the released checker token into a second runner. The concurrent Vitest/PGlite processes contended during database setup and full-suite static mutants, causing hook-timeout-only apparent kills, wall-clock timeouts, and an observable sixteen-minute counter stall.",
+      "fix": "Use Stryker's supported concurrency-one control, retain all static mutants, all 429 tests, related-mode false, the 15-second timeout, and unchanged thresholds, and preserve append-only plus per-mutant event evidence. The authoritative rerun completed all 2,207 mutants in 44 minutes with zero runtime, compile, no-coverage, or publication-tail timeout outcomes.",
+      "regressionEvidence": [
+        "stryker.config.mjs",
+        "backend/tooling/verification/mutation-harness.test.mjs",
+        "backend/tooling/verification/mutation-survivor-classification.json",
+        "backend/tooling/verification/mutation-evidence.mjs",
+        "DOCS/release/evidence/public/first-failures/DEF-084.json"
+      ],
+      "validation": {
+        "status": "release-pass",
+        "note": "The exact current-tree run completed 2,207 of 2,207 mutants in 2,641 seconds after a 429-test dry run: 2,193 killed, nine proven-equivalent survivors, five exact classified timeouts, and zero no-coverage, runtime-error, or compile-error outcomes. The two wall-clock red-flag timeouts were byte-mapped to a seven-mutant targeted run that killed all seven in three seconds with exact named tests."
+      }
+    },
+    {
+      "id": "DEF-085",
+      "title": "Expo public API examples duplicated the client-owned route prefix",
+      "classification": "product",
+      "requirements": ["OPS-008", "SYS-005", "QA-MOB-002", "QA-MOB-004"],
+      "status": "fixed-release-validated",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Configuration review found that the Expo example supplied /api/v1 even though every client request already owns its complete /api/v1 route. No passing release run had been accepted with that example."
+      },
+      "diagnosis": "The public configuration parser accepted an absolute URL with a pathname, while the HTTP client appends complete versioned request paths. Copying the documented value therefore formed duplicated /api/v1/api/v1 request paths.",
+      "fix": "Make the Expo public value an origin-only contract, correct the environment and playbook examples, and reject credentials, non-root paths, query strings, and fragments at the public configuration boundary.",
+      "regressionEvidence": [
+        ".env.example",
+        "playbook.md",
+        "client-frontend/src/lib/api/public-configuration.ts",
+        "client-frontend/src/lib/api/config.test.ts"
+      ],
+      "validation": {
+        "status": "release-pass",
+        "note": "The public-configuration unit suite and mobile configuration gate pass with origin-only web, iOS, and Android examples; an explicit /api/v1 pathname is now rejected before any request can be formed."
+      }
+    },
+    {
+      "id": "DEF-086",
+      "title": "Client demo boundary lacked an explicit narrow-screen width guarantee",
+      "classification": "product",
+      "requirements": [
+        "MUI-008",
+        "QA-CLI-002",
+        "QA-CLI-004",
+        "QA-CLI-006",
+        "QA-CLI-007",
+        "QA-A11Y-006",
+        "QA-MOB-001"
+      ],
+      "status": "fixed-release-validated",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Responsive review found that the shared demo banner used intrinsic flex-start sizing and lacked an executable width assertion. A stale image-tool path cache exaggerated one preview into a collapsed rendering, so that preview is not claimed as raw production failure evidence."
+      },
+      "diagnosis": "The shared Screen contract depended on intrinsic banner sizing instead of guaranteeing the no-auth synthetic-data notice would span the mobile content column. The contradictory cached preview also showed that screenshots alone were insufficient acceptance evidence.",
+      "fix": "Stretch the banner to the full content width and add a production Playwright assertion requiring more than 300 pixels at a 390 by 844 viewport across Today, History, Check-in, Session, and Selector routes.",
+      "regressionEvidence": [
+        "client-frontend/src/components/Screen.tsx",
+        "client-frontend/tests/e2e/client-web.spec.ts",
+        "DOCS/assets/screenshots/client-check-in-mobile.png",
+        "DOCS/assets/screenshots/client-no-published-plan-mobile.png",
+        "DOCS/assets/screenshots/client-selector-mobile.png"
+      ],
+      "validation": {
+        "status": "release-pass",
+        "note": "The isolated production client E2E suite passed 10 of 10. Direct fresh DOM measurement recorded a 358-pixel banner with 332-pixel text content at the 390-pixel viewport, all five route assertions passed, and four narrow screenshots were freshly recaptured."
       }
     }
   ]

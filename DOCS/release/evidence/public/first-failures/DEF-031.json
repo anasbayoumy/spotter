@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-031",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Clean mutation audit exposed nine genuine behavioral assertion gaps",
+    "note": "The first harness-clean 2,207-mutant report had zero runtime, compile, and no-coverage errors, but survivor review identified nine behavioral gaps that could not be classified as equivalent.",
+    "diagnosis": "Tests did not distinguish a volume-operation diagnostic, DomainError naming, fingerprint whitespace normalization, the second exercise-equivalence tuple and unknown-equivalence detail, readiness 4001 rejection, or the candidate-row FOR UPDATE lock."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-031/mutation-zero-error-survivor-report.json",
+        "type": "file",
+        "digest": "sha256:f1e362bb3f2231be1688af6e7ad8c4af5828d0bbd567fff8a27e49f8623e9215"
+      }
+    ]
+  }
+}

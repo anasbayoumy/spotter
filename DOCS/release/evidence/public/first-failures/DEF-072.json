@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-072",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Standard performance corpus used a non-contract constraint-detail key",
+    "note": "The first fresh-owned performance smoke retained its structured HTTP 500 failure, complete environment and corpus identity, teardown transcript, and empty container, volume, and network inventories. Fresh no-cache images and the exact 50-client corpus succeeded before the first client-detail warm-up failed, so no measurement began and cleanup completed exactly.",
+    "diagnosis": "The direct-SQL standard corpus stored a preference constraint detail under the strict-invalid key preference instead of the canonical nullable note field. Client-detail output validation rejected the persisted shape and returned sanitized HTTP 500. The failure path also omitted bounded response diagnostics and pre-cleanup Compose logs that would have made the product cause directly attributable before database and container teardown."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-072",
+        "type": "directory",
+        "digest": "tree-sha256:f824842c9a0fa0e57ea32d9c8d249235cff8c0d399aa3570fc3ab19e87ba7912"
+      }
+    ]
+  }
+}

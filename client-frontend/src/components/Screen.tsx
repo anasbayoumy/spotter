@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   demoBanner: {
-    alignSelf: "flex-start",
+    alignSelf: "stretch",
     backgroundColor: theme.colors.canvasElevated,
     borderColor: theme.colors.line,
     borderRadius: theme.radius.pill,
@@ -72,6 +72,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xl,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
+    width: "100%",
   },
   demoBannerText: {
     color: theme.colors.inkMuted,

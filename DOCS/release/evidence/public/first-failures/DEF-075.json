@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-075",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Queue Lighthouse loaded-state proof aborted without retaining its raw failed report",
+    "note": "The completed fresh smoke retained the structured queue loaded-state abort, redacted pre-cleanup container log, safe teardown, and exact empty post-teardown inventories. The harness failed before persisting the raw failed Lighthouse report, and that evidence gap is explicitly disclosed rather than reconstructed.",
+    "diagnosis": "The custom gatherer sampled the measured navigation once without waiting for its asynchronous loaded marker, and loaded-state extraction threw before the failed Lighthouse payload was durably written. The historical raw audit artifact remains unavailable and is disclosed; source analysis identified the unbounded single-sample lifecycle defect."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-075",
+        "type": "directory",
+        "digest": "tree-sha256:1aee143bd42950d65cb5b69d6fbcc39190891d35dfd8f0bced2474aa8a0e2df0"
+      }
+    ]
+  }
+}

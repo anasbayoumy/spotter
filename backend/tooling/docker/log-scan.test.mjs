@@ -7,9 +7,43 @@ test("accepts ordinary structured application and PostgreSQL lifecycle logs", ()
   const logs = [
     'web-1 | {"level":30,"event":"backend_ready","syntheticOnly":true}',
     "test-postgres-1 | LOG: database system is ready to accept connections",
+    "test-postgres-1 | LOG: received fast shutdown request",
+    "test-postgres-1 | FATAL: the database system is shutting down",
+    "test-postgres-1 | LOG: database system is shut down",
+    "test-postgres-1 | PostgreSQL init process complete; ready for start up.",
     "web-1 | Ready in 120ms",
   ].join("\n");
   assert.deepEqual(scanRuntimeLogs(logs), []);
+
+  const persistentRestart = [
+    "test-postgres-1 | LOG: received fast shutdown request",
+    "test-postgres-1 | LOG: aborting any active transactions",
+    "test-postgres-1 | FATAL: terminating connection due to administrator command",
+    'test-postgres-1 | LOG: background worker "logical replication launcher" exited with exit code 1',
+    "test-postgres-1 | LOG: shutting down",
+    "test-postgres-1 | LOG: checkpoint starting: shutdown immediate",
+    "test-postgres-1 | FATAL: the database system is shutting down",
+    "test-postgres-1 | LOG: database system is shut down",
+    "test-postgres-1 | PostgreSQL Database directory appears to contain a database; Skipping initialization",
+    "test-postgres-1 | LOG: database system is ready to accept connections",
+  ].join("\n");
+  assert.deepEqual(scanRuntimeLogs(persistentRestart), []);
+
+  const incompleteBootstrap = [
+    "test-postgres-1 | LOG: received fast shutdown request",
+    "test-postgres-1 | FATAL: the database system is shutting down",
+    "test-postgres-1 | LOG: database system is shut down",
+  ].join("\n");
+  assert.deepEqual(scanRuntimeLogs(incompleteBootstrap), [{ id: "crash-fatal", line: 2 }]);
+  assert.deepEqual(
+    scanRuntimeLogs(
+      logs.replace(
+        "test-postgres-1 | FATAL: the database system is shutting down",
+        "web-1 | FATAL: the database system is shutting down",
+      ),
+    ),
+    [{ id: "crash-fatal", line: 4 }],
+  );
 });
 
 test("reports crashes, unexpected warnings, and raw dependency internals", () => {

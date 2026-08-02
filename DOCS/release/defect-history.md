@@ -5,9 +5,11 @@ This is the human index for the versioned machine record at
 The machine record owns exact requirement mappings, diagnoses, corrections, regression paths, and
 pre-fix artifact copy destinations.
 
-The frozen sources live under [`evidence/first-failures`](./evidence/first-failures) so a fresh
-clone can reproduce the evidence bundle without relying on a developer's gitignored runtime
-directories.
+Release-safe summaries live under
+[`evidence/public/first-failures`](./evidence/public/first-failures), so a fresh clone can reproduce
+the evidence bundle without large browser traces, videos, mutation dumps, or developer runtime
+directories. The original captures remain immutable in the gitignored developer-local
+`evidence/first-failures` vault; each summary records their file or tree digests.
 
 It is deliberately not a final quality verdict. `fixed-targeted-validation` means the focused
 regression passed; it does not mean `pnpm verify:full` or `pnpm evidence:verify` passed for the
@@ -23,14 +25,14 @@ blocking.
 | `DEF-005` | Docker workspace build-order failure               | environment | 14/14 focused Docker pass; release pending       |
 | `DEF-006` | Compose literal-`null` image inventory             | environment | 14/14 focused Docker pass; release pending       |
 | `DEF-007` | Image scan hid findings without available fixes    | security    | 14/14 focused Docker pass; release pending       |
-| `DEF-008` | Browser-state/runtime-guard isolation defects      | test        | Client gate passes; coach gate pending           |
+| `DEF-008` | Browser-state/runtime-guard isolation defects      | test        | Client 9/9 and coach 12/12 journeys pass         |
 | `DEF-009` | Payload-stale UI idempotency keys                  | product     | Focused/client retry gates pass                  |
 | `DEF-010` | Static Expo-web query timer process hang           | test        | Native/export/client E2E gates pass              |
 | `DEF-011` | Incomplete coverage execution attribution          | test        | Attribution fixed; real threshold gaps open      |
-| `DEF-012` | Mutation sandbox copied local browser cache        | test        | Failure retained; corrected gate running         |
+| `DEF-012` | Mutation sandbox copied local browser cache        | test        | Failure retained; current-tree mutation passes   |
 | `DEF-013` | Docker smoke asserted a private response field     | test        | 14/14 focused Docker pass; release pending       |
 | `DEF-014` | Expo proxy canonicalized origin inconsistently     | test        | Failure retained; client gate passes             |
-| `DEF-015` | Screenshot route reads were navigation-aborted     | test        | Failure retained; browser rerun pending          |
+| `DEF-015` | Screenshot route reads were navigation-aborted     | test        | Coach 12/12 passes; screenshots refreshed        |
 | `DEF-016` | Isolated PostgreSQL database lacked pgvector       | test        | 14/14 focused Docker pass; release pending       |
 | `DEF-017` | Restart proof used tmpfs PostgreSQL storage        | test        | 14/14 focused Docker pass; release pending       |
 | `DEF-018` | Expo-web session had duplicate page headings       | product     | First artifact absent; client gate passes        |
@@ -38,15 +40,15 @@ blocking.
 | `DEF-020` | Check-in redirected during selection restore       | product     | Failure retained; native/client gates pass       |
 | `DEF-021` | Docker log gate omitted required scan classes      | test        | 14/14 focused Docker pass; release pending       |
 | `DEF-022` | Docker teardown lost stopped container identity    | test        | 14/14 focused Docker pass; release pending       |
-| `DEF-023` | Mutation iterations overwrote failing reports      | test        | Gap disclosed; final binding pending             |
-| `DEF-024` | Mutation workers produced systemic runtime errors  | test        | Prior rerun clean; frozen-tree rerun pending     |
+| `DEF-023` | Mutation iterations overwrote failing reports      | test        | Gap disclosed; final report bound                |
+| `DEF-024` | Mutation workers produced systemic runtime errors  | test        | 2,207/2,207 complete; zero runtime errors        |
 | `DEF-025` | Mocked suites substituted for live fault proof     | test        | 14/14 focused Docker pass; release pending       |
 | `DEF-026` | Docker state/log scan omitted evidence streams     | test        | 14/14 focused Docker pass; release pending       |
 | `DEF-027` | Restart proof covered partial state/replay         | test        | 14/14 focused Docker pass; release pending       |
 | `DEF-028` | Image evidence accepted incomplete proof           | security    | 14/14 focused Docker pass; release pending       |
 | `DEF-029` | Failure cleanup omitted networks and errors        | test        | 14/14 focused Docker pass; release pending       |
 | `DEF-030` | DB/migration/image provenance proof incomplete     | test        | 14/14 focused Docker pass; release pending       |
-| `DEF-031` | Clean mutation audit found behavioral survivors    | test        | Fixes pass; frozen-tree rerun pending            |
+| `DEF-031` | Clean mutation audit found behavioral survivors    | test        | 99.365655% conservative score passes             |
 | `DEF-032` | PostgreSQL outage mapped to generic 500            | product     | 14/14 focused Docker pass; release pending       |
 | `DEF-033` | Named PostgresError ESM import broke startup       | product     | Failure retained; client gate passes             |
 | `DEF-034` | Check-in free text omitted from next trace         | product     | Failure retained; client gate passes             |
@@ -56,7 +58,7 @@ blocking.
 | `DEF-038` | Log scan rejected expected PostgreSQL test noise   | test        | Failure retained; focused scanner passes         |
 | `DEF-039` | Bundled SBOM plugin used an obsolete Docker API    | environment | Failure retained; local Scout proof passes       |
 | `DEF-040` | Trivy subcommand flag was passed at global scope   | test        | Failure retained; exact SARIF retest passes      |
-| `DEF-041` | Deterministic coach edit appeared as live          | product     | Backend/PGlite pass; coach gate pending          |
+| `DEF-041` | Deterministic coach edit appeared as live          | product     | Backend/PGlite and coach 12/12 pass              |
 | `DEF-042` | Invalid chart semantics and broad alert locators   | product     | Failure retained; accessibility gate passes      |
 | `DEF-043` | Keyboard test navigated before reads settled       | test        | Failure retained; accessibility gate passes      |
 | `DEF-044` | Expo title and radio state semantics were absent   | product     | Failure retained; client a11y gate passes        |
@@ -74,7 +76,7 @@ blocking.
 | `DEF-056` | Session fixtures retained obsolete `createdAt`     | test        | Failure retained; seven workspaces typecheck     |
 | `DEF-057` | Session fixtures retained non-public `sessionKey`  | test        | Failure retained; seven workspaces typecheck     |
 | `DEF-058` | Lint mixed immutable evidence with live source     | test        | Failure retained; strict repository lint passes  |
-| `DEF-059` | Frontend tests crossed backend import boundary     | test        | Failure retained; 350-file boundary gate passes  |
+| `DEF-059` | Frontend tests crossed backend import boundary     | test        | Failure retained; 410-file boundary gate passes  |
 | `DEF-060` | Live files lacked deterministic formatting         | test        | Failure retained; repository formatting passes   |
 | `DEF-061` | Tablet client profile values were crushed          | product     | Failure retained; coach E2E passes 12/12         |
 | `DEF-062` | Evidence rejected digit-bearing requirement IDs    | test        | Failure retained; validator tests pass 2/2       |
@@ -99,20 +101,22 @@ blocking.
 | `DEF-081` | Residual system capacity missed the read budget    | performance | Open; deciding p95 is 303.742 ms                 |
 | `DEF-082` | Expo main-thread blocking missed score 85          | performance | Open; route medians score 84                     |
 | `DEF-083` | Snapshot missed workers after Next title rewrite   | test        | Targeted live failure; fix is in progress        |
+| `DEF-084` | Concurrent mutation runners stalled static tail    | test        | 2,193 killed; 9 survivors; 5 timeouts; pass      |
+| `DEF-085` | Expo API example duplicated its route prefix       | product     | Origin-only config and mobile gates pass         |
+| `DEF-086` | Client demo boundary lacked a width guarantee      | product     | Width checks and committed client 9/9 pass       |
 
 ## Release evidence rule
 
 The final evidence runner must copy the machine record to `reports/defects/defect-history.json` and
-copy every `firstFailure.artifacts[]` source to its declared `releasePath` before checksums are
-generated. The verifier must fail when a retained runtime-failure source or copied destination is
-absent, when a copied item is outside the evidence `reports/` tree, or when a record still has a
-blocking validation status.
+copy each runtime failure's compact `firstFailure.artifacts[]` summary to its declared `releasePath`
+before checksums are generated. The verifier must fail when a retained runtime-failure summary or
+copied destination is absent, ignored, oversized, stale, outside the evidence `reports/` tree, or
+when a record still has a blocking validation status.
 
-File artifacts pin the original bytes with `sourceSha256`. Directory artifacts use
-`sourceTreeSha256`, calculated as SHA-256 over sorted lines of
-`<file-sha256><two spaces><relative-posix-path>\n`. The final evidence sanitizer may transform
-copied text, so the source digest proves the frozen input while `checksums.sha256` proves the
-sanitized release artifact.
+The ledger's `sourceSha256` pins the compact summary bytes. Inside each summary, original file
+captures retain their `sha256:` digest and directory captures retain a `tree-sha256:` digest,
+calculated over sorted lines of `<file-sha256><two spaces><relative-posix-path>\n`. Release
+`checksums.sha256` independently proves the copied public artifact.
 
 Five defect histories (`DEF-003`, `DEF-009`, `DEF-010`, `DEF-018`, and `DEF-023`) lack complete raw
 pre-fix evidence. They are disclosed as evidence gaps rather than reconstructed. A final QA-EVD-007

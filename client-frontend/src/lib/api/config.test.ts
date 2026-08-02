@@ -21,5 +21,8 @@ describe("public API configuration", () => {
     expect(() => resolveApiConfiguration("https://user:secret@example.test", "web")).toThrow(
       PublicConfigurationError,
     );
+    expect(() => resolveApiConfiguration("https://api.example.test/api/v1", "web")).toThrow(
+      PublicConfigurationError,
+    );
   });
 });

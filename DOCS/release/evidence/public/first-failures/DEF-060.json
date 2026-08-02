@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-060",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Ten live files required repository formatting normalization",
+    "note": "The retained command summary identifies the exact ten live backend, client, frontend, and verification files that failed pnpm format:check after immutable evidence had been correctly removed from the formatter's live-source scope.",
+    "diagnosis": "New and modified live test, source, configuration, and coverage-verification files had not all received the repository's deterministic Prettier normalization. Frozen pre-fix evidence also required an explicit generated-artifact exclusion rather than source rewriting."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-060",
+        "type": "directory",
+        "digest": "tree-sha256:658116ad16fe1f8145006f13a5f8e8575f6b21364f83491576e518f1ac723b5d"
+      }
+    ]
+  }
+}

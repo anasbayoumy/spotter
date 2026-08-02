@@ -109,13 +109,13 @@ Next.js.
 
 Representative commands are:
 
-- `GenerateProgrammeUseCase`
-- `EditProgrammeUseCase`
-- `ApproveProgrammeUseCase`
-- `OverrideProgrammeUseCase`
-- `CompleteSessionUseCase`
-- `GenerateAdjustmentUseCase`
-- `RunAccountabilityUseCase`
+- `GenerateProgramme`
+- `EditProgrammeProposal`
+- `ApproveProgramme`
+- `OverrideBlockedProgramme`
+- `CompleteSession`
+- `GenerateAdjustment`
+- `RunAccountabilityForClient`
 
 ### Infrastructure
 

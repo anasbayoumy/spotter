@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { spawn } from "node:child_process";
 import { createWriteStream } from "node:fs";
-import { mkdir, readFile, realpath, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, readlink, realpath, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const qaProjectPattern = /^spotter-qa-[a-z0-9][a-z0-9-]{0,61}$/u;
@@ -570,7 +570,16 @@ export async function hashWorkspace(root) {
   const hash = createHash("sha256");
   for (const file of files) {
     hash.update(`${file}\0`);
-    hash.update(await readFile(path.join(root, file)));
+    const workspacePath = path.join(root, file);
+    const fileStatus = await lstat(workspacePath);
+    if (fileStatus.isSymbolicLink()) {
+      hash.update("symlink\0");
+      hash.update(await readlink(workspacePath));
+    } else if (fileStatus.isFile()) {
+      hash.update(await readFile(workspacePath));
+    } else {
+      throw new Error(`Workspace path is not a file or symbolic link: ${file}`);
+    }
     hash.update("\0");
   }
   return { algorithm: "sha256", files: files.length, value: hash.digest("hex") };

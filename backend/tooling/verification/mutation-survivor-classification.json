@@ -4,17 +4,17 @@
   "reviewer": "/root/mutation_audit (Pool 5)",
   "reportBinding": {
     "path": "reports/mutation/mutation.json",
-    "rawSha256": "d699b4795872b5b50a51ee993a07b27e261476f545796b50034624f180b986e9",
-    "canonicalReportSha256": "c3594ebb222dce54afd2b5755e24624f6a5cf1cd02a0a1d74a4981e370e58c33",
+    "rawSha256": "c0f0ea26e6a4a51b9f862c20538fde663936bba382657d98bc7c7c60ab3bec4e",
+    "canonicalReportSha256": "019c30bc05b4447f8f65e7c5450a6cce7d709fa1ff9230ba93a63b364e813c0b",
     "selectedFileSetSha256": "4b41eed68734ac59f459459a6a3233fbe5662a0d131d0bfa3da87f45fdd87328",
-    "selectedTestFileSetSha256": "e74534376610d333a52e11b092474ae1a554adadcb75bf206683e2111ee68b7e",
-    "testSourceSetSha256": "b1e8e2c518666f58eff4e020c1e47cac80a8cb6f256569b3e5d541bcdca5144e",
-    "mutationExecutionInputsSha256": "bbe325f0781d84a69dde4c830208dd6631692265a0ec9f6f35393d50ae07cfd8",
+    "selectedTestFileSetSha256": "d39e581cc1d9b3e5c4b2c54e50b2ed5c75f6f9d80fc3f5e6364d99a30e0ef54b",
+    "testSourceSetSha256": "8ecb1432aa4676f9d698c07cf541dc9fbd8ba17da248878bf3619a4bdafb5f58",
+    "mutationExecutionInputsSha256": "0ed1d9e2ee784ab78b90a3369eafc63cc64dde66b3c4553b66e186b5cc224958",
     "mutatedSourceSetSha256": "0f24a0f4b4f7154ea8c03d91f9c001ff56c1efb75a13dde89245022646e33886",
     "survivorInventorySha256": "9e622817bfd3d118e7e5e5da130fb8b9b57dc6c775d353e746d75123b3e5e7fc",
-    "timeoutInventorySha256": "7361f467d2bca16292dc8a9447539a60c6f71ff462e1ff1fd0345a6dbe119579",
+    "timeoutInventorySha256": "c516f42158b51537a4d8f24d092ac277043a4facfd139bffb878928f1dca277e",
     "strykerVersion": "9.2.0",
-    "configSha256": "2898df117c219e32081bd3a29eb1b504e6cdc8a1d05287d4791461cb835ec0a5",
+    "configSha256": "3ffc51c6f942950e23990c632e0803f2ba44d433e089144643f07980d4543596",
     "digestAlgorithms": {
       "canonicalReportSha256": "Recursively sort all report object keys, replace only the exact repository-root string with <REPOSITORY_ROOT>, JSON.stringify the complete report, then SHA-256 the UTF-8 payload.",
       "selectedFileSetSha256": "Sort every exact report file path, JSON.stringify the array, then SHA-256 the UTF-8 payload; validation also derives the current file set from the pinned Stryker selectors.",
@@ -38,19 +38,19 @@
   "runtimeAudit": {
     "acceptedReport": {
       "generatedMutants": 2207,
-      "dryRunTests": 374,
-      "elapsedSeconds": 690,
+      "dryRunTests": 429,
+      "elapsedSeconds": 2641,
       "statusCounts": {
-        "Killed": 2195,
+        "Killed": 2193,
         "Survived": 9,
-        "Timeout": 3,
+        "Timeout": 5,
         "NoCoverage": 0,
         "RuntimeError": 0,
         "CompileError": 0
       },
       "workerCrashObserved": false,
       "harness": {
-        "strykerConcurrency": 2,
+        "strykerConcurrency": 1,
         "disableBail": true,
         "testRunnerProcesses": 1,
         "checkerProcesses": 1,
@@ -92,19 +92,19 @@
       "selectors": ["backend/src/evals/safety/**"],
       "thresholdPercent": 95,
       "counts": {
-        "killed": 471,
+        "killed": 469,
         "survived": 2,
         "noCoverage": 0,
-        "timeout": 0,
+        "timeout": 2,
         "denominator": 473
       },
       "canonicalScorePercent": 99.577167,
-      "conservativeScorePercent": 99.577167,
+      "conservativeScorePercent": 99.154334,
       "pass": true,
       "additionalRule": {
         "rule": "No surviving blocker-removal mutant.",
         "pass": true,
-        "basis": "Both survivors are locally proven normalization/null-map equivalents."
+        "basis": "Both survivors are locally proven normalization/null-map equivalents; both full-run regex timeouts are exact targeted-kill proven."
       }
     },
     {
@@ -179,19 +179,19 @@
       "selectors": ["Every production file selected by stryker.config.mjs"],
       "thresholdPercent": 90,
       "counts": {
-        "killed": 2195,
+        "killed": 2193,
         "survived": 9,
         "noCoverage": 0,
-        "timeout": 3,
+        "timeout": 5,
         "denominator": 2207
       },
       "canonicalScorePercent": 99.592207,
-      "conservativeScorePercent": 99.456275,
+      "conservativeScorePercent": 99.365655,
       "pass": true,
       "additionalRule": {
         "rule": "Every survivor is classified.",
         "pass": true,
-        "basis": "All 9 survivors and all 3 timeouts have exact descriptor-bound classifications."
+        "basis": "All 9 survivors and all 5 timeouts have exact descriptor-bound classifications."
       }
     }
   ],
@@ -455,17 +455,84 @@
       "expiresOn": "2026-11-02",
       "disposition": "accepted-detected-nontermination",
       "countedAsDetected": true
+    },
+    {
+      "file": "backend/src/evals/safety/red-flags.ts",
+      "id": "2028",
+      "status": "Timeout",
+      "mutatorName": "Regex",
+      "replacement": "/\\b(?:faint(?:ed|ing)?|passed\\s+out|loss\\sof\\s+consciousness)\\b/iu",
+      "location": {
+        "start": { "line": 5, "column": 14 },
+        "end": { "line": 5, "column": 81 }
+      },
+      "scopeIds": ["QA-MUT-001", "QA-MUT-005"],
+      "classification": "proven-targeted-kill-timeout",
+      "boundedTest": {
+        "file": "backend/src/evals/__tests__/safety-gates-coverage.test.ts",
+        "name": "red-flag phrase coverage detects spacing-sensitive phrase loss  of consciousness",
+        "vitestTimeoutMs": 10000,
+        "strykerTimeoutMs": 15000
+      },
+      "targetedProof": {
+        "reportPath": "DOCS/release/evidence/first-failures/DEF-084/red-flags-targeted-mutation.json",
+        "rawSha256": "386c40f5cf273f90434aeb0b6b47c87ab6308888341042b43ebfc15408f21e8f",
+        "mutantStatus": "Killed",
+        "killedByTests": [
+          "red-flag phrase coverage detects spacing-sensitive phrase loss  of consciousness"
+        ]
+      },
+      "proof": "The complete run exhausted its static-mutant wall clock without a status reason. An exact byte-mapped targeted rerun killed this mutant in three seconds because removing the repeated-whitespace quantifier makes the named bounded test return no escalation code.",
+      "reviewer": "/root/mutation_audit (Pool 5)",
+      "reviewedOn": "2026-08-02",
+      "expiresOn": "2026-11-02",
+      "disposition": "accepted-detected-targeted-kill",
+      "countedAsDetected": true
+    },
+    {
+      "file": "backend/src/evals/safety/red-flags.ts",
+      "id": "2029",
+      "status": "Timeout",
+      "mutatorName": "Regex",
+      "replacement": "/\\b(?:faint(?:ed|ing)?|passed\\s+out|loss\\S+of\\s+consciousness)\\b/iu",
+      "location": {
+        "start": { "line": 5, "column": 14 },
+        "end": { "line": 5, "column": 81 }
+      },
+      "scopeIds": ["QA-MUT-001", "QA-MUT-005"],
+      "classification": "proven-targeted-kill-timeout",
+      "boundedTest": {
+        "file": "backend/src/evals/__tests__/safety-gates-coverage.test.ts",
+        "name": "red-flag phrase coverage detects spacing-sensitive phrase loss  of consciousness",
+        "vitestTimeoutMs": 10000,
+        "strykerTimeoutMs": 15000
+      },
+      "targetedProof": {
+        "reportPath": "DOCS/release/evidence/first-failures/DEF-084/red-flags-targeted-mutation.json",
+        "rawSha256": "386c40f5cf273f90434aeb0b6b47c87ab6308888341042b43ebfc15408f21e8f",
+        "mutantStatus": "Killed",
+        "killedByTests": [
+          "red-flag phrase coverage detects spacing-sensitive phrase loss  of consciousness",
+          "red-flag phrase coverage detects spacing-sensitive phrase loss of  consciousness"
+        ]
+      },
+      "proof": "The exact targeted report maps the full-run replacement and location to a killed mutant. Requiring non-whitespace between loss and of changes both reviewed whitespace cases, and the two named bounded tests reject it immediately.",
+      "reviewer": "/root/mutation_audit (Pool 5)",
+      "reviewedOn": "2026-08-02",
+      "expiresOn": "2026-11-02",
+      "disposition": "accepted-detected-targeted-kill",
+      "countedAsDetected": true
     }
   ],
   "inventorySummary": {
     "survived": 9,
     "noCoverage": 0,
-    "timeout": 3,
+    "timeout": 5,
     "runtimeError": 0,
     "compileError": 0,
     "classifiedSurvived": 9,
     "classifiedNoCoverage": 0,
-    "classifiedTimeout": 3,
+    "classifiedTimeout": 5,
     "unclassified": 0
   }
 }

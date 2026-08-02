@@ -42,7 +42,13 @@ export function processReportFilename(role, pid) {
   if (!/^(?:primary|worker-[1-9]\d*)$/u.test(role) || !Number.isSafeInteger(pid) || pid < 1) {
     throw new Error("Process report identity is invalid.");
   }
-  return `/tmp/spotter-process-report-${role}-pid-${String(pid)}.json`;
+  return `spotter-process-report-${role}-pid-${String(pid)}.json`;
+}
+
+export function configureProcessReport(report, role, pid) {
+  report.reportOnSignal = true;
+  report.directory = "/tmp";
+  report.filename = processReportFilename(role, pid);
 }
 
 function sendAdmissionResult(worker, correlationId, result) {
@@ -172,9 +178,7 @@ if (isMainModule()) {
   const workerCount = parseWorkerCount(process.env.SPOTTER_WEB_WORKERS ?? "2");
   const profile = parseRateLimitProfile(process.env.SPOTTER_RATE_LIMIT_PROFILE ?? "default");
   const workerFile = fileURLToPath(new URL("./spotter-worker.mjs", import.meta.url));
-  process.report.reportOnSignal = true;
-  process.report.directory = "/tmp";
-  process.report.filename = processReportFilename("primary", process.pid);
+  configureProcessReport(process.report, "primary", process.pid);
   const supervisor = createClusterSupervisor({
     admission: new DeploymentAdmissionController(profile),
     clusterModule: cluster,

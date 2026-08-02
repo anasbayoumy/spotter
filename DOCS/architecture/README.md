@@ -49,6 +49,9 @@ frontend/ (Next.js coach UI + route adapters) ── imports ── backend/ (se
 - `backend/` owns all domain rules, application use cases, persistence, agent orchestration,
   evaluations, transactions, jobs, and operational policies. It is not an independently running HTTP
   service.
+- `backend/packages/`, `backend/resources/`, `backend/infra/`, and `backend/tooling/` respectively
+  own shared workspaces, deterministic committed data, infrastructure declarations, and repository
+  verification/operations scripts.
 - `client-frontend/` owns the Expo client experience and consumes only the public REST contract.
 - `backend/packages/contracts` contains the shared Zod wire schemas. It contains no business
   behavior.

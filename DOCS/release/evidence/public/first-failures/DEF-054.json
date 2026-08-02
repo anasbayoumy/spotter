@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-054",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Today route tests spread an unknown query-data fixture",
+    "note": "The retained Today-state transitions correspond to two TS2698 diagnostics because the shared controllable query slot was typed unknown and then spread directly.",
+    "diagnosis": "A deliberately generic route mock stored query data as unknown. Two Today-state transitions derived new objects directly from that slot, which was runtime-valid but could not satisfy strict compile-time object-spread safety."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-054",
+        "type": "directory",
+        "digest": "tree-sha256:f2864aafee3091980ff7ce6cea83e4dab78a329ded7dfa0c80760cd79ab70116"
+      }
+    ]
+  }
+}

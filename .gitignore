@@ -19,6 +19,7 @@ playwright-report/
 test-results/
 reports/
 .stryker-tmp/
+.stryker-diagnostic*/
 frontend/tests/e2e/.runtime-state.json
 client-frontend/tests/e2e/.runtime-state.json
 

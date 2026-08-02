@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-062",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Evidence validation rejected valid digit-bearing requirement families",
+    "note": "The retained independent ledger review and exact pre-fix expression show that release evidence would reject legitimate digit-bearing requirement families already mapped by the defect history, including QA-E2E-011 and QA-A11Y-005.",
+    "diagnosis": "The defect-history verifier allowed uppercase letters only in intermediate requirement-ID segments, while the canonical inventory includes alphanumeric families such as E2E and A11Y. The validator was therefore narrower than the identifiers it was responsible for checking."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-062",
+        "type": "directory",
+        "digest": "tree-sha256:65f2b001375e028252ed5997ee47cb693c84f239091d4bdff0f3e032959671d3"
+      }
+    ]
+  }
+}

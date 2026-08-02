@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-042",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Coach accessibility gate exposed invalid chart semantics and ambiguous alert locators",
+    "note": "The exact one-worker, zero-retry coach accessibility run retained three failing result trees, screenshots, traces, DOM contexts, the HTML report, and last-run result after three tests failed and two passed.",
+    "diagnosis": "Scorecard chart bars and metric tracks were generic elements carrying ARIA labels, so axe reported prohibited ARIA attributes instead of meaningful graphical semantics. Two accessibility assertions also selected every alert on the page, colliding with Next.js's empty route announcer rather than uniquely targeting the intended application error or validation alert."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-042",
+        "type": "directory",
+        "digest": "tree-sha256:c0ceca95542928ecc458949d14c5fe837d9807e4861f11d9d29282e87cefab6e"
+      }
+    ]
+  }
+}

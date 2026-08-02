@@ -31,10 +31,19 @@ vi.mock("@tanstack/react-query", () => ({
     return mocks.query;
   },
 }));
+vi.mock("@expo/vector-icons/Ionicons", () => ({
+  default: (props: Record<string, unknown>) => React.createElement("Ionicons", props),
+}));
 vi.mock("expo-router", () => {
-  const Tabs = ({ children }: { readonly children?: React.ReactNode }): React.ReactElement =>
-    React.createElement("Tabs", null, children);
-  Tabs.Screen = ({ name }: { readonly name: string }) => React.createElement("TabScreen", { name });
+  const Tabs = ({
+    children,
+    screenOptions,
+  }: {
+    readonly children?: React.ReactNode;
+    readonly screenOptions?: unknown;
+  }): React.ReactElement => React.createElement("Tabs", { screenOptions }, children);
+  Tabs.Screen = ({ name, options }: { readonly name: string; readonly options?: unknown }) =>
+    React.createElement("TabScreen", { name, options });
   return {
     Redirect: ({ href }: { readonly href: string }) => React.createElement("Redirect", { href }),
     Tabs,
@@ -63,7 +72,7 @@ vi.mock("../../src/lib/api/client", () => ({
 }));
 
 import HistoryRoute from "../../src/app/(tabs)/history";
-import TabsLayout from "../../src/app/(tabs)/_layout";
+import TabsLayout, { TabBarIcon } from "../../src/app/(tabs)/_layout";
 import TodayRoute from "../../src/app/(tabs)/today";
 import IndexRoute from "../../src/app/index";
 import SelectClientRoute from "../../src/app/select-client";
@@ -242,7 +251,40 @@ describe("native route branch coverage", () => {
     act(() => {
       root.render(<TabsLayout />);
     });
-    expect(nodes(root.container, (node) => node.type === "TabScreen")).toHaveLength(3);
+    const tabs = nodes(root.container, (node) => node.type === "TabScreen");
+    expect(tabs).toHaveLength(3);
+    const iconNames = tabs.flatMap((tab) => {
+      const icon = (
+        tab.props.options as {
+          readonly tabBarIcon: (props: {
+            readonly color: string;
+            readonly focused: boolean;
+            readonly size: number;
+          }) => React.ReactElement;
+        }
+      ).tabBarIcon;
+      const activeWrapper = icon({ color: "brand", focused: true, size: 30 });
+      const inactiveWrapper = icon({
+        color: "muted",
+        focused: false,
+        size: 30,
+      });
+      const active = TabBarIcon(
+        activeWrapper.props as Parameters<typeof TabBarIcon>[0],
+      ) as React.ReactElement<{ readonly name: string }>;
+      const inactive = TabBarIcon(
+        inactiveWrapper.props as Parameters<typeof TabBarIcon>[0],
+      ) as React.ReactElement<{ readonly name: string }>;
+      return [active.props.name, inactive.props.name];
+    });
+    expect(iconNames).toEqual([
+      "calendar",
+      "calendar-outline",
+      "time",
+      "time-outline",
+      "pulse",
+      "pulse-outline",
+    ]);
   });
 
   it("renders selector pending, API failure/retry, and empty states", () => {

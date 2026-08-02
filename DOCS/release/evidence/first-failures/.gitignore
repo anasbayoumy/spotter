@@ -1,0 +1,4 @@
+# The immutable raw vault is intentionally developer-local. Public, digest-pinned summaries live in
+# ../public/first-failures and are the only first-failure inputs copied into release evidence.
+*
+!.gitignore

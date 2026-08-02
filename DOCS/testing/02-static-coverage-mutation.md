@@ -26,7 +26,7 @@ Dependency rules are enforced with ESLint boundaries or dependency-cruiser, not 
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
 | `QA-ARC-001` | `frontend/` may use `backend` only from server route adapters/server components; client components may not import it.            | `pnpm lint:boundaries`                       |
 | `QA-ARC-002` | `client-frontend/` depends only on shared contracts/design tokens and HTTP clients, never `backend`, DB, Next.js, or model SDKs. | `pnpm lint:boundaries`                       |
-| `QA-ARC-003` | `backend/domain` is pure and imports no framework, database driver, React, Expo, or model SDK.                                   | `pnpm lint:boundaries`                       |
+| `QA-ARC-003` | `backend/src/domain` is pure and imports no framework, database driver, React, Expo, or model SDK.                               | `pnpm lint:boundaries`                       |
 | `QA-ARC-004` | Application services may orchestrate ports but route adapters remain validate-call-map only.                                     | `pnpm lint:boundaries`                       |
 | `QA-ARC-005` | Agent modules receive assembled input and cannot import repositories or publish/mutate directly.                                 | `pnpm lint:boundaries`                       |
 | `QA-ARC-006` | Deterministic safety gates do not import an LLM/provider adapter.                                                                | `pnpm lint:boundaries`                       |
@@ -34,6 +34,9 @@ Dependency rules are enforced with ESLint boundaries or dependency-cruiser, not 
 | `QA-ARC-008` | Runtime environment parsing occurs once in the server composition root; public env allowlists are explicit.                      | `pnpm lint:boundaries && pnpm test:security` |
 
 The root `pnpm lint` includes `pnpm lint:boundaries`.
+
+The current tracked tree passes the boundary check across 410 source files and the forbidden-pattern
+check across 371 files.
 
 ## Type-quality rules
 
@@ -77,6 +80,11 @@ integrity guarantee. It does not mutate generated schemas, presentation markup, 
 | `QA-MUT-003` | Publication approval, override, and supersession logic |                    95% | No surviving authorization/state mutant | `pnpm test:mutation` |
 | `QA-MUT-004` | Engagement tier and 48-hour suppression logic          |                    95% | No surviving time/ownership mutant      | `pnpm test:mutation` |
 | `QA-MUT-005` | Combined selected critical scope                       |                    90% | Every survivor is classified            | `pnpm test:mutation` |
+
+The accepted current-tree run completed all 2,207 generated mutants: 2,193 killed, 9
+reviewed-equivalent survivors, and 5 classified timeouts. Its conservative score is 99.365655%,
+counting every survivor and timeout as not killed; the final release evidence manifest remains
+pending.
 
 The committed scope selectors are:
 

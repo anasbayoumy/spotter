@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-050",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Module reset split the query-policy error constructor identity",
+    "note": "The retained first-failing native test shows one pass and one failure because an otherwise retryable ApiClientError was not recognized after the module graph reset.",
+    "diagnosis": "The test reset modules before dynamically loading the query client but constructed errors with a statically imported pre-reset ApiClientError. Production correctly uses instanceof, so the distinct constructor identities made the test fixture non-retryable."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-050",
+        "type": "directory",
+        "digest": "tree-sha256:c56d03d9582bc33aa4ea4334c65f1976b5087b6b78dbc38dd2f50ab7eb1a9c96"
+      }
+    ]
+  }
+}

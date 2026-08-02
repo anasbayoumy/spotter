@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-040",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Trivy image scan passed a subcommand flag at global CLI scope",
+    "note": "The fourth focused Docker protocol retained the exact pinned-Trivy CLI failure, valid preceding SPDX proof, and clean teardown after QA-DKR-001 through QA-DKR-011 passed.",
+    "diagnosis": "The harness placed --skip-version-check before the Trivy image subcommand even though pinned Trivy 0.67.2 exposes that option only in image scope. Argument parsing therefore exited 1 before the scanner could emit SARIF or a vulnerability verdict."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-040",
+        "type": "directory",
+        "digest": "tree-sha256:434ca8a921b876f9eb3e5f426d54d46ae930eb0ab6316d1770316afa54e28ec6"
+      }
+    ]
+  }
+}

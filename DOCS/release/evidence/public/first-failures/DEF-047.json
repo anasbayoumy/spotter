@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-047",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Invalid server rate-profile configuration was misclassified as client input",
+    "note": "The retained pre-fix security test and coverage configuration reproduce one failure after 15 passes: invalid load-profile activation returned the generic client-validation status rather than failing the server boundary closed.",
+    "diagnosis": "Server-environment parsing occurred inside the shared request guard, but its Zod failure escaped to a boundary that interpreted every Zod error as malformed request input. A valid request against invalid server policy therefore received HTTP 400 instead of a sanitized HTTP 500."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-047",
+        "type": "directory",
+        "digest": "tree-sha256:7fd8de75c6d2a8ff1628c62d7aca243bbfbcf6890cd6b5b492fc915a30de93ea"
+      }
+    ]
+  }
+}

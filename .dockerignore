@@ -8,6 +8,7 @@
 .pnpm-store
 .cache
 .stryker-tmp
+.stryker-diagnostic*
 .turbo
 artifacts
 build
@@ -23,6 +24,7 @@ test-results
 **/.next
 **/.pnpm-store
 **/.stryker-tmp
+DOCS/release/evidence/first-failures
 **/.turbo
 **/artifacts
 **/build

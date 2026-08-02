@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-055",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Behavior-coverage fixtures violated strict public contracts",
+    "note": "The retained diagnostic summary records one unused import, two missing required nullable sentiment fields, and two obsolete completedAt properties in newly added coach behavior fixtures.",
+    "diagnosis": "Coverage fixtures were assembled from older persistence-shaped examples instead of the current shared ClientDetail and Session response contracts, and one async-test helper remained unused."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-055",
+        "type": "directory",
+        "digest": "tree-sha256:4d603836476740b6d9ccb9247a416ad9e0ee104337bd9c69e179afa163f875ad"
+      }
+    ]
+  }
+}

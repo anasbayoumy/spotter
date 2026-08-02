@@ -12,10 +12,19 @@ contains:
   infrastructure, deterministic-resource, and verification-tooling modules.
 - `client-frontend/`: Expo client application.
 
-The former root `infra/`, `packages/`, fixtures, scripts, and planning folders are intentionally not
-part of the public shape. Required implementation assets live under `backend/`; generated reports,
-coverage, local memory, dependencies, and credentials remain untracked. No real client data or
-credentials are required for the deterministic V1 path.
+Backend-owned supporting assets are grouped by responsibility:
+
+- `backend/packages/`: versioned cross-surface contracts, configuration, design tokens, and test
+  utilities.
+- `backend/resources/`: committed synthetic demo, model-recording, calibration, and safety data.
+- `backend/infra/`: PostgreSQL initialization and verification schema declarations.
+- `backend/tooling/`: repository verification and operational commands.
+
+Generated reports, coverage, local state, dependencies, and credentials remain untracked. No real
+client data or credentials are required for the deterministic V1 path.
+
+For Docker startup, Expo launch, hands-on acceptance, automated E2E commands, and cleanup, follow
+the [local and staging playbook](./playbook.md).
 
 ## Product screenshots
 

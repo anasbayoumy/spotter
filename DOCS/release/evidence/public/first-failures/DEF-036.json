@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-036",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Offline-state browser assertion used an ambiguous broad-text locator",
+    "note": "The production offline-state journey retained seven exact artifacts after the expected state rendered but a broad text regex matched both its heading and supporting copy under strict locator semantics.",
+    "diagnosis": "The product presented the correct accessible offline state, but the test searched all text with /offline|could not reach/ and therefore resolved two visible elements instead of one exact semantic target."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-036",
+        "type": "directory",
+        "digest": "tree-sha256:8d20fc6f7a90e03612461f40c6a493d8341789f9ec809e87cb7e19559c38e744"
+      }
+    ]
+  }
+}

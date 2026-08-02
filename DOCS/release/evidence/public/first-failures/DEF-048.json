@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-048",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Programme load editing dereferenced a cleared React event target",
+    "note": "The retained pre-fix component and behavior test reproduce TypeError: Cannot read properties of null (reading value) after two related mutation-page checks had passed.",
+    "diagnosis": "The load input read event.currentTarget.value inside a deferred setState updater. React had cleared currentTarget before that updater executed, so editing a prescribed load could crash the programme editor."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-048",
+        "type": "directory",
+        "digest": "tree-sha256:bdfbce1c1e5541d66e4343ec0e4130bd29e0de9554d1764e0f8c78c8418eeac8"
+      }
+    ]
+  }
+}

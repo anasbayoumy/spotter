@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-056",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Public Session fixtures retained obsolete createdAt fields",
+    "note": "The retained two fixture assignments and TS2353 diagnostic show createdAt is not a property of the shared public Session type.",
+    "diagnosis": "Once the adjacent completedAt mismatch was removed, strict excess-property checking exposed two persistence-only createdAt fields still present in the public client-detail session fixtures."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-056",
+        "type": "directory",
+        "digest": "tree-sha256:2117701cbcca7c50e1c9750196423fd7e36084b1784f6af4231583ac28b37312"
+      }
+    ]
+  }
+}

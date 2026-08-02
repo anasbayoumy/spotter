@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-045",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Coverage collected a Node-native resolver regression as an empty Vitest suite",
+    "note": "The retained configuration, coverage orchestrator, Node-native test, and command summary show Vitest reporting no suite in database-error.runtime.test.mjs after the Node runner had already passed it; 42 Vitest files and 488 tests passed before collection aborted.",
+    "diagnosis": "The backend coverage scope selected the complete src tree, so Vitest collected a deliberate node:test ESM resolver regression solely because its filename ended in .test.mjs. The file correctly had no Vitest suite."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-045",
+        "type": "directory",
+        "digest": "tree-sha256:8c63594ec240c9ec5afc6766e6929973b2b0477f3f76a89fd3f449e53577919e"
+      }
+    ]
+  }
+}

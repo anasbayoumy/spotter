@@ -1,7 +1,7 @@
 /** @type {import("@stryker-mutator/api/core").PartialStrykerOptions} */
 const config = {
   checkers: ["typescript"],
-  concurrency: 2,
+  concurrency: 1,
   coverageAnalysis: "perTest",
   disableBail: true,
   ignorePatterns: ["/.cache", "/artifacts", "/client-frontend", "/coverage", "/frontend"],
@@ -16,7 +16,7 @@ const config = {
     "!**/*.test.ts",
     "!**/index.ts",
   ],
-  reporters: ["clear-text", "html", "json"],
+  reporters: ["event-recorder", "progress-append-only", "clear-text", "html", "json"],
   testRunner: "vitest",
   thresholds: { break: 90, high: 95, low: 90 },
   timeoutMS: 15_000,

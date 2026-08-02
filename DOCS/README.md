@@ -5,8 +5,8 @@ This directory is the canonical source of truth for implementation and verificat
 ## Decision precedence
 
 1. Explicitly approved product decisions recorded in this repository.
-2. Requirements, architecture, and testing contracts in this directory.
-3. Architecture Decision Records for deliberate refinements.
+2. Accepted Architecture Decision Records for deliberate refinements.
+3. Requirements, architecture, and testing contracts in this directory.
 4. Code and generated artifacts.
 
 The original discovery documents were read-only inputs. Their intended behavior is normalized here

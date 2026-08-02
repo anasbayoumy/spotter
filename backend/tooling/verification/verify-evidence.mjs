@@ -12,6 +12,7 @@ import {
   sourceState,
   walkFiles,
 } from "./evidence-common.mjs";
+import { validateCompactFirstFailure } from "./defect-evidence.mjs";
 import { isCanonicalRequirementId } from "./evidence-validation.mjs";
 import { validateMutationEvidence } from "./mutation-evidence.mjs";
 
@@ -159,6 +160,7 @@ assert(manifest.revision.dirty === false, "A final pass must be produced from a 
 assert(manifest.revision.sourceStable === true, "Source changed during verification.");
 
 const currentSource = await sourceState();
+const currentSourceInventory = new Set(currentSource.files);
 assert(
   currentSource.dirty === false,
   "Current worktree is dirty; evidence cannot be reproduced exactly.",
@@ -488,6 +490,17 @@ for (const [index, record] of defectHistory.records.entries()) {
       record.firstFailure.artifacts.length === 0,
       `Evidence-gap record declares an artifact: ${record.id}`,
     );
+  }
+  if (record.firstFailure.kind === "runtime-failure") {
+    assert(
+      record.firstFailure.artifacts.length === 1,
+      `Runtime failure must declare one compact summary: ${record.id}`,
+    );
+    await validateCompactFirstFailure({
+      artifact: record.firstFailure.artifacts[0],
+      record,
+      sourceInventory: currentSourceInventory,
+    });
   }
   for (const artifact of record.firstFailure.artifacts) {
     const keys =

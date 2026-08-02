@@ -1,19 +1,24 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { promisify } from "node:util";
 
 import {
   assertProjectScopedVolume,
   assertTestPostgresVolumeConfiguration,
   ComposeProject,
   EvidenceCommandRunner,
+  hashWorkspace,
   parseJsonRecords,
   serializeError,
   stopServiceGracefully,
   teardownProjectAfterFailure,
 } from "./lib.mjs";
+
+const execFileAsync = promisify(execFile);
 
 test("treats the pre-container Docker Compose image inventory as empty", () => {
   assert.deepEqual(parseJsonRecords("null\n", "Compose image inventory"), []);
@@ -32,6 +37,25 @@ test("rejects scalar records instead of dereferencing them", () => {
     () => parseJsonRecords('"unexpected"', "Compose output"),
     /Compose output contained a malformed JSON record/u,
   );
+});
+
+test("hashes symbolic links without following directory targets", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "spotter-workspace-hash-"));
+  try {
+    await execFileAsync("git", ["init", "--quiet"], { cwd: directory });
+    await writeFile(path.join(directory, ".gitignore"), "artifacts/\n", "utf8");
+    await mkdir(path.join(directory, "target"));
+    await writeFile(path.join(directory, "target", "fixture.txt"), "fixture\n", "utf8");
+    await symlink("target", path.join(directory, "linked-directory"), "dir");
+
+    const result = await hashWorkspace(directory);
+
+    assert.equal(result.algorithm, "sha256");
+    assert.equal(result.files, 3);
+    assert.match(result.value, /^[a-f0-9]{64}$/u);
+  } finally {
+    await rm(directory, { force: true, recursive: true });
+  }
 });
 
 test("retains structured failure evidence without leaking configured secrets", () => {

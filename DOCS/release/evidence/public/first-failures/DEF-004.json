@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-004",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Docker build context and pnpm configuration prevented a clean web build",
+    "note": "QA-DKR-003 failed because the clean container workspace could not resolve the Next binary; the complete failing protocol report and build log were frozen before changes.",
+    "diagnosis": "The build context contained recursive generated trees while the container install omitted repository pnpm configuration needed to build the filtered workspace consistently."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-004/docker-protocol-report.json",
+        "type": "file",
+        "digest": "sha256:454764e9cb976de185bef6a327d2ced0d69c6571fe442b0e4e9e51ffb9f42544"
+      },
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-004/clean-production-build.log",
+        "type": "file",
+        "digest": "sha256:ea3a01b14b7e03c85212ae5691f673d631bb347714b5b79d80918b415d999e4e"
+      }
+    ]
+  }
+}

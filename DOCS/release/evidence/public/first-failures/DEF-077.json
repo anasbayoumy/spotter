@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-077",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Performance corpus evaluation name violated the strict gate-result contract",
+    "note": "The complete database gate report retains 25 HTTP 500 validation failures in each 100-request run, all for programme 54000000-0000-4000-8000-000000000112, while the redacted container log records the matching sanitized ZodError request IDs.",
+    "diagnosis": "The direct-SQL standard corpus inserted evaluation name performance_corpus_gate, which is not a member of gateResultSchema's closed name enum. Programme-detail output parsing therefore failed closed with HTTP 500 whenever the critical route read that evaluation."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-077",
+        "type": "directory",
+        "digest": "tree-sha256:6d00cad1c3487c04f72084afb22c00374454f00f650d108152c63ea26ed5b34b"
+      }
+    ]
+  }
+}

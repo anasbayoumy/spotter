@@ -34,6 +34,17 @@ async function selectClient(page: Page, handle: string): Promise<void> {
   await expect(page.getByRole("heading", { name: "Today" })).toBeVisible();
 }
 
+async function expectDemoBoundary(page: Page): Promise<void> {
+  const copy = page.getByText("Synthetic demo · Client selector is not sign-in", { exact: true });
+  await expect(copy).toBeVisible();
+  const banner = copy.locator("..");
+  await expect
+    .poll(async () => (await banner.boundingBox())?.width ?? 0, {
+      message: "The synthetic/no-auth boundary must not collapse in a mobile viewport.",
+    })
+    .toBeGreaterThan(300);
+}
+
 async function ensureCompletedHistorySession(request: APIRequestContext): Promise<void> {
   const session = await data<{
     readonly rpe: number | null;
@@ -344,9 +355,18 @@ test.describe.serial("QA-CLI production Expo-web journeys", () => {
     page,
   }, testInfo) => {
     const runtime = installRuntimeGuard(page, testInfo);
-    for (const path of ["/today", "/history", "/check-in", "/select-client"] as const) {
+    await page.setViewportSize({ height: 844, width: 390 });
+    await selectClient(page, "c_001");
+    for (const path of [
+      "/today",
+      "/history",
+      "/check-in",
+      `/session/${ids.session}`,
+      "/select-client",
+    ] as const) {
       await page.goto(path);
       await expect(page.locator("body")).not.toBeEmpty();
+      await expectDemoBoundary(page);
     }
     await runtime.assertClean();
   });

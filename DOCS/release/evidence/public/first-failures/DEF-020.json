@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-020",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Direct check-in navigation redirected before client selection restoration completed",
+    "note": "The direct /check-in production-web journey retained a trace and error context after a previously selected synthetic client was redirected to the selector before its persisted selection restored.",
+    "diagnosis": "SelectionProvider was still loading AsyncStorage when CheckInRoute evaluated a transient null client ID as final and redirected. The surrounding tabs layout handled restoration correctly, but the route failed to distinguish loading from no selection."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-020",
+        "type": "directory",
+        "digest": "tree-sha256:8c357a5d91b7ca2add5d343377e23c9ff4e1944f9e34aed1e5ae7196f88a61d9"
+      }
+    ]
+  }
+}

@@ -4,17 +4,17 @@ This directory is the canonical product contract for the implementation at the r
 
 ## Authority
 
-When source documents disagree, implementation decisions use this order:
+When canonical documents disagree, implementation decisions use this order:
 
 1. Approved user decisions: no authentication, all implementation inside `app`, the named
    `frontend`, `backend`, and `client-frontend` boundaries, autonomous delivery, synthetic data.
-2. `DOCS/tech-stack.md`, which explicitly identifies itself as the V1 implementation contract.
-3. `DOCS/tests.md`.
-4. `DOCS/arch.md` and `DOCS/data-model.md`.
-5. `DOCS/overview.md`.
+2. Accepted decisions under [`../architecture/adr/`](../architecture/adr/).
+3. The atomic requirements and product contracts in this directory.
+4. [`../technical-spec.md`](../technical-spec.md), the detailed architecture documents, and the
+   testing contract.
 
-`DOCS/agent-layer.md` currently duplicates the data-model document. Where agent behavior is absent
-from it, the pipeline and agent contracts in `tech-stack.md` are authoritative.
+Earlier discovery drafts were normalized into these canonical documents and are not required to
+interpret the implementation.
 
 ## Resolved source conflicts
 
@@ -24,7 +24,7 @@ from it, the pipeline and agent contracts in `tech-stack.md` are authoritative.
 | HTTP boundary          | Versioned JSON REST, not tRPC or GraphQL.                                                                                                                  |
 | Adjustments            | Every adjustment requires coach approval; no auto-application in V1.                                                                                       |
 | Jobs                   | Idempotent cron-triggered route handlers; no separate queue worker.                                                                                        |
-| Demo database          | PGlite is the mandatory keyless path; Docker PostgreSQL/pgvector is a parity path.                                                                         |
+| Demo database          | PGlite is the mandatory keyless path; Docker PostgreSQL/pgvector is authoritative for integration and release parity.                                      |
 | Client 001             | The committed/no-auth demo uses a synthetic `c_001`; no real health data is committed.                                                                     |
 | Physical layout        | `frontend/`, modular server-only `backend/`, and `client-frontend/`. Thin Next route adapters import backend use cases, preserving one web/API deployable. |
 | Clear-plan bulk action | Not required because it has no V1 REST contract. Individual approval remains required.                                                                     |

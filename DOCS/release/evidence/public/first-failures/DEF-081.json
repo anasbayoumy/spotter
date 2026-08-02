@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-081",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Residual system capacity kept mixed-read p95 above the unchanged latency budget",
+    "note": "The exact completed-smoke reports retain three 25-VU runs with 1,114, 1,125, and 940 contract-valid HTTP 200 samples, aggregate p95 values of 300.872000, 303.742083, and 347.797291 milliseconds, and zero request or validation errors. The deciding route p95 values were 272.299250 milliseconds for the active-client list, 322.597167 for client detail, 292.526375 for Today, 316.253958 for the queued-programme list, and 301.491375 for trace detail.",
+    "diagnosis": "Removing the remaining serialized repository phases improved DEF-079's deciding p95 from 371.456541 to 303.742083 milliseconds, but every route in the fresh deciding 25-VU mix remained above the 250 millisecond system budget. The same source measured the standalone queued-programme API at 15.976083 milliseconds p95, the critical repository API at 21.996500 milliseconds p95, and its SQL at 0.134 milliseconds p95. With zero errors throughout, the residual miss is shared production-server capacity or concurrency contention rather than a slow isolated query or repository operation."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-081",
+        "type": "directory",
+        "digest": "tree-sha256:62649e7277b9615bb437e01b1005937f4179256361742a2236c1a85800e6a2c2"
+      }
+    ]
+  }
+}

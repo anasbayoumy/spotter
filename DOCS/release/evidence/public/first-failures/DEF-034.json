@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-034",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Stored check-in free text was omitted from the next assembled context trace",
+    "note": "The zero-retry production client journey retained screenshot, video, trace, HTML, and error context after a successful check-in body failed to appear in the next exact context trace.",
+    "diagnosis": "The check-in repository persisted and returned the exact bounded body, and the deterministic assembler preserved supplied bodies, but DatabaseContextAssembler projected only latency, readiness, and respondedAt into checkInsMetrics and dropped body between storage and rendering."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-034",
+        "type": "directory",
+        "digest": "tree-sha256:297191dbe8b63c58d318c12f03d7f35b8cc74b58f5ad701802f80b5687ce1175"
+      }
+    ]
+  }
+}

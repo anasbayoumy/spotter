@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-015",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Screenshot journey navigated before expected queue reads settled",
+    "note": "The responsive screenshot journey produced all 20 images, then retained a trace showing the next navigation cancel an in-flight queue API read that the strict runtime guard classified as unexpected.",
+    "diagnosis": "Heading readiness was sufficient for capture but not for request-lifecycle completion. Immediate navigation then aborted legitimate page reads, creating a harness-owned cancellation rather than a product network failure."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-015",
+        "type": "directory",
+        "digest": "tree-sha256:83a8c58c56bd372072106ec9d20f36ff175cf485f4f814a43bf32216cfb07c8c"
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-082",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Expo-web main-thread blocking kept client Lighthouse scores below budget",
+    "note": "Nine retained production Expo-web Lighthouse reports show Today scores of 84, 82, and 84 and session/check-in scores of 84 in every run, below the unchanged score-85 budget. All nine have accessibility 100, CLS 0, LCP between 1,445.276367 and 1,540.915300 milliseconds, exact valid loaded-state proofs, no runtime errors, and no run warnings.",
+    "diagnosis": "The client routes are ready, stable, accessible, and within the LCP budget, but total blocking time remains 614 to 715 milliseconds in the nine raw reports. Every report identifies the same 2,721,053-byte uncompressed Expo entry JavaScript resource. The repeated cross-route evidence isolates main-thread bundle execution as the focused reason performance scores remain 82 to 84 instead of the required 85."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-082",
+        "type": "directory",
+        "digest": "tree-sha256:fca6db4577f3a080dccab8e6220802330c762aec5f33809760fb000da323ae3b"
+      }
+    ]
+  }
+}

@@ -40,10 +40,7 @@ const ignoredMutationInputDirectories = new Set([
   "reports",
   "test-results",
 ]);
-const ignoredMutationInputRootRelativeDirectories = new Set([
-  "backend/infra",
-  "backend/tooling",
-]);
+const ignoredMutationInputRootRelativeDirectories = new Set(["backend/infra", "backend/tooling"]);
 
 const expectedScopes = {
   "QA-MUT-001": {
@@ -241,10 +238,7 @@ export async function mutationExecutionInputs(repositoryRoot) {
       if (entry.isDirectory() && ignoredMutationInputDirectories.has(entry.name)) continue;
       const target = path.join(directory, entry.name);
       const relativeTarget = path.relative(repositoryRoot, target).split(path.sep).join("/");
-      if (
-        entry.isDirectory() &&
-        ignoredMutationInputRootRelativeDirectories.has(relativeTarget)
-      ) {
+      if (entry.isDirectory() && ignoredMutationInputRootRelativeDirectories.has(relativeTarget)) {
         continue;
       }
       if (entry.isDirectory()) await addTree(target);
@@ -400,6 +394,7 @@ async function validateTimeoutEntry(
   repositoryRoot,
   releaseTime,
 ) {
+  const isTargetedKill = entry.classification === "proven-targeted-kill-timeout";
   exactKeys(
     entry,
     [
@@ -411,7 +406,6 @@ async function validateTimeoutEntry(
       "location",
       "scopeIds",
       "classification",
-      "statusReason",
       "boundedTest",
       "proof",
       "reviewer",
@@ -419,21 +413,79 @@ async function validateTimeoutEntry(
       "expiresOn",
       "disposition",
       "countedAsDetected",
+      ...(isTargetedKill ? ["targetedProof"] : ["statusReason"]),
     ],
     `mutation timeout ${entry.file}:${entry.id}`,
   );
   assert(entry.status === "Timeout", "Invalid timeout status.");
-  assert(
-    entry.classification === "proven-nontermination-timeout" &&
-      entry.disposition === "accepted-detected-nontermination" &&
-      entry.countedAsDetected === true,
-    "Mutation timeout lacks a detected nontermination disposition.",
-  );
+  const validDisposition = isTargetedKill
+    ? entry.disposition === "accepted-detected-targeted-kill"
+    : entry.classification === "proven-nontermination-timeout" &&
+      entry.disposition === "accepted-detected-nontermination";
+  assert(validDisposition && entry.countedAsDetected === true, "Mutation timeout lacks proof.");
   assertMeaningfulText(entry.proof, "Mutation timeout proof", 80);
-  assert(
-    /^Hit limit reached \(\d+\/\d+\)$/u.test(entry.statusReason),
-    "Timeout reason is invalid.",
-  );
+  if (isTargetedKill) {
+    assert(reportEntry.statusReason === undefined, "Targeted-kill timeout has a full-run reason.");
+    exactKeys(
+      entry.targetedProof,
+      ["reportPath", "rawSha256", "mutantStatus", "killedByTests"],
+      `targeted kill proof ${entry.id}`,
+    );
+    assert(
+      entry.targetedProof.reportPath ===
+        "DOCS/release/evidence/first-failures/DEF-084/red-flags-targeted-mutation.json",
+      "Targeted mutation proof path is non-canonical.",
+    );
+    assert(
+      /^[0-9a-f]{64}$/u.test(entry.targetedProof.rawSha256),
+      "Targeted report digest is invalid.",
+    );
+    assert(entry.targetedProof.mutantStatus === "Killed", "Targeted mutant was not killed.");
+    assert(
+      Array.isArray(entry.targetedProof.killedByTests) &&
+        entry.targetedProof.killedByTests.length > 0,
+      "Targeted kill has no detecting test.",
+    );
+    const targetedPath = path.resolve(repositoryRoot, entry.targetedProof.reportPath);
+    assert(
+      targetedPath.startsWith(`${repositoryRoot}${path.sep}`),
+      "Targeted report path escapes repository.",
+    );
+    try {
+      const targetedBytes = await readFile(targetedPath);
+      assert(
+        sha256(targetedBytes) === entry.targetedProof.rawSha256,
+        "Targeted report digest is stale.",
+      );
+      const targetedReport = JSON.parse(targetedBytes);
+      const targetedMutant = targetedReport.files?.[entry.file]?.mutants?.find(
+        (mutant) =>
+          mutant.status === "Killed" &&
+          mutant.replacement === entry.replacement &&
+          canonicalKey(mutant.location) === canonicalKey(entry.location),
+      );
+      assert(
+        targetedMutant !== undefined,
+        "Targeted report does not contain the exact killed mutant.",
+      );
+      const testNames = new Map();
+      for (const testFile of Object.values(targetedReport.testFiles ?? {})) {
+        for (const test of testFile.tests ?? []) testNames.set(test.id, test.name);
+      }
+      const killedByTests = (targetedMutant.killedBy ?? []).map((id) => testNames.get(id)).sort();
+      assert(
+        canonicalKey(killedByTests) === canonicalKey([...entry.targetedProof.killedByTests].sort()),
+        "Targeted detecting-test inventory is stale.",
+      );
+    } catch (error) {
+      if (error?.code !== "ENOENT") throw error;
+    }
+  } else {
+    assert(
+      /^Hit limit reached \(\d+\/\d+\)$/u.test(entry.statusReason),
+      "Timeout reason is invalid.",
+    );
+  }
   assert(entry.reviewer === classification.reviewer, "Timeout reviewer is inconsistent.");
   assert(entry.reviewedOn === classification.reviewedOn, "Timeout review date is inconsistent.");
   const reviewed = Date.parse(`${entry.reviewedOn}T00:00:00.000Z`);
@@ -476,7 +528,9 @@ async function validateTimeoutEntry(
     (match) => match[1],
   );
   assert(
-    declaredTestNames.some((name) => entry.boundedTest.name.endsWith(name)),
+    isTargetedKill
+      ? entry.targetedProof.killedByTests.includes(entry.boundedTest.name)
+      : declaredTestNames.some((name) => entry.boundedTest.name.endsWith(name)),
     "Bounded timeout test name is stale.",
   );
 }
