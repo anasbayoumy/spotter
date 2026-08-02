@@ -18,7 +18,7 @@
     "build": "tsc -p tsconfig.json --noEmit",
     "calibrate": "tsx src/cli/calibrate.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test:unit": "vitest run --config vitest.unit.config.ts src/domain src/agents src/application src/evals src/jobs src/composition/backend-facade.coverage.test.ts src/infrastructure/database/database-error.test.ts tests/property tests/pglite/publish-programme.coverage.integration.test.ts && node --test src/infrastructure/database/database-error.runtime.test.mjs",
+    "test:unit": "vitest run --config vitest.unit.config.ts src/domain src/agents src/application src/evals src/jobs src/cli/*.test.ts src/composition/backend-facade.coverage.test.ts src/infrastructure/database/database-error.test.ts tests/property tests/pglite/publish-programme.coverage.integration.test.ts && node --test src/infrastructure/database/database-error.runtime.test.mjs",
     "test:integration:pglite": "vitest run tests/pglite",
     "test:integration": "vitest run tests/postgres",
     "test:concurrency": "vitest run tests/concurrency",

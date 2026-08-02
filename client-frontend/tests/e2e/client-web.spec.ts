@@ -1,3 +1,6 @@
+import { mkdir } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+
 import {
   expect,
   test,
@@ -15,6 +18,9 @@ const ids = {
   session: "00000000-0000-4000-8000-000000000701",
   supersededClient: "00000000-0000-4000-8000-000000000104",
 } as const;
+
+const documentationScreenshots = resolve(process.cwd(), "../DOCS/assets/screenshots");
+const captureDocumentation = process.env.SPOTTER_CAPTURE_DOCS === "true";
 
 async function data<T>(response: APIResponse): Promise<T> {
   const body = (await response.json()) as {
@@ -368,6 +374,48 @@ test.describe.serial("QA-CLI production Expo-web journeys", () => {
       await expect(page.locator("body")).not.toBeEmpty();
       await expectDemoBoundary(page);
     }
+    await runtime.assertClean();
+  });
+
+  test("QA-CLI-011 captures every documented client screen from the current build", async ({
+    page,
+  }, testInfo) => {
+    const runtime = installRuntimeGuard(page, testInfo);
+    await page.setViewportSize({ height: 844, width: 390 });
+    await mkdir(documentationScreenshots, { recursive: true });
+
+    const capture = async (name: string): Promise<void> => {
+      const screenshotPath = `${documentationScreenshots}/${name}`;
+      await mkdir(dirname(screenshotPath), { recursive: true });
+      await page.waitForLoadState("networkidle");
+      await expectDemoBoundary(page);
+      if (captureDocumentation) {
+        await page.screenshot({ fullPage: true, path: screenshotPath });
+      }
+    };
+
+    await page.goto("/select-client");
+    await expect(page.getByRole("heading", { name: "Select demo client" })).toBeVisible();
+    await capture("client-selector-mobile.png");
+
+    await selectClient(page, "c_002");
+    await expect(page.getByText("No published plan yet")).toBeVisible();
+    await capture("client-no-published-plan-mobile.png");
+
+    await selectClient(page, "c_001");
+    await expect(page.getByRole("heading", { name: "Today" })).toBeVisible();
+    await expect(page.getByText(/Rest day|Row ergometer intervals/u).first()).toBeVisible();
+    await capture("client-today-mobile.png");
+
+    await page.goto("/check-in");
+    await expect(page.getByRole("heading", { name: "Check-in" })).toBeVisible();
+    await capture("client-check-in-mobile.png");
+
+    await page.goto(`/session/${ids.session}`);
+    await expect(
+      page.getByRole("heading", { name: /Log session|Session completed/u }),
+    ).toBeVisible();
+    await capture("client-session-log-mobile.png");
     await runtime.assertClean();
   });
 });

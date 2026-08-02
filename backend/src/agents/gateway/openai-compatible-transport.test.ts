@@ -33,6 +33,60 @@ function transport(
 }
 
 describe("OpenAI-compatible transport", () => {
+  it("requires a complete provider-neutral configuration", () => {
+    for (const overrides of [{ apiKey: " " }, { baseUrl: " /// " }, { schemaName: " " }]) {
+      try {
+        new OpenAICompatibleTransport({
+          apiKey: "test-key",
+          baseUrl: "http://model.test/v1/",
+          modelFactory: () => model,
+          outputSchema,
+          schemaName: "test output",
+          textGenerator: vi.fn<TextGenerator>(),
+          ...overrides,
+        });
+        expect.fail("Incomplete transport configuration must fail closed.");
+      } catch (error) {
+        expect(error).toBeInstanceOf(LiveTransportError);
+        if (!(error instanceof LiveTransportError)) throw error;
+        expect(error.retryable).toBe(false);
+      }
+    }
+  });
+
+  it("returns validated JSON, raw-response telemetry, and a generated schema instruction", async () => {
+    const generate = vi.fn<TextGenerator>().mockResolvedValue({
+      text: '  {"answer":"valid"}  ',
+      usage: {},
+    });
+    const modelFactory = vi.fn(() => model);
+    const onRawResponse = vi.fn<(rawResponse: string) => void>();
+    const onSchemaTelemetry = vi.fn<(telemetry: SchemaTelemetry) => void>();
+    const configured = new OpenAICompatibleTransport({
+      apiKey: " test-key ",
+      baseUrl: "http://model.test/v1///",
+      modelFactory,
+      onRawResponse,
+      onSchemaTelemetry,
+      outputSchema,
+      schemaName: "test output",
+      textGenerator: generate,
+    });
+
+    await expect(configured.generate(request())).resolves.toEqual({
+      output: { answer: "valid" },
+      usage: { costUsd: 0, inputTokens: 0, outputTokens: 0 },
+    });
+    expect(modelFactory).toHaveBeenCalledWith("model-a");
+    expect(generate.mock.calls[0]?.[0].prompt).toMatch(/Return exactly one JSON value/u);
+    expect(generate.mock.calls[0]?.[0].prompt).toMatch(/"answer"/u);
+    expect(onRawResponse).toHaveBeenCalledWith('  {"answer":"valid"}  ');
+    expect(onSchemaTelemetry).toHaveBeenCalledWith({
+      schemaFailure: false,
+      schemaRetryCount: 0,
+    });
+  });
+
   it("repairs one schema failure and makes the second failure non-retryable", async () => {
     const repairedTelemetry = vi.fn<(telemetry: SchemaTelemetry) => void>();
     const repaired = vi
@@ -89,6 +143,50 @@ describe("OpenAI-compatible transport", () => {
       ).retryable,
     ).toBe(false);
     expect(mapOpenAICompatibleError(new TypeError("fetch failed")).retryable).toBe(true);
+    expect(mapOpenAICompatibleError({ cause: { code: "ECONNREFUSED" } }).retryable).toBe(true);
+    expect(mapOpenAICompatibleError({ status: 401 }).retryable).toBe(false);
+    expect(mapOpenAICompatibleError({ statusCode: 502 }).retryable).toBe(true);
+    expect(mapOpenAICompatibleError(new Error("unknown provider failure")).retryable).toBe(false);
+  });
+
+  it("maps generator failures once and records whether they follow a schema retry", async () => {
+    const initialTelemetry = vi.fn<(telemetry: SchemaTelemetry) => void>();
+    const initialFailure = vi
+      .fn<TextGenerator>()
+      .mockRejectedValue(Object.assign(new Error("socket"), { code: "ETIMEDOUT" }));
+    await expect(
+      transport(initialFailure, initialTelemetry).generate(request()),
+    ).rejects.toMatchObject({ retryable: true });
+    expect(initialFailure).toHaveBeenCalledOnce();
+    expect(initialTelemetry).toHaveBeenCalledWith({
+      schemaFailure: false,
+      schemaRetryCount: 0,
+    });
+
+    const repairTelemetry = vi.fn<(telemetry: SchemaTelemetry) => void>();
+    const repairFailure = vi
+      .fn<TextGenerator>()
+      .mockResolvedValueOnce({ text: '{"answer":1}', usage: {} })
+      .mockRejectedValueOnce({ status: 400 });
+    await expect(
+      transport(repairFailure, repairTelemetry).generate(request()),
+    ).rejects.toMatchObject({ retryable: false });
+    expect(repairFailure).toHaveBeenCalledTimes(2);
+    expect(repairFailure.mock.calls[1]?.[0].prompt).toMatch(/answer: Invalid input/u);
+    expect(repairTelemetry).toHaveBeenCalledWith({
+      schemaFailure: false,
+      schemaRetryCount: 1,
+    });
+  });
+
+  it("honours a signal that was aborted before generation", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const generate = vi.fn<TextGenerator>();
+    await expect(transport(generate).generate(request(controller.signal))).rejects.toMatchObject({
+      name: "AbortError",
+    });
+    expect(generate).not.toHaveBeenCalled();
   });
 
   it("preserves aborts instead of mapping or retrying them", async () => {
@@ -109,5 +207,11 @@ describe("OpenAI-compatible transport", () => {
     controller.abort();
     await expect(pending).rejects.toMatchObject({ name: "AbortError" });
     expect(generate).toHaveBeenCalledOnce();
+
+    const errorAbort = Object.assign(new Error("aborted"), { name: "AbortError" });
+    const rejectWithError = vi.fn<TextGenerator>().mockRejectedValue(errorAbort);
+    await expect(transport(rejectWithError).generate(request())).rejects.toMatchObject({
+      name: "AbortError",
+    });
   });
 });

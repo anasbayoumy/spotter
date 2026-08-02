@@ -33,18 +33,22 @@ These are application-build screens rendered with deterministic synthetic fixtur
 
 ### Coach console
 
-| Risk-ranked review queue                                                                                                    | Programme safety review                                                                                                                 |
-| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Coach review queue](./DOCS/assets/screenshots/coach-review-queue.png)](./DOCS/assets/screenshots/coach-review-queue.png) | [![Coach programme review](./DOCS/assets/screenshots/coach-programme-review.png)](./DOCS/assets/screenshots/coach-programme-review.png) |
+| Current build                                                                                                                                       | What it shows                                                         |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| [![Coach review queue](./DOCS/assets/screenshots/coach-review-queue.png)](./DOCS/assets/screenshots/coach-review-queue.png)                         | Populated review queue with risk-ranked items and safety findings.    |
+| [![Coach programme review](./DOCS/assets/screenshots/coach-programme-review.png)](./DOCS/assets/screenshots/coach-programme-review.png)             | Safety-flagged programme with the deterministic gate finding visible. |
+| [![Coach context trace](./DOCS/assets/screenshots/coach-context-trace.png)](./DOCS/assets/screenshots/coach-context-trace.png)                      | Exact context trace for the safety-flagged programme.                 |
+| [![Coach evaluation scorecard](./DOCS/assets/screenshots/coach-evaluation-scorecard.png)](./DOCS/assets/screenshots/coach-evaluation-scorecard.png) | Evaluation scorecard generated from the seeded recorded-mode runs.    |
 
 See the [coach console gallery](./frontend/README.md) for client context, traceability, and
 evaluation evidence.
 
 ### Client experience
 
-| Unpublished-plan privacy state                                                                                                                                              | Daily check-in                                                                                                                         |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Client experience with no published plan](./DOCS/assets/screenshots/client-no-published-plan-mobile.png)](./DOCS/assets/screenshots/client-no-published-plan-mobile.png) | [![Client daily check-in](./DOCS/assets/screenshots/client-check-in-mobile.png)](./DOCS/assets/screenshots/client-check-in-mobile.png) |
+| Current build                                                                                                                          | What it shows                                                 |
+| -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| [![Client today screen](./DOCS/assets/screenshots/client-today-mobile.png)](./DOCS/assets/screenshots/client-today-mobile.png)         | Today's current coach-published session in the mobile client. |
+| [![Client daily check-in](./DOCS/assets/screenshots/client-check-in-mobile.png)](./DOCS/assets/screenshots/client-check-in-mobile.png) | Readiness and feedback check-in in the mobile client.         |
 
 See the [client experience gallery](./client-frontend/README.md) for client selection and session
 logging.

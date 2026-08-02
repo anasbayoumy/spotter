@@ -1,5 +1,6 @@
 import { mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
   expect,
@@ -18,14 +19,17 @@ const ids = {
   blockedProgramme: "00000000-0000-4000-8000-000000000602",
   disengagedClient: "00000000-0000-4000-8000-000000000106",
   healthyClient: "00000000-0000-4000-8000-000000000101",
-  publishedProgramme: "00000000-0000-4000-8000-000000000601",
   rejectClient: "00000000-0000-4000-8000-000000000105",
   rejectProgramme: "00000000-0000-4000-8000-000000000606",
   supersededClient: "00000000-0000-4000-8000-000000000104",
   supersededProgramme: "00000000-0000-4000-8000-000000000604",
   currentProgramme: "00000000-0000-4000-8000-000000000605",
-  trace: "00000000-0000-4000-8000-000000000201",
 } as const;
+
+const documentationScreenshots = fileURLToPath(
+  new URL("../../../DOCS/assets/screenshots", import.meta.url),
+);
+const captureDocumentation = process.env["SPOTTER_CAPTURE_DOCS"] === "true";
 
 async function data<T>(response: APIResponse): Promise<T> {
   const body = (await response.json()) as {
@@ -112,10 +116,14 @@ test.describe.serial("QA-E2E coach journeys", () => {
     await page.getByRole("button", { name: "Edit proposal" }).click();
     const summary = page.getByLabel("Programme summary");
     await summary.fill(`${await summary.inputValue()} Coach-reviewed.`);
-    await page.getByLabel("Sets").first().fill("3");
+    const sets = page.locator('input[id^="sets-"]');
+    await expect(sets).toHaveCount(3);
+    for (let index = 0; index < 3; index += 1) await sets.nth(index).fill("1");
     await page.getByRole("button", { name: "Save and rerun gates" }).click();
     await expect(page.getByText("Changes saved and safety evidence refreshed.")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Deterministic safety gates" })).toBeVisible();
+    await expect(page.getByText(/Volume Spike/u)).toBeVisible();
+    await expect(page.getByText(/volume_spike passed/u)).toBeVisible();
     await page.getByRole("button", { name: "Approve" }).click();
     const dialog = page.getByRole("dialog", { name: "Publish this programme?" });
     await expect(dialog).toBeVisible();
@@ -376,15 +384,36 @@ test.describe.serial("QA-E2E coach journeys", () => {
   }, testInfo) => {
     const runtime = installRuntimeGuard(page, testInfo);
     const pages = [
-      { name: "queue", path: "/queue", ready: "Review queue" },
-      { name: "client", path: `/clients/${ids.healthyClient}`, ready: "c_001" },
       {
+        asset: "coach-review-queue.png",
+        name: "queue",
+        path: "/queue",
+        ready: "Review queue",
+      },
+      {
+        asset: "coach-client-workspace.png",
+        name: "client",
+        path: `/clients/${ids.healthyClient}`,
+        ready: "c_001",
+      },
+      {
+        asset: "coach-programme-review.png",
         name: "programme",
-        path: `/programmes/${ids.publishedProgramme}`,
+        path: `/programmes/${ids.blockedProgramme}`,
         ready: "Programme content",
       },
-      { name: "trace", path: `/traces/${ids.trace}`, ready: "Context trace" },
-      { name: "scorecard", path: "/scorecard", ready: "Evaluation scorecard" },
+      {
+        asset: "coach-context-trace.png",
+        name: "trace",
+        path: "/traces/00000000-0000-4000-8000-000000000202",
+        ready: "Context trace",
+      },
+      {
+        asset: "coach-evaluation-scorecard.png",
+        name: "scorecard",
+        path: "/scorecard",
+        ready: "Evaluation scorecard",
+      },
     ] as const;
     const viewports = [
       { height: 812, name: "375x812", width: 375 },
@@ -399,6 +428,24 @@ test.describe.serial("QA-E2E coach journeys", () => {
         await expect(page.getByRole("heading", { name: target.ready }).first()).toBeVisible();
         await page.waitForLoadState("networkidle");
         await assertNoHorizontalOverflow(page);
+        if (target.name === "queue" && captureDocumentation) {
+          await expect(page.getByText(/forbidden movement/iu).first()).toBeVisible();
+        }
+        if (target.name === "programme") {
+          await expect(
+            page.getByText("Synthetic forbidden movement is correctly blocked."),
+          ).toBeVisible();
+        }
+        if (target.name === "trace") {
+          await expect(
+            page.getByRole("heading", { name: "Exact rendered model input" }),
+          ).toBeVisible();
+        }
+        if (target.name === "scorecard") {
+          await expect(
+            page.getByRole("heading", { name: "Safety pass rate by gate" }),
+          ).toBeVisible();
+        }
         if (target.name === "client" && viewport.width === 768) {
           const contentColumnCount = await page
             .locator(".content-layout")
@@ -412,6 +459,12 @@ test.describe.serial("QA-E2E coach journeys", () => {
         const path = testInfo.outputPath("screenshots", `${target.name}-${viewport.name}.png`);
         await mkdir(dirname(path), { recursive: true });
         await page.screenshot({ fullPage: true, path });
+        if (viewport.width === 1440 && captureDocumentation) {
+          await page.screenshot({
+            fullPage: true,
+            path: `${documentationScreenshots}/${target.asset}`,
+          });
+        }
         await testInfo.attach(`${target.name}-${viewport.name}`, {
           contentType: "image/png",
           path,
