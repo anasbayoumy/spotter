@@ -41,7 +41,9 @@ await mkdir(path.join(directory, "logs"), { recursive: true });
 const results = [];
 for (const [index, script] of commands.entries()) {
   const commandStarted = Date.now();
-  const code = await run("corepack", ["pnpm", "run", script]);
+  const code = await run("corepack", ["pnpm", "run", script], {
+    env: { SPOTTER_VERIFICATION_RUN_ID: runId },
+  });
   const log = `logs/cmd-${String(index + 1).padStart(3, "0")}.log`;
   await writeFile(path.join(directory, log), `${script}: exit ${code}\n`, "utf8");
   results.push({

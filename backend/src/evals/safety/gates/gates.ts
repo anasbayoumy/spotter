@@ -6,6 +6,10 @@ import { resolveMovementFamily } from "../movement-taxonomy";
 
 type Gate = (input: SafetyInput) => GateResult;
 
+function isPositiveInteger(value: unknown): boolean {
+  return Number.isInteger(value) && Number(value) >= 1;
+}
+
 function result(name: GateName, findings: readonly GateFinding[]): GateResult {
   return {
     findings,
@@ -63,15 +67,17 @@ export const forbiddenMovementGate: Gate = (input) => {
   for (const constraint of activeHardConstraints(input)) {
     for (const rawFamily of constraint.forbids) {
       const family = resolveMovementFamily(rawFamily);
-      if (family !== null) forbidden.set(family, constraint.id);
+      if (family === null) continue;
+      forbidden.set(family, constraint.id);
     }
   }
 
   const findings: GateFinding[] = [];
   for (const exercise of input.exercises) {
     const family = resolveMovementFamily(exercise.family);
-    const constraintId = family === null ? undefined : forbidden.get(family);
-    if (family !== null && constraintId !== undefined) {
+    if (family === null) continue;
+    const constraintId = forbidden.get(family);
+    if (constraintId !== undefined) {
       findings.push({
         code: "forbidden_movement_family",
         detail: `Exercise ${exercise.name} resolves to forbidden family ${family} from constraint ${constraintId}.`,
@@ -85,12 +91,7 @@ export const forbiddenMovementGate: Gate = (input) => {
 export const volumeSpikeGate: Gate = (input) => {
   const findings = input.volumeChanges.flatMap((change): readonly GateFinding[] => {
     if (input.adherence14d === null || input.adherence14d >= 0.6) return [];
-    const increaseRatio =
-      change.previousSets === 0
-        ? change.proposedSets > 0
-          ? Number.POSITIVE_INFINITY
-          : 0
-        : (change.proposedSets - change.previousSets) / change.previousSets;
+    const increaseRatio = (change.proposedSets - change.previousSets) / change.previousSets;
     return increaseRatio > 0.3
       ? [
           {
@@ -159,12 +160,7 @@ export const adjustmentOperationScopeGate: Gate = (input) => {
         }
         break;
       case "reduce_volume":
-        if (
-          operation.direction === "increase" ||
-          operation.setsToRemove === undefined ||
-          !Number.isInteger(operation.setsToRemove) ||
-          operation.setsToRemove < 1
-        ) {
+        if (operation.direction === "increase" || !isPositiveInteger(operation.setsToRemove)) {
           findings.push({
             code: "invalid_volume_reduction",
             detail: `Operation ${String(index)} is not a valid volume reduction.`,

@@ -31,7 +31,7 @@ import {
   sessionSchema,
 } from "./sessions";
 import { scorecardSchema } from "./scorecard";
-import { contextTraceSchema } from "./traces";
+import { contextTraceAttemptSchema } from "./traces";
 
 export const idPathParamsSchema = z.object({ id: uuidSchema }).strict();
 export const clientPathParamsSchema = z.object({ clientId: uuidSchema }).strict();
@@ -152,7 +152,7 @@ export const apiContracts = {
     },
   },
   traces: {
-    detail: { input: tracePathParamsSchema, output: apiResponseSchema(contextTraceSchema) },
+    detail: { input: tracePathParamsSchema, output: apiResponseSchema(contextTraceAttemptSchema) },
   },
   scorecard: {
     detail: { input: z.object({}).strict(), output: apiResponseSchema(scorecardSchema) },

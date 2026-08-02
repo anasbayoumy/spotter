@@ -1,6 +1,7 @@
 import {
   gateResultSchema,
   judgeResultSchema,
+  contextTraceSchema,
   programmeModelOutputSchema,
   programmePayloadSchema,
   programmeReviewSchema,
@@ -69,6 +70,12 @@ export class GenerateProgramme {
           targetWeekStart: input.targetWeekStart,
         });
         await this.dependencies.traces.persistBeforeModel(assembled.trace);
+        if (assembled.status === "hard_constraint_overflow") {
+          throw new ApplicationError(
+            "context_hard_constraints_exceed_budget",
+            "Active hard constraints exceed the context budget.",
+          );
+        }
         try {
           const output = programmeModelOutputSchema.parse(
             await this.dependencies.gateway.generateProgramme(assembled.trace),
@@ -151,13 +158,16 @@ export class EditProgrammeProposal {
       );
     }
     const payload = programmePayloadSchema.parse(input.payload);
-    const trace = await this.dependencies.traces.get(existing.traceId);
-    if (trace === undefined)
+    const traceAttempt = await this.dependencies.traces.get(existing.traceId);
+    if (traceAttempt === undefined)
       throw new ApplicationError("dependency_unavailable", "Programme trace is unavailable.");
+    const trace = contextTraceSchema.safeParse(traceAttempt);
+    if (!trace.success)
+      throw new ApplicationError("dependency_unavailable", "Programme trace is invalid.");
     const output = programmeModelOutputSchema.parse({ payload, citations: existing.citations });
     const gates = z
       .array(gateResultSchema)
-      .parse(await this.dependencies.evaluation.runGates("programme", trace, output));
+      .parse(await this.dependencies.evaluation.runGates("programme", trace.data, output));
     const band = reviewBandFromResults(gates, existing.judges);
     return this.dependencies.programmes.edit({
       programmeId,

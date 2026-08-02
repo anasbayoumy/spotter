@@ -38,7 +38,7 @@ export interface ProgrammeState {
 
 function copyPayload(payload: ProgrammePayload): ProgrammePayload {
   const summary = payload.summary.trim();
-  if (summary.length === 0 || payload.days.length === 0 || payload.days.length > 14) {
+  if (summary.length === 0 || payload.days.length === 0) {
     throw new DomainError("invalid_value", "Programme requires a summary and one to fourteen days");
   }
   const indexes = new Set<number>();

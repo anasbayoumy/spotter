@@ -48,18 +48,14 @@ export function calculateAccountabilityTier(inputs: EngagementInputs): Accountab
   ) {
     throw new DomainError("invalid_value", "Invalid engagement recency or latency");
   }
-  const adherence14d = calculateAdherence(inputs.completedDue14d, inputs.plannedDue14d);
-  if (inputs.daysSinceOpen !== null && inputs.daysSinceOpen >= 21) return 4;
-  if (
-    (inputs.daysSinceOpen !== null && inputs.daysSinceOpen >= 7) ||
-    (inputs.plannedDue14d >= 2 && adherence14d !== null && adherence14d < 0.5)
-  )
-    return 3;
+  const adherence14d = calculateAdherence(inputs.completedDue14d, inputs.plannedDue14d) ?? 1;
+  const daysSinceOpen = inputs.daysSinceOpen ?? 0;
+  if (daysSinceOpen >= 21) return 4;
+  if (daysSinceOpen >= 7 || (inputs.plannedDue14d >= 2 && adherence14d < 0.5)) return 3;
   const doubledLatency =
     inputs.baselineCheckInCount >= 2 &&
     inputs.currentCheckInLatencyHours !== null &&
     inputs.baselineCheckInLatencyHours !== null &&
-    inputs.baselineCheckInLatencyHours > 0 &&
     inputs.currentCheckInLatencyHours >= inputs.baselineCheckInLatencyHours * 2;
   if (inputs.missedDue14d >= 2 || doubledLatency) return 2;
   if (inputs.missedDue7d === 1) return 1;

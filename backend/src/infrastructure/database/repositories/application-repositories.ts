@@ -7,7 +7,7 @@ import {
   clientConstraintSchema,
   clientDetailSchema,
   clientSummarySchema,
-  contextTraceSchema,
+  contextTraceAttemptSchema,
   engagementInputsSchema,
   gateResultSchema,
   inAppMessageSchema,
@@ -26,7 +26,7 @@ import {
   type CheckIn,
   type ClientDetail,
   type ClientSummary,
-  type ContextTrace,
+  type ContextTraceAttempt,
   type EngagementInputs,
   type Programme,
   type ProgrammePayload,
@@ -392,7 +392,7 @@ export class DrizzleClientReadRepository implements ClientReadPort {
 export class DrizzleTraceRepository implements TracePort {
   public constructor(private readonly database: DatabaseSession) {}
 
-  public async persistBeforeModel(trace: ContextTrace): Promise<void> {
+  public async persistBeforeModel(trace: ContextTraceAttempt): Promise<void> {
     await this.database
       .insert(contextTraces)
       .values({
@@ -409,13 +409,13 @@ export class DrizzleTraceRepository implements TracePort {
       .onConflictDoNothing();
   }
 
-  public async get(traceId: string): Promise<ContextTrace | undefined> {
+  public async get(traceId: string): Promise<ContextTraceAttempt | undefined> {
     const row = await this.database.query.contextTraces.findFirst({
       where: eq(contextTraces.id, traceId),
     });
     if (row === undefined) return undefined;
     const selected = selectedTraceSchema.parse(row.selected);
-    return contextTraceSchema.parse({
+    return contextTraceAttemptSchema.parse({
       budget: row.budget,
       clientId: row.clientId,
       createdAt: row.createdAt.toISOString(),
@@ -652,6 +652,18 @@ export class DrizzleProgrammeApplicationRepository implements ProgrammePort {
       throw new ApplicationError("validation_failed", "Programme requires a scheduled day.");
     }
     await this.adapter.transaction(async (database) => {
+      await database.execute(
+        sql`SELECT id FROM programmes WHERE id = ${input.programmeId} FOR UPDATE`,
+      );
+      const locked = await database.query.programmes.findFirst({
+        where: eq(programmes.id, input.programmeId),
+      });
+      if (locked === undefined) {
+        throw new ApplicationError("programme_not_found", "Programme does not exist.");
+      }
+      if (locked.version !== input.expectedVersion || locked.status !== existing.programme.status) {
+        throw new ApplicationError("version_conflict", "Programme changed during editing.");
+      }
       await database.insert(agentRuns).values({
         agent: "programme",
         attemptKey: `programme.edit:${input.context.idempotencyKey}`,
@@ -695,11 +707,17 @@ export class DrizzleProgrammeApplicationRepository implements ProgrammePort {
         week: existing.programme.week,
         weekStart,
       });
-      if (existing.programme.status === "queued") {
+      if (locked.status === "queued") {
         await database
           .update(programmes)
           .set({ status: "rejected" })
-          .where(eq(programmes.id, input.programmeId));
+          .where(
+            and(
+              eq(programmes.id, input.programmeId),
+              eq(programmes.status, "queued"),
+              eq(programmes.version, input.expectedVersion),
+            ),
+          );
       }
       await database.insert(coachActions).values({
         action: "edited",
@@ -731,10 +749,32 @@ export class DrizzleProgrammeApplicationRepository implements ProgrammePort {
         "Only pending programmes can be rejected.",
       );
     await this.adapter.transaction(async (database) => {
+      await database.execute(sql`SELECT id FROM programmes WHERE id = ${row.id} FOR UPDATE`);
+      const locked = await database.query.programmes.findFirst({
+        where: eq(programmes.id, row.id),
+      });
+      if (locked === undefined) {
+        throw new ApplicationError("programme_not_found", "Programme does not exist.");
+      }
+      if (locked.version !== input.expectedVersion) {
+        throw new ApplicationError("version_conflict", "Programme version changed.");
+      }
+      if (locked.status !== "draft" && locked.status !== "queued") {
+        throw new ApplicationError(
+          "invalid_state_transition",
+          "Only pending programmes can be rejected.",
+        );
+      }
       await database
         .update(programmes)
         .set({ status: "rejected" })
-        .where(eq(programmes.id, row.id));
+        .where(
+          and(
+            eq(programmes.id, row.id),
+            eq(programmes.version, input.expectedVersion),
+            inArray(programmes.status, ["draft", "queued"]),
+          ),
+        );
       await database.insert(coachActions).values({
         action: "rejected",
         clientId: row.clientId,
@@ -828,11 +868,15 @@ export class DrizzleSessionRepository implements SessionPort {
         "invalid_state_transition",
         "Completed session work cannot be changed.",
       );
-    await this.database
+    const [updated] = await this.database
       .update(sessions)
       .set({ actual: jsonValue(input.actual), notes: input.notes, version: row.version + 1 })
-      .where(and(eq(sessions.id, row.id), eq(sessions.version, input.expectedVersion)));
-    return this.requireResult(row.id);
+      .where(and(eq(sessions.id, row.id), eq(sessions.version, input.expectedVersion)))
+      .returning();
+    if (updated === undefined) {
+      throw new ApplicationError("version_conflict", "Session version changed.");
+    }
+    return sessionFromRow(updated);
   }
 
   public async complete(input: Parameters<SessionPort["complete"]>[0]): Promise<Session> {
@@ -846,7 +890,7 @@ export class DrizzleSessionRepository implements SessionPort {
         "invalid_state_transition",
         "Session work must be logged before completion.",
       );
-    await this.database
+    const [updated] = await this.database
       .update(sessions)
       .set({
         performedAt: new Date(input.performedAt),
@@ -854,8 +898,12 @@ export class DrizzleSessionRepository implements SessionPort {
         status: "completed",
         version: row.version + 1,
       })
-      .where(and(eq(sessions.id, row.id), eq(sessions.version, input.expectedVersion)));
-    return this.requireResult(row.id);
+      .where(and(eq(sessions.id, row.id), eq(sessions.version, input.expectedVersion)))
+      .returning();
+    if (updated === undefined) {
+      throw new ApplicationError("version_conflict", "Session version changed.");
+    }
+    return sessionFromRow(updated);
   }
 
   private async requireMutable(
@@ -876,13 +924,6 @@ export class DrizzleSessionRepository implements SessionPort {
       throw new ApplicationError("stale_programme", "Session programme is no longer current.");
     }
     return row;
-  }
-
-  private async requireResult(sessionId: string): Promise<Session> {
-    const row = await this.database.query.sessions.findFirst({ where: eq(sessions.id, sessionId) });
-    if (row === undefined)
-      throw new DatabaseInvariantError("dependency_unavailable", "Stored session was not found.");
-    return sessionFromRow(row);
   }
 }
 
@@ -1394,19 +1435,46 @@ export class DrizzleAccountabilityRepository implements AccountabilityPort {
   public async commitDecision(
     input: Parameters<AccountabilityPort["commitDecision"]>[0],
   ): Promise<AccountabilityDetail> {
-    const scoreId = randomUUID();
     await this.adapter.transaction(async (database) => {
-      if (input.runId !== null) await this.audit.persistSuccess(database, input.runId);
       await database
+        .insert(messageGuards)
+        .values({ clientId: input.clientId })
+        .onConflictDoNothing();
+      await database.execute(
+        sql`SELECT client_id FROM message_guards WHERE client_id = ${input.clientId} FOR UPDATE`,
+      );
+      const [guard, currentState] = await Promise.all([
+        database.query.messageGuards.findFirst({
+          where: eq(messageGuards.clientId, input.clientId),
+        }),
+        database.query.accountabilityStates.findFirst({
+          where: eq(accountabilityStates.clientId, input.clientId),
+        }),
+      ]);
+      const preserveHumanOwnership =
+        currentState?.owner === "coach" && input.nextState.owner !== "coach";
+      const committedState = preserveHumanOwnership
+        ? {
+            automationPaused: currentState.automationPaused,
+            churnFlagged: currentState.churnFlagged,
+            owner: currentState.owner,
+            tier: currentState.tier,
+            version: Math.max(input.nextState.version, currentState.version + 1),
+          }
+        : input.nextState;
+      if (input.runId !== null) await this.audit.persistSuccess(database, input.runId);
+      const computationKey = `daily:${input.context.effectiveAt.toISOString().slice(0, 10)}`;
+      const candidateScoreId = randomUUID();
+      const insertedScores = await database
         .insert(engagementScores)
         .values({
           adherence14d: adherence(input.inputs.completedDue14d, input.inputs.plannedDue14d),
           adherence7d: adherence(input.inputs.completedDue7d, input.inputs.plannedDue7d),
           clientId: input.clientId,
-          computationKey: `daily:${input.context.effectiveAt.toISOString().slice(0, 10)}`,
+          computationKey,
           computedAt: input.context.effectiveAt,
           daysSinceOpen: input.inputs.daysSinceOpen,
-          id: scoreId,
+          id: candidateScoreId,
           inputs: jsonObject(input.inputs),
           policyVersion: "v1",
           score: Math.max(
@@ -1418,28 +1486,44 @@ export class DrizzleAccountabilityRepository implements AccountabilityPort {
           ),
           tier: input.tier,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing()
+        .returning({ id: engagementScores.id });
+      const storedScore =
+        insertedScores[0] ??
+        (await database.query.engagementScores.findFirst({
+          where: and(
+            eq(engagementScores.clientId, input.clientId),
+            eq(engagementScores.computationKey, computationKey),
+          ),
+        }));
+      if (storedScore === undefined) {
+        throw new DatabaseInvariantError(
+          "dependency_unavailable",
+          "Accountability score was not found after its atomic claim.",
+        );
+      }
+      const scoreId = storedScore.id;
       await database
         .insert(accountabilityStates)
         .values({
-          automationPaused: input.nextState.automationPaused,
-          churnFlagged: input.nextState.churnFlagged,
+          automationPaused: committedState.automationPaused,
+          churnFlagged: committedState.churnFlagged,
           clientId: input.clientId,
           latestScoreId: scoreId,
-          owner: input.nextState.owner,
-          tier: input.nextState.tier,
+          owner: committedState.owner,
+          tier: committedState.tier,
           transitionedAt: input.context.effectiveAt,
-          version: input.nextState.version,
+          version: committedState.version,
         })
         .onConflictDoUpdate({
           set: {
-            automationPaused: input.nextState.automationPaused,
-            churnFlagged: input.nextState.churnFlagged,
+            automationPaused: committedState.automationPaused,
+            churnFlagged: committedState.churnFlagged,
             latestScoreId: scoreId,
-            owner: input.nextState.owner,
-            tier: input.nextState.tier,
+            owner: committedState.owner,
+            tier: committedState.tier,
             transitionedAt: input.context.effectiveAt,
-            version: input.nextState.version,
+            version: committedState.version,
           },
           target: accountabilityStates.clientId,
         });
@@ -1457,19 +1541,9 @@ export class DrizzleAccountabilityRepository implements AccountabilityPort {
       }
       if (input.draftedContent !== null && input.tier >= 1 && input.tier <= 3) {
         if (input.tier === 1) {
-          await database
-            .insert(messageGuards)
-            .values({ clientId: input.clientId })
-            .onConflictDoNothing();
-          await database.execute(
-            sql`SELECT client_id FROM message_guards WHERE client_id = ${input.clientId} FOR UPDATE`,
-          );
-          const guard = await database.query.messageGuards.findFirst({
-            where: eq(messageGuards.clientId, input.clientId),
-          });
           const eligible =
             input.automatedSendAllowed &&
-            input.nextState.owner !== "coach" &&
+            committedState.owner !== "coach" &&
             (guard?.lastAutomatedSentAt === null ||
               guard?.lastAutomatedSentAt === undefined ||
               input.context.effectiveAt.valueOf() - guard.lastAutomatedSentAt.valueOf() >=

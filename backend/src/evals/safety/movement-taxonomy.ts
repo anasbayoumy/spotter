@@ -34,23 +34,21 @@ export function normalizeMovementIdentifier(value: string): string {
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/gu, "_")
-    .replace(/^_+|_+$/gu, "")
-    .replace(/_+/gu, "_");
+    .replace(/^_|_$/gu, "");
 }
-
-const aliasEntries = Object.entries(taxonomy).flatMap(([family, aliases]) =>
-  aliases.map((alias) => [normalizeMovementIdentifier(alias), family] as const),
-);
-const aliasToFamily: ReadonlyMap<string, MovementFamily> = new Map(
-  aliasEntries.map(([alias, family]) => [alias, family as MovementFamily]),
-);
 
 export const knownMovementFamilies: ReadonlySet<MovementFamily> = new Set(
   Object.keys(taxonomy) as MovementFamily[],
 );
 
 export function resolveMovementFamily(value: string): MovementFamily | null {
-  return aliasToFamily.get(normalizeMovementIdentifier(value)) ?? null;
+  const normalized = normalizeMovementIdentifier(value);
+  for (const family of knownMovementFamilies) {
+    if (taxonomy[family].some((alias) => normalizeMovementIdentifier(alias) === normalized)) {
+      return family;
+    }
+  }
+  return null;
 }
 
 export function movementAliases(family: MovementFamily): readonly string[] {

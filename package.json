@@ -42,6 +42,7 @@
     "test:security": "node scripts/security/run-security-suite.mjs",
     "test:docker": "node scripts/docker/verify.mjs",
     "verify:docker": "pnpm test:docker",
+    "generate:openapi": "node scripts/verification/generate-openapi.mjs",
     "verify:generated": "node scripts/verification/verify-generated.mjs",
     "coverage:changed": "turbo run coverage:changed",
     "evidence:verify": "node scripts/verification/verify-evidence.mjs",

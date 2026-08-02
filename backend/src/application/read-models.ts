@@ -3,7 +3,7 @@ import type {
   adjustmentSchema,
   clientDetailSchema,
   clientSummarySchema,
-  contextTraceSchema,
+  contextTraceAttemptSchema,
   inAppMessageSchema,
   programmeReviewSchema,
   programmeSchema,
@@ -18,7 +18,7 @@ export type AccountabilityDetail = z.infer<typeof accountabilityDetailSchema>;
 export type Adjustment = z.infer<typeof adjustmentSchema>;
 export type ClientDetail = z.infer<typeof clientDetailSchema>;
 export type ClientSummary = z.infer<typeof clientSummarySchema>;
-export type ContextTrace = z.infer<typeof contextTraceSchema>;
+export type ContextTrace = z.infer<typeof contextTraceAttemptSchema>;
 export type InAppMessage = z.infer<typeof inAppMessageSchema>;
 export type Programme = z.infer<typeof programmeSchema>;
 export type ProgrammeReview = z.infer<typeof programmeReviewSchema>;

@@ -36,3 +36,20 @@
 - 2026-08-02: Integration testing found and fixed a missing Drizzle journal entry for migration
   `0001_api_runtime_contract`; PGlite had applied filename-sorted SQL, while authoritative
   PostgreSQL correctly proved the metadata omission before the fix.
+- 2026-08-02: Pool 4 adversarial verification exposed production-path defects hidden by isolated
+  tests: safety evaluation omitted trace-derived constraints/schedule/adherence/volume; overflow
+  evidence was thrown away before persistence; accountability tier and message kind could diverge;
+  and several publication, session, programme-edit, and accountability races could lose state or
+  downgrade human ownership. Each defect now has a production-path or authoritative PostgreSQL
+  regression.
+- 2026-08-02: The Pool 4 checkpoint passed 364 backend unit/property tests at 99.91% statements,
+  99.61% branches, 100% functions, and 99.90% lines; 138 safety/property tests; the exact 50-case
+  golden set with zero mismatches; 15 PGlite tests; 5 PostgreSQL integration tests; and 12 repeated
+  PostgreSQL races spanning all `QA-CON-001..009` scenarios.
+- 2026-08-02: Expanded mutation testing now genuinely executes 2,146 mutants across all critical
+  scopes. The final strict score is 95.59%, every critical aggregate exceeds 95%, no mutation lacks
+  coverage, and no blocker-removal, temporal-boundary, publication-state, or tier/ownership mutant
+  survives. Every remaining survivor is classified in retained evidence.
+- 2026-08-02: The public API now has a reproducible generated OpenAPI 3.1 inventory covering all 28
+  operations. Route additions/removals/method changes fail `pnpm verify:generated` until the
+  committed snapshot is regenerated and reviewed.

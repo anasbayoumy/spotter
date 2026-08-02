@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DEMO_ANCHOR, demoSeedDataset } from "../../../fixtures/demo/index.js";
 import {
@@ -33,9 +33,21 @@ interface CauseNode {
   code?: unknown;
 }
 
+function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
+  return value !== null && typeof value === "object";
+}
+
+function renderedSql(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map((entry) => renderedSql(entry)).join("");
+  if (!isRecord(value)) return "";
+  return renderedSql(value["queryChunks"] ?? value["value"] ?? "");
+}
+
 async function expectDatabaseError(
   operation: Promise<unknown>,
   expectedCode: string,
+  expectedMessage?: string,
 ): Promise<DatabaseInvariantError> {
   try {
     await operation;
@@ -43,6 +55,7 @@ async function expectDatabaseError(
     expect(error).toBeInstanceOf(DatabaseInvariantError);
     if (error instanceof DatabaseInvariantError) {
       expect(error.code).toBe(expectedCode);
+      if (expectedMessage !== undefined) expect(error.message).toBe(expectedMessage);
       return error;
     }
     throw error;
@@ -67,6 +80,8 @@ function command(overrides: Partial<PublishProgrammeCommand> = {}): PublishProgr
 }
 
 class AdvisoryPgliteUnitOfWork implements UnitOfWork {
+  public sawAdvisoryLock = false;
+  public sawExpectedAdvisoryLockKey = false;
   public readonly capabilities: DatabaseCapabilities = {
     advisoryLocks: true,
     authoritative: false,
@@ -77,7 +92,73 @@ class AdvisoryPgliteUnitOfWork implements UnitOfWork {
   public constructor(private readonly adapter: PgliteDatabaseAdapter) {}
 
   public run<T>(work: (database: DatabaseSession) => Promise<T>): Promise<T> {
-    return this.adapter.transaction(work);
+    return this.adapter.transaction((database) => {
+      const execute = database.execute.bind(database);
+      vi.spyOn(database, "execute").mockImplementation((statement) => {
+        const rendered = renderedSql(statement);
+        if (rendered.includes("pg_advisory_xact_lock")) {
+          this.sawAdvisoryLock = true;
+          this.sawExpectedAdvisoryLockKey = rendered.includes(`${HEALTHY_CLIENT_ID}:2026-08-03`);
+        }
+        return execute(statement);
+      });
+      return work(database);
+    });
+  }
+}
+
+class PublicationConflictPgliteUnitOfWork implements UnitOfWork {
+  public readonly capabilities: DatabaseCapabilities = {
+    advisoryLocks: false,
+    authoritative: false,
+    concurrentTransactions: false,
+    hnswVectorIndex: false,
+  };
+
+  public constructor(private readonly adapter: PgliteDatabaseAdapter) {}
+
+  public run<T>(work: (database: DatabaseSession) => Promise<T>): Promise<T> {
+    return this.adapter.transaction((database) => {
+      let programmeReads = 0;
+      const programmesQuery = database.query.programmes;
+      const findFirst = programmesQuery.findFirst.bind(programmesQuery);
+      const changedSlot = programmesQuery.findFirst({
+        where: eq(programmes.id, "00000000-0000-4000-8000-000000009999"),
+      });
+      vi.spyOn(programmesQuery, "findFirst").mockImplementation((...parameters) => {
+        programmeReads += 1;
+        return programmeReads === 3 ? changedSlot : findFirst(...parameters);
+      });
+      return work(database);
+    });
+  }
+}
+
+class NonAdvisoryTracingPgliteUnitOfWork implements UnitOfWork {
+  public sawAdvisoryLock = false;
+  public sawPublishedSlotRowLock = false;
+  public readonly capabilities: DatabaseCapabilities = {
+    advisoryLocks: false,
+    authoritative: false,
+    concurrentTransactions: false,
+    hnswVectorIndex: false,
+  };
+
+  public constructor(private readonly adapter: PgliteDatabaseAdapter) {}
+
+  public run<T>(work: (database: DatabaseSession) => Promise<T>): Promise<T> {
+    return this.adapter.transaction((database) => {
+      const execute = database.execute.bind(database);
+      vi.spyOn(database, "execute").mockImplementation((statement) => {
+        const rendered = renderedSql(statement);
+        if (rendered.includes("pg_advisory_xact_lock")) this.sawAdvisoryLock = true;
+        if (rendered.includes("status = 'published'") && rendered.includes("FOR UPDATE")) {
+          this.sawPublishedSlotRowLock = true;
+        }
+        return execute(statement);
+      });
+      return work(database);
+    });
   }
 }
 
@@ -108,7 +189,7 @@ describe("PGlite programme publication coverage", () => {
 
   beforeEach(async () => {
     adapter = await PgliteDatabaseAdapter.create();
-    await migratePgliteDatabase(adapter, "migrations");
+    await migratePgliteDatabase(adapter, new URL("../../migrations", import.meta.url).pathname);
     await seedDemoDatabase(adapter.database, demoSeedDataset);
   });
 
@@ -167,6 +248,7 @@ describe("PGlite programme publication coverage", () => {
           }),
         ),
         "dependency_unavailable",
+        "Stored idempotency response does not match the programme publication contract.",
       );
     }
   });
@@ -198,7 +280,11 @@ describe("PGlite programme publication coverage", () => {
   it("requires override for blocked candidates and rejects override elsewhere", async () => {
     const publisher = new PublishProgrammeTransaction(new DrizzleUnitOfWork(adapter));
 
-    await expectDatabaseError(publisher.execute(command()), "blocked_requires_override");
+    await expectDatabaseError(
+      publisher.execute(command()),
+      "blocked_requires_override",
+      "Blocked programme requires override.",
+    );
     await expectDatabaseError(
       publisher.execute(
         command({
@@ -212,7 +298,20 @@ describe("PGlite programme publication coverage", () => {
         }),
       ),
       "invalid_state_transition",
+      "Only a blocked programme can be overridden.",
     );
+  });
+
+  it("takes the published-slot row lock without requesting an unsupported advisory lock", async () => {
+    await insertHealthyCandidate();
+    const unitOfWork = new NonAdvisoryTracingPgliteUnitOfWork(adapter);
+    const publisher = new PublishProgrammeTransaction(unitOfWork);
+
+    await expect(
+      publisher.execute(command({ candidateProgrammeId: CANDIDATE_ID })),
+    ).resolves.toEqual({ programmeId: CANDIDATE_ID, status: "published" });
+    expect(unitOfWork.sawAdvisoryLock).toBe(false);
+    expect(unitOfWork.sawPublishedSlotRowLock).toBe(true);
   });
 
   it("rejects both absent and whitespace-only blocked override reasons", async () => {
@@ -239,7 +338,8 @@ describe("PGlite programme publication coverage", () => {
 
   it("publishes with an advisory lock, supersedes atomically, materializes, audits, and replays", async () => {
     await insertHealthyCandidate();
-    const publisher = new PublishProgrammeTransaction(new AdvisoryPgliteUnitOfWork(adapter));
+    const unitOfWork = new AdvisoryPgliteUnitOfWork(adapter);
+    const publisher = new PublishProgrammeTransaction(unitOfWork);
     const publish = command({
       candidateProgrammeId: CANDIDATE_ID,
       sessions: [
@@ -285,6 +385,32 @@ describe("PGlite programme publication coverage", () => {
     });
     expect(action).toMatchObject({ action: "approved", reason: null });
     expect(idempotency).toMatchObject({ responseStatus: 200, state: "completed" });
+    expect(unitOfWork.sawAdvisoryLock).toBe(true);
+    expect(unitOfWork.sawExpectedAdvisoryLockKey).toBe(true);
+  });
+
+  it("fails and rolls back when the current publication changes before its locking read", async () => {
+    await insertHealthyCandidate();
+    const publisher = new PublishProgrammeTransaction(
+      new PublicationConflictPgliteUnitOfWork(adapter),
+    );
+    const publish = command({
+      candidateProgrammeId: CANDIDATE_ID,
+      idempotencyKey: "observed-slot-conflict",
+      idempotencyRecordId: "00000000-0000-4000-8000-000000009252",
+      requestHash: "sha256:observed-slot-conflict",
+    });
+
+    const error = await expectDatabaseError(publisher.execute(publish), "publication_conflict");
+    expect(error.message).toBe("Another publication changed this programme slot.");
+    expect(
+      await adapter.database.query.programmes.findFirst({ where: eq(programmes.id, CANDIDATE_ID) }),
+    ).toMatchObject({ status: "queued", supersededBy: null });
+    expect(
+      await adapter.database.query.idempotencyRecords.findFirst({
+        where: eq(idempotencyRecords.id, publish.idempotencyRecordId),
+      }),
+    ).toBeUndefined();
   });
 
   it("trims and audits a valid blocked override without sessions", async () => {

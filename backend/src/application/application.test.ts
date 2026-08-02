@@ -211,7 +211,7 @@ function generationDependencies(
   const assembler: ContextAssemblerPort = {
     assemble() {
       events.push("assemble");
-      return Promise.resolve({ trace });
+      return Promise.resolve({ status: "ready", trace });
     },
   };
   const traces: TracePort = {
@@ -352,7 +352,10 @@ describe("programme orchestration", () => {
         { clientId: ids.client, targetWeekStart: "2026-08-03" },
         context,
       ),
-    ).rejects.toMatchObject({ code: "model_output_invalid" });
+    ).rejects.toMatchObject({
+      code: "model_output_invalid",
+      message: "Programme output did not match the required schema.",
+    });
     expect(events).toContain("audit-failure");
     expect(events).not.toContain("gates");
   });
@@ -366,7 +369,10 @@ describe("programme orchestration", () => {
         { expectedVersion: 1 },
         context,
       ),
-    ).rejects.toMatchObject({ code: "blocked_requires_override" });
+    ).rejects.toMatchObject({
+      code: "blocked_requires_override",
+      message: "Blocked programme requires an override.",
+    });
     await expect(
       new OverrideBlockedProgramme(port, idempotent).executeOverride(
         ids.programme,

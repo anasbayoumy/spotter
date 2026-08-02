@@ -135,6 +135,7 @@ function output(tier: 1 | 2 | 3): AccountabilityModelOutput {
 }
 
 interface TestOverrides {
+  readonly assemblyStatus?: "hard_constraint_overflow" | "ready";
   readonly current?: AccountabilityDetail | undefined;
   readonly inputs?: EngagementInputs;
   readonly gatewayOutput?: unknown;
@@ -143,14 +144,29 @@ interface TestOverrides {
 }
 
 interface AccountabilitySetup {
+  readonly assemble: ReturnType<typeof vi.fn<ContextAssemblerPort["assemble"]>>;
   readonly useCase: RunAccountabilityForClient;
+  readonly claims: readonly {
+    readonly scope: string;
+    readonly actorId: string;
+    readonly key: string;
+    readonly requestFingerprint: string;
+  }[];
   readonly commitDecision: ReturnType<typeof vi.fn<AccountabilityPort["commitDecision"]>>;
   readonly draftAccountability: ReturnType<typeof vi.fn<ModelGatewayPort["draftAccountability"]>>;
   readonly recordSuccess: ReturnType<typeof vi.fn<AgentAuditPort["recordSuccess"]>>;
   readonly recordFailure: ReturnType<typeof vi.fn<AgentAuditPort["recordFailure"]>>;
+  readonly runGates: ReturnType<typeof vi.fn<EvaluationPort["runGates"]>>;
+  readonly runJudges: ReturnType<typeof vi.fn<EvaluationPort["runJudges"]>>;
 }
 
 function dependencies(overrides: TestOverrides = {}): AccountabilitySetup {
+  const claims: {
+    readonly scope: string;
+    readonly actorId: string;
+    readonly key: string;
+    readonly requestFingerprint: string;
+  }[] = [];
   const commitDecision = vi.fn<AccountabilityPort["commitDecision"]>().mockImplementation((input) =>
     Promise.resolve(
       accountabilityDetailSchema.parse({
@@ -173,7 +189,10 @@ function dependencies(overrides: TestOverrides = {}): AccountabilitySetup {
     loadInputs: () => Promise.resolve(overrides.inputs ?? inputsByTier[1]),
     commitDecision,
   };
-  const assembler: ContextAssemblerPort = { assemble: () => Promise.resolve({ trace }) };
+  const assemble = vi
+    .fn<ContextAssemblerPort["assemble"]>()
+    .mockResolvedValue({ status: overrides.assemblyStatus ?? "ready", trace });
+  const assembler: ContextAssemblerPort = { assemble };
   const traces: TracePort = {
     persistBeforeModel: () => Promise.resolve(),
     get: () => Promise.resolve(trace),
@@ -191,15 +210,19 @@ function dependencies(overrides: TestOverrides = {}): AccountabilitySetup {
     generateAdjustment: () => Promise.reject(new Error("unused")),
     draftAccountability,
   };
-  const evaluation: EvaluationPort = {
-    runGates: () => Promise.resolve(overrides.gates ?? [passingGate]),
-    runJudges: () => Promise.resolve([judge]),
-  };
+  const runGates = vi
+    .fn<EvaluationPort["runGates"]>()
+    .mockResolvedValue(overrides.gates ?? [passingGate]);
+  const runJudges = vi.fn<EvaluationPort["runJudges"]>().mockResolvedValue([judge]);
+  const evaluation: EvaluationPort = { runGates, runJudges };
   const recordSuccess = vi.fn<AgentAuditPort["recordSuccess"]>().mockResolvedValue(ids.run);
   const recordFailure = vi.fn<AgentAuditPort["recordFailure"]>().mockResolvedValue(undefined);
   const audit: AgentAuditPort = { recordSuccess, recordFailure };
   const idempotency: IdempotencyPort = {
-    claim: () => Promise.resolve({ kind: "claimed", recordId: ids.run }),
+    claim: (input) => {
+      claims.push(input);
+      return Promise.resolve({ kind: "claimed", recordId: ids.run });
+    },
     complete: () => Promise.resolve(),
     fail: () => Promise.resolve(),
   };
@@ -215,10 +238,14 @@ function dependencies(overrides: TestOverrides = {}): AccountabilitySetup {
       idempotency,
       fingerprint,
     }),
+    assemble,
     commitDecision,
     draftAccountability,
     recordSuccess,
     recordFailure,
+    claims,
+    runGates,
+    runJudges,
   };
 }
 
@@ -254,7 +281,7 @@ describe("critical accountability orchestration", () => {
     };
     const useCase = new RunAccountabilityForClient({
       accountability,
-      assembler: { assemble: () => Promise.resolve({ trace }) },
+      assembler: { assemble: () => Promise.resolve({ status: "ready", trace }) },
       traces: { persistBeforeModel: () => Promise.resolve(), get: () => Promise.resolve(trace) },
       gateway: {
         generateProgramme: () => Promise.reject(new Error("unused")),
@@ -271,6 +298,7 @@ describe("critical accountability orchestration", () => {
     });
     await expect(useCase.execute(ids.client, context)).rejects.toMatchObject({
       code: "client_not_found",
+      message: "Client does not exist.",
     });
   });
 
@@ -293,6 +321,13 @@ describe("critical accountability orchestration", () => {
     const setup = dependencies({ inputs: inputsByTier[tier] });
     await setup.useCase.execute(ids.client, context);
     expect(setup.recordSuccess).toHaveBeenCalled();
+    expect(setup.assemble).toHaveBeenCalledWith({
+      kind: "accountability",
+      clientId: ids.client,
+      effectiveAt: now,
+    });
+    expect(setup.runGates).toHaveBeenCalledWith("accountability", trace, output(tier));
+    expect(setup.runJudges).toHaveBeenCalledWith("accountability", trace, output(tier));
     expect(setup.commitDecision).toHaveBeenCalledWith(
       expect.objectContaining({
         tier,
@@ -302,6 +337,26 @@ describe("critical accountability orchestration", () => {
         runId: ids.run,
       }),
     );
+    expect(setup.claims).toEqual([
+      {
+        scope: "accountability.run",
+        actorId: ids.coach,
+        key: context.idempotencyKey,
+        requestFingerprint: JSON.stringify({
+          clientId: ids.client,
+          effectiveAt: now.toISOString(),
+        }),
+      },
+    ]);
+  });
+
+  it("fails closed with stable evidence when hard constraints exceed the context budget", async () => {
+    const setup = dependencies({ assemblyStatus: "hard_constraint_overflow" });
+    await expect(setup.useCase.execute(ids.client, context)).rejects.toMatchObject({
+      code: "context_hard_constraints_exceed_budget",
+      message: "Active hard constraints exceed the context budget.",
+    });
+    expect(setup.draftAccountability).not.toHaveBeenCalled();
   });
 
   it("selects the latest eligible sent-agent message and enforces the exact 48-hour window", async () => {
@@ -334,6 +389,41 @@ describe("critical accountability orchestration", () => {
     );
   });
 
+  it("ignores recent non-agent and unsent messages but sorts eligible sends newest first", async () => {
+    const ignoredRecentCoach = message(ids.message1, {
+      actor: "coach",
+      sentAt: new Date(now.valueOf() - 60 * 60 * 1_000).toISOString(),
+    });
+    const ignoredRecentDraft = message(ids.message2, {
+      status: "drafted",
+      sentAt: new Date(now.valueOf() - 2 * 60 * 60 * 1_000).toISOString(),
+    });
+    const eligibleOld = message(ids.message3, {
+      sentAt: new Date(now.valueOf() - 72 * 60 * 60 * 1_000).toISOString(),
+    });
+    const eligibleRecent = message(ids.message4, {
+      sentAt: new Date(now.valueOf() - 47 * 60 * 60 * 1_000).toISOString(),
+    });
+
+    const ignoresIneligible = dependencies({
+      current: current(0, [ignoredRecentCoach, ignoredRecentDraft, eligibleOld]),
+      inputs: inputsByTier[1],
+    });
+    await ignoresIneligible.useCase.execute(ids.client, context);
+    expect(ignoresIneligible.commitDecision).toHaveBeenCalledWith(
+      expect.objectContaining({ automatedSendAllowed: true }),
+    );
+
+    const sortsEligible = dependencies({
+      current: current(0, [eligibleOld, eligibleRecent]),
+      inputs: inputsByTier[1],
+    });
+    await sortsEligible.useCase.execute(ids.client, context);
+    expect(sortsEligible.commitDecision).toHaveBeenCalledWith(
+      expect.objectContaining({ automatedSendAllowed: false }),
+    );
+  });
+
   it("keeps coach ownership and suppresses automation when the computed tier falls", async () => {
     const setup = dependencies({ current: current(3), inputs: inputsByTier[1] });
     await setup.useCase.execute(ids.client, context);
@@ -353,16 +443,21 @@ describe("critical accountability orchestration", () => {
     const setup = dependencies({ inputs: inputsByTier[1], gatewayOutput: output(2) });
     await expect(setup.useCase.execute(ids.client, context)).rejects.toMatchObject({
       code: "model_output_invalid",
+      message: "Accountability output cannot select a different tier.",
     });
-    expect(setup.recordFailure).toHaveBeenCalledWith(
-      expect.objectContaining({ errorCode: "model_output_invalid" }),
-    );
+    expect(setup.recordFailure).toHaveBeenCalledWith({
+      kind: "accountability",
+      traceId: ids.trace,
+      errorCode: "model_output_invalid",
+      context,
+    });
   });
 
   it("audits and rejects a blocking gate", async () => {
     const setup = dependencies({ inputs: inputsByTier[2], gates: [passingGate, blockingGate] });
     await expect(setup.useCase.execute(ids.client, context)).rejects.toMatchObject({
       code: "model_output_invalid",
+      message: "Accountability content failed a blocking safety gate.",
     });
     expect(setup.recordFailure).toHaveBeenCalledWith(
       expect.objectContaining({ errorCode: "model_output_invalid" }),

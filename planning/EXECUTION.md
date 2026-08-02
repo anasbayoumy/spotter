@@ -26,4 +26,7 @@ There is no arbitrary retry cap for code defects.
 - Pool 2: intelligence runtime, evaluations, application workflows, jobs, and critical coverage —
   complete (`dd46af4`).
 - Pool 3: public backend facade, REST/health adapters, contract-valid migrations/seed, coach
-  console, and Expo client — complete locally; checkpoint publication in progress.
+  console, and Expo client — complete (`8c25b39`).
+- Pool 4: production-path adversarial/property tests, exact safety evidence, authoritative
+  PostgreSQL races, and critical-scope mutation hardening — complete locally; checkpoint publication
+  in progress.

@@ -97,6 +97,15 @@ export class PublishProgrammeTransaction {
           );
         }
 
+        const currentSlot = and(
+          eq(programmes.clientId, candidate.clientId),
+          eq(programmes.weekStart, candidate.weekStart),
+          eq(programmes.status, "published"),
+          isNull(programmes.supersededBy),
+        );
+        const observedCurrent = await database.query.programmes.findFirst({
+          where: currentSlot,
+        });
         if (this.unitOfWork.capabilities.advisoryLocks) {
           await database.execute(
             sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${candidate.clientId}:${candidate.weekStart}`}, 0))`,
@@ -108,18 +117,18 @@ export class PublishProgrammeTransaction {
             AND status = 'published' AND superseded_by IS NULL
           FOR UPDATE
         `);
+        const lockedCurrent = await database.query.programmes.findFirst({ where: currentSlot });
+        if (lockedCurrent?.id !== observedCurrent?.id) {
+          throw new DatabaseInvariantError(
+            "publication_conflict",
+            "Another publication changed this programme slot.",
+          );
+        }
 
         await database
           .update(programmes)
           .set({ status: "superseded", supersededBy: candidate.id })
-          .where(
-            and(
-              eq(programmes.clientId, candidate.clientId),
-              eq(programmes.weekStart, candidate.weekStart),
-              eq(programmes.status, "published"),
-              isNull(programmes.supersededBy),
-            ),
-          );
+          .where(currentSlot);
         await database
           .update(programmes)
           .set({

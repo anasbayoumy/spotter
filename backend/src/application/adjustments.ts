@@ -70,6 +70,12 @@ export class GenerateAdjustment {
           effectiveAt: context.effectiveAt,
         });
         await this.dependencies.traces.persistBeforeModel(assembled.trace);
+        if (assembled.status === "hard_constraint_overflow") {
+          throw new ApplicationError(
+            "context_hard_constraints_exceed_budget",
+            "Active hard constraints exceed the context budget.",
+          );
+        }
         try {
           const output = adjustmentModelOutputSchema.parse(
             await this.dependencies.gateway.generateAdjustment(assembled.trace),

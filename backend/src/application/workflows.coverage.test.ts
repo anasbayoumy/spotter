@@ -241,14 +241,20 @@ interface GenerationDependencies extends IdempotentDependencies {
 
 function generationDependencies(
   overrides: {
+    readonly assembler?: ContextAssemblerPort;
     readonly programmes?: ProgrammePort;
     readonly adjustments?: AdjustmentPort;
     readonly gateway?: Partial<ModelGatewayPort>;
     readonly evaluation?: Partial<EvaluationPort>;
+    readonly idempotency?: IdempotencyPort;
     readonly audit?: Partial<AgentAuditPort>;
   } = {},
 ): GenerationDependencies {
-  const assembler: ContextAssemblerPort = { assemble: () => Promise.resolve({ trace }) };
+  const assembler: ContextAssemblerPort =
+    overrides.assembler ??
+    ({
+      assemble: () => Promise.resolve({ status: "ready", trace }),
+    } satisfies ContextAssemblerPort);
   const traces: TracePort = {
     persistBeforeModel: () => Promise.resolve(),
     get: () => Promise.resolve(trace),
@@ -277,7 +283,8 @@ function generationDependencies(
     audit,
     programmes: overrides.programmes ?? programmePort(),
     adjustments: overrides.adjustments ?? adjustmentPort(),
-    ...idempotent(),
+    fingerprint,
+    idempotency: overrides.idempotency ?? idempotency(),
   };
 }
 
@@ -298,43 +305,158 @@ describe("programme workflow edge coverage", () => {
         context,
       ),
     ).rejects.toBe(failure);
-    expect(recordFailure).toHaveBeenCalledWith(
-      expect.objectContaining({ errorCode: expectedCode }),
+    expect(recordFailure).toHaveBeenCalledWith({
+      kind: "programme",
+      traceId: ids.trace,
+      errorCode: expectedCode,
+      context,
+    });
+  });
+
+  it("passes the exact programme intent and audit evidence through generation", async () => {
+    const claimScopes: string[] = [];
+    const assemble = vi
+      .fn<ContextAssemblerPort["assemble"]>()
+      .mockResolvedValue({ status: "ready", trace });
+    const runGates = vi.fn<EvaluationPort["runGates"]>().mockResolvedValue([passingGate]);
+    const runJudges = vi.fn<EvaluationPort["runJudges"]>().mockResolvedValue([judge]);
+    const recordSuccess = vi.fn<AgentAuditPort["recordSuccess"]>().mockResolvedValue(ids.run);
+    const queueGenerated = vi.fn<ProgrammePort["queueGenerated"]>().mockResolvedValue(queuedReview);
+    const dependencies = generationDependencies({
+      assembler: { assemble },
+      evaluation: { runGates, runJudges },
+      audit: { recordSuccess },
+      programmes: programmePort({ queueGenerated }),
+      idempotency: {
+        claim: (input) => {
+          claimScopes.push(input.scope);
+          return Promise.resolve({ kind: "claimed", recordId: ids.run });
+        },
+        complete: () => Promise.resolve(),
+        fail: () => Promise.resolve(),
+      },
+    });
+    await new GenerateProgramme(dependencies).execute(
+      { clientId: ids.client, targetWeekStart: "2026-08-03" },
+      context,
     );
+    expect(runGates).toHaveBeenCalledWith("programme", trace, programmeOutput);
+    expect(runJudges).toHaveBeenCalledWith("programme", trace, programmeOutput);
+    expect(recordSuccess).toHaveBeenCalledWith({
+      kind: "programme",
+      traceId: ids.trace,
+      output: programmeOutput,
+      gates: [passingGate],
+      judges: [judge],
+      context,
+    });
+    expect(assemble).toHaveBeenCalledWith({
+      kind: "programme",
+      clientId: ids.client,
+      effectiveAt: now,
+      targetWeekStart: "2026-08-03",
+    });
+    expect(claimScopes).toEqual(["programme.generate"]);
+    expect(queueGenerated).toHaveBeenCalledWith({
+      clientId: ids.client,
+      payload,
+      band: "clear",
+      traceId: ids.trace,
+      runId: ids.run,
+      gates: [passingGate],
+      judges: [judge],
+      context,
+    });
+  });
+
+  it("fails closed before model execution when hard constraints exceed the context budget", async () => {
+    const generateProgramme = vi.fn<ModelGatewayPort["generateProgramme"]>();
+    const dependencies = generationDependencies({
+      assembler: {
+        assemble: () => Promise.resolve({ status: "hard_constraint_overflow", trace }),
+      },
+      gateway: { generateProgramme },
+    });
+    await expect(
+      new GenerateProgramme(dependencies).execute(
+        { clientId: ids.client, targetWeekStart: "2026-08-03" },
+        context,
+      ),
+    ).rejects.toMatchObject({
+      code: "context_hard_constraints_exceed_budget",
+      message: "Active hard constraints exceed the context budget.",
+    });
+    expect(generateProgramme).not.toHaveBeenCalled();
+  });
+
+  it("converts schema-invalid programme output into a stable audited application error", async () => {
+    const recordFailure = vi.fn<AgentAuditPort["recordFailure"]>().mockResolvedValue(undefined);
+    const dependencies = generationDependencies({
+      gateway: {
+        generateProgramme: () =>
+          Promise.resolve({ invalid: true } as unknown as typeof programmeOutput),
+      },
+      audit: { recordFailure },
+    });
+    await expect(
+      new GenerateProgramme(dependencies).execute(
+        { clientId: ids.client, targetWeekStart: "2026-08-03" },
+        context,
+      ),
+    ).rejects.toMatchObject({
+      code: "model_output_invalid",
+      message: "Programme output did not match the required schema.",
+    });
+    expect(recordFailure).toHaveBeenCalledWith({
+      kind: "programme",
+      traceId: ids.trace,
+      errorCode: "model_output_invalid",
+      context,
+    });
   });
 
   it("edits an eligible proposal after re-evaluation", async () => {
     const edit = vi.fn<ProgrammePort["edit"]>().mockResolvedValue(queuedReview);
+    const runGates = vi.fn<EvaluationPort["runGates"]>().mockResolvedValue([passingGate]);
     const result = await new EditProgrammeProposal({
       programmes: programmePort({ edit }),
       traces: { persistBeforeModel: () => Promise.resolve(), get: () => Promise.resolve(trace) },
       evaluation: {
-        runGates: () => Promise.resolve([passingGate]),
+        runGates,
         runJudges: () => Promise.resolve([judge]),
       },
     }).execute(ids.programme, { payload, expectedVersion: 1 }, context);
     expect(result).toEqual(queuedReview);
     expect(edit).toHaveBeenCalledWith(expect.objectContaining({ band: "clear" }));
+    expect(runGates).toHaveBeenCalledWith("programme", trace, programmeOutput);
   });
 
   it.each([
-    [programmePort({ getReview: () => Promise.resolve(undefined) }), 1, "programme_not_found"],
+    [
+      programmePort({ getReview: () => Promise.resolve(undefined) }),
+      1,
+      "programme_not_found",
+      "Programme does not exist.",
+    ],
     [
       programmePort({ getReview: () => Promise.resolve(review("queued", "clear", 2)) }),
       1,
       "version_conflict",
+      "Programme version changed.",
     ],
     [
       programmePort({ getReview: () => Promise.resolve(review("rejected")) }),
       1,
       "invalid_state_transition",
+      "This programme can no longer be edited.",
     ],
     [
       programmePort({ getReview: () => Promise.resolve(review("superseded")) }),
       1,
       "invalid_state_transition",
+      "This programme can no longer be edited.",
     ],
-  ])("rejects invalid edit state", async (programmes, expectedVersion, code) => {
+  ])("rejects invalid edit state", async (programmes, expectedVersion, code, message) => {
     const useCase = new EditProgrammeProposal({
       programmes,
       traces: { persistBeforeModel: () => Promise.resolve(), get: () => Promise.resolve(trace) },
@@ -342,7 +464,7 @@ describe("programme workflow edge coverage", () => {
     });
     await expect(
       useCase.execute(ids.programme, { payload, expectedVersion }, context),
-    ).rejects.toMatchObject({ code });
+    ).rejects.toMatchObject({ code, message });
   });
 
   it("rejects an invalid edit payload and a missing source trace", async () => {
@@ -363,60 +485,147 @@ describe("programme workflow edge coverage", () => {
         persistBeforeModel: () => Promise.resolve(),
         get: () => Promise.resolve(undefined),
       }).execute(ids.programme, { payload, expectedVersion: 1 }, context),
-    ).rejects.toMatchObject({ code: "dependency_unavailable" });
+    ).rejects.toMatchObject({
+      code: "dependency_unavailable",
+      message: "Programme trace is unavailable.",
+    });
+    await expect(
+      useCase({
+        persistBeforeModel: () => Promise.resolve(),
+        get: () => Promise.resolve({ invalid: true } as unknown as typeof trace),
+      }).execute(ids.programme, { payload, expectedVersion: 1 }, context),
+    ).rejects.toMatchObject({
+      code: "dependency_unavailable",
+      message: "Programme trace is invalid.",
+    });
   });
 
   it("publishes standard and rejects programmes", async () => {
+    const claims: { readonly requestFingerprint: string; readonly scope: string }[] = [];
+    const reject = vi
+      .fn<ProgrammePort["reject"]>()
+      .mockResolvedValue({ ...queuedReview.programme, status: "rejected" });
+    const boundary: IdempotentDependencies = {
+      fingerprint,
+      idempotency: {
+        claim: (input) => {
+          claims.push({ requestFingerprint: input.requestFingerprint, scope: input.scope });
+          return Promise.resolve({ kind: "claimed", recordId: ids.run });
+        },
+        complete: () => Promise.resolve(),
+        fail: () => Promise.resolve(),
+      },
+    };
     await expect(
-      new ApproveProgramme(programmePort(), idempotent()).execute(
+      new ApproveProgramme(programmePort(), boundary).execute(
         ids.programme,
         { expectedVersion: 1 },
         context,
       ),
     ).resolves.toEqual(publishedProgramme);
     await expect(
-      new RejectProgramme(programmePort(), idempotent()).execute(
+      new RejectProgramme(programmePort({ reject }), boundary).execute(
         ids.programme,
         { expectedVersion: 1, reason: "coach choice" },
         context,
       ),
     ).resolves.toMatchObject({ status: "rejected" });
+    expect(claims).toEqual([
+      {
+        scope: "programme.standard",
+        requestFingerprint: JSON.stringify({
+          programmeId: ids.programme,
+          expectedVersion: 1,
+        }),
+      },
+      {
+        scope: "programme.reject",
+        requestFingerprint: JSON.stringify({
+          programmeId: ids.programme,
+          expectedVersion: 1,
+          reason: "coach choice",
+        }),
+      },
+    ]);
+    expect(reject).toHaveBeenCalledWith({
+      programmeId: ids.programme,
+      expectedVersion: 1,
+      reason: "coach choice",
+      context,
+    });
   });
 
   it.each([
-    [programmePort({ getReview: () => Promise.resolve(undefined) }), 1, "programme_not_found"],
+    [
+      programmePort({ getReview: () => Promise.resolve(undefined) }),
+      1,
+      "programme_not_found",
+      "Programme does not exist.",
+    ],
     [
       programmePort({ getReview: () => Promise.resolve(review("queued", "clear", 2)) }),
       1,
       "version_conflict",
+      "Programme version changed.",
     ],
     [
       programmePort({ getReview: () => Promise.resolve(review("rejected")) }),
       1,
       "invalid_state_transition",
+      "Only queued programmes can be published.",
     ],
-  ])("rejects invalid publish state", async (programmes, expectedVersion, code) => {
+  ])("rejects invalid publish state", async (programmes, expectedVersion, code, message) => {
     await expect(
       new ApproveProgramme(programmes, idempotent()).execute(
         ids.programme,
         { expectedVersion },
         context,
       ),
-    ).rejects.toMatchObject({ code });
+    ).rejects.toMatchObject({ code, message });
   });
 
   it("enforces every override invariant", async () => {
     const clear = new OverrideBlockedProgramme(programmePort(), idempotent());
     await expect(
       clear.executeOverride(ids.programme, { expectedVersion: 1, reason: "reason" }, context),
-    ).rejects.toMatchObject({ code: "invalid_state_transition" });
+    ).rejects.toMatchObject({
+      code: "invalid_state_transition",
+      message: "Only blocked programmes can be overridden.",
+    });
+    const overrideClaims: { readonly scope: string }[] = [];
     const blocked = new OverrideBlockedProgramme(
       programmePort({ getReview: () => Promise.resolve(review("queued", "blocked")) }),
-      idempotent(),
+      {
+        fingerprint,
+        idempotency: {
+          claim: (input) => {
+            overrideClaims.push({ scope: input.scope });
+            return Promise.resolve({ kind: "claimed", recordId: ids.run });
+          },
+          complete: () => Promise.resolve(),
+          fail: () => Promise.resolve(),
+        },
+      },
     );
     await expect(
+      blocked.executeOverride(
+        ids.programme,
+        { expectedVersion: 1, reason: undefined } as unknown as {
+          readonly expectedVersion: number;
+          readonly reason: string;
+        },
+        context,
+      ),
+    ).rejects.toMatchObject({
+      code: "override_reason_required",
+      message: "Override requires a reason.",
+    });
+    await expect(
       blocked.executeOverride(ids.programme, { expectedVersion: 1, reason: " " }, context),
-    ).rejects.toMatchObject({ code: "override_reason_required" });
+    ).rejects.toMatchObject({
+      code: "override_reason_required",
+      message: "Override requires a reason.",
+    });
     await expect(
       blocked.executeOverride(
         ids.programme,
@@ -424,6 +633,7 @@ describe("programme workflow edge coverage", () => {
         context,
       ),
     ).resolves.toEqual(publishedProgramme);
+    expect(overrideClaims).toEqual([{ scope: "programme.override" }]);
   });
 });
 

@@ -7,6 +7,7 @@ import type {
   ClientDetail,
   ClientSummary,
   ContextTrace,
+  ContextTraceAttempt,
   EngagementInputs,
   GateResult,
   JudgeResult,
@@ -28,9 +29,9 @@ export type EvaluatedOutput =
   | AdjustmentModelOutput
   | AccountabilityModelOutput;
 
-export interface AssembledContext {
-  readonly trace: ContextTrace;
-}
+export type AssembledContext =
+  | { readonly status: "ready"; readonly trace: ContextTrace }
+  | { readonly status: "hard_constraint_overflow"; readonly trace: ContextTraceAttempt };
 
 export interface ClientReadPort {
   listSyntheticActive(): Promise<readonly ClientSummary[]>;
@@ -170,8 +171,8 @@ export interface ContextAssemblerPort {
 }
 
 export interface TracePort {
-  persistBeforeModel(trace: ContextTrace): Promise<void>;
-  get(traceId: string): Promise<ContextTrace | undefined>;
+  persistBeforeModel(trace: ContextTraceAttempt): Promise<void>;
+  get(traceId: string): Promise<ContextTraceAttempt | undefined>;
 }
 
 export interface ModelGatewayPort {

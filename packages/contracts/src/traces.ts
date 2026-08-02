@@ -29,7 +29,7 @@ export const contextSectionSchema = z
     rendered: z.string().max(100_000),
   })
   .strict();
-const contextTraceBaseSchema = z
+export const contextTraceAttemptSchema = z
   .object({
     id: uuidSchema,
     clientId: uuidSchema,
@@ -43,13 +43,14 @@ const contextTraceBaseSchema = z
   })
   .strict();
 
-export const contextTraceSchema = contextTraceBaseSchema.refine(
+export const contextTraceSchema = contextTraceAttemptSchema.refine(
   (trace) => trace.tokenCount <= trace.budget,
   "Trace token count exceeds budget",
 );
-export const traceSummarySchema = contextTraceBaseSchema
+export const traceSummarySchema = contextTraceAttemptSchema
   .omit({ rendered: true })
   .extend({ renderedPreview: z.string().max(limits.longText) })
   .strict();
 
 export type ContextTrace = z.infer<typeof contextTraceSchema>;
+export type ContextTraceAttempt = z.infer<typeof contextTraceAttemptSchema>;

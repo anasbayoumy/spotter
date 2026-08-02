@@ -101,7 +101,7 @@ describe("safety properties and exact boundaries", () => {
     }
   });
 
-  it("blocks prohibited V1 auto-application and increasing operations", () => {
+  it("QA-SAF-055: blocks prohibited V1 auto-application regardless of operation type", () => {
     const evaluation = runDeterministicSafety({
       ...safeInput,
       adjustment: {

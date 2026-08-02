@@ -8,6 +8,7 @@ export default tseslint.config(
     ignores: [
       "**/.next/**",
       "**/.expo/**",
+      "**/.stryker-tmp/**",
       "**/.turbo/**",
       "**/artifacts/**",
       "**/build/**",

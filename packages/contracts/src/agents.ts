@@ -23,9 +23,18 @@ export const accountabilityModelOutputSchema = z
     citations: z.array(citationSchema).min(1).max(100),
   })
   .strict()
+  .refine((value) => value.tier >= 1 && value.tier <= 3, "Only tiers 1 through 3 can draft content")
   .refine(
-    (value) => value.tier >= 1 && value.tier <= 3,
-    "Only tiers 1 through 3 can draft content",
+    (value) =>
+      value.kind ===
+      (
+        {
+          1: "client_nudge",
+          2: "reduced_plan_offer",
+          3: "coach_context_brief",
+        } as const
+      )[value.tier as 1 | 2 | 3],
+    "Accountability content kind must match its deterministic tier",
   );
 
 export const modelModeSchema = z.enum(["recorded", "live"]);

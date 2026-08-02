@@ -41,7 +41,7 @@ export function isVolumeSpike(
   ) {
     throw new DomainError("invalid_value", "Invalid volume/adherence input");
   }
-  if (adherence14d === null || adherence14d >= 0.6 || proposedSets <= previousSets) return false;
+  if (adherence14d === null || adherence14d >= 0.6) return false;
   return previousSets === 0 ? proposedSets > 0 : (proposedSets - previousSets) / previousSets > 0.3;
 }
 

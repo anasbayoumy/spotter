@@ -651,6 +651,29 @@ describe("session input and lifecycle boundaries", () => {
         1,
       ),
     ).toThrow(DomainError);
+    const maximumSets = Array.from({ length: 20 }, (_, index) => ({
+      ...validActual[0].sets[0],
+      setIndex: index + 1,
+    }));
+    expect(
+      fresh({ plannedSetCount: 20 })
+        .log([{ exerciseId: ids.exercise, sets: maximumSets }], 1)
+        .snapshot().actual?.[0]?.sets,
+    ).toHaveLength(20);
+    expect(() =>
+      fresh().log(
+        [
+          {
+            exerciseId: ids.exercise,
+            sets: Array.from({ length: 21 }, (_, index) => ({
+              ...validActual[0].sets[0],
+              setIndex: index + 1,
+            })),
+          },
+        ],
+        1,
+      ),
+    ).toThrow(DomainError);
     expect(() =>
       fresh().log(
         [{ exerciseId: ids.exercise, sets: [validActual[0].sets[0], validActual[0].sets[0]] }],
@@ -674,6 +697,7 @@ describe("session input and lifecycle boundaries", () => {
     expect(() => fresh({ plannedSetCount: 0 })).toThrow(DomainError);
     expect(() => fresh({ version: 0 })).toThrow(DomainError);
     expect(() => fresh({ performedAt: now, rpe: null })).toThrow(DomainError);
+    expect(() => fresh({ performedAt: null, rpe: 8 })).toThrow(DomainError);
     expect(() => fresh({ performedAt: now, rpe: 8, actual: null })).toThrow(DomainError);
   });
 
@@ -688,15 +712,30 @@ describe("session input and lifecycle boundaries", () => {
       1,
     );
     expect(logged.completionRatio()).toBe(1);
+    expect(logged.snapshot().actual).toEqual([
+      {
+        exerciseId: ids.exercise,
+        sets: [validActual[0].sets[0], { ...validActual[0].sets[0], setIndex: 2 }],
+      },
+    ]);
     expect(() => logged.complete(0, now, 2)).toThrow(DomainError);
     expect(() => logged.complete(11, now, 2)).toThrow(DomainError);
     expect(() => logged.complete(8, new Date("invalid"), 2)).toThrow(DomainError);
+    expect(logged.complete(10, now, 2).snapshot().rpe).toBe(10);
   });
 
   it("does not derive session triggers until completion", () => {
     const logged = fresh().log(validActual, 1);
     expect(adjustmentTriggers(null, logged)).toEqual([]);
     expect(fresh().completionRatio()).toBe(0);
+    const healthyCompletion = fresh({ plannedSetCount: 1 }).log(validActual, 1).complete(7, now, 2);
+    expect(adjustmentTriggers(null, healthyCompletion)).toEqual([]);
+    expect(() => healthyCompletion.complete(7, now, 3)).toThrowError(
+      "Session must have uncompleted actual work before completion",
+    );
+    expect(() => fresh().complete(7, now, 1)).toThrowError(
+      "Session must have uncompleted actual work before completion",
+    );
   });
 
   it.each([

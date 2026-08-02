@@ -10,7 +10,7 @@ import { runRecordedJudges } from "./judges/run-judges";
 import { combineEvaluation } from "./review-band";
 import { safetyInputSchema, safetyExerciseSchema } from "./safety/contracts";
 import { maximumAutomatedMessages, runDeterministicSafety } from "./safety/run-gates";
-import type { GateName, ReviewBand } from "./types";
+import type { GateName, GateResult, ReviewBand } from "./types";
 
 const instant = z.coerce.date();
 const safetyPatchSchema = safetyInputSchema.omit({ asOf: true, intent: true }).partial().strict();
@@ -125,6 +125,7 @@ export interface GoldenEvaluationResult {
   readonly band: ReviewBand;
   readonly blockedGate: GateName | null;
   readonly budget: ContextBudgetResult | null;
+  readonly gates: readonly GateResult[];
   readonly maxMessages: 0 | 1;
   readonly outcome: "accepted" | "attention" | "blocked" | "escalated" | "failed";
   readonly selectedRecordIds: readonly string[];
@@ -201,6 +202,7 @@ export async function evaluateGoldenFixture(rawFixture: unknown): Promise<Golden
       band: "blocked",
       blockedGate,
       budget,
+      gates: safety.gates,
       maxMessages,
       outcome: "failed",
       selectedRecordIds,
@@ -212,6 +214,7 @@ export async function evaluateGoldenFixture(rawFixture: unknown): Promise<Golden
       band: "blocked",
       blockedGate,
       budget,
+      gates: safety.gates,
       maxMessages,
       outcome: "escalated",
       selectedRecordIds,
@@ -223,6 +226,7 @@ export async function evaluateGoldenFixture(rawFixture: unknown): Promise<Golden
       band: "blocked",
       blockedGate,
       budget,
+      gates: safety.gates,
       maxMessages,
       outcome: "blocked",
       selectedRecordIds,
@@ -243,6 +247,7 @@ export async function evaluateGoldenFixture(rawFixture: unknown): Promise<Golden
     band: proposal.reviewBand,
     blockedGate,
     budget,
+    gates: safety.gates,
     maxMessages,
     outcome: proposal.reviewBand === "attention" ? "attention" : "accepted",
     selectedRecordIds,

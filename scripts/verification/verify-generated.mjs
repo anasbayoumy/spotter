@@ -1,14 +1,20 @@
-import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
-const knownGeneratedRoots = ["packages/contracts/src/generated", "frontend/src/generated"];
-const present = knownGeneratedRoots.filter(existsSync);
+import { buildOpenApiDocument, serializeOpenApiDocument } from "./openapi-document.mjs";
 
-if (present.length > 0) {
+const target = path.resolve("packages/contracts/generated/spotter-v1.openapi.json");
+const expected = await serializeOpenApiDocument(await buildOpenApiDocument());
+const actual = await readFile(target, "utf8");
+if (actual !== expected) {
   throw new Error(
-    `Generated roots now exist (${present.join(", ")}); add a reproducibility command before release.`,
+    "Generated OpenAPI inventory is stale. Run `pnpm generate:openapi` and commit the result.",
   );
 }
 
-console.log(
-  "No code generator is configured; reproducibility gate is deliberately not applicable.",
-);
+const parsed = JSON.parse(actual);
+const operations = Object.values(parsed.paths).flatMap((item) => Object.keys(item));
+if (operations.length !== 28) {
+  throw new Error(`OpenAPI inventory expected 28 operations but found ${operations.length}.`);
+}
+console.log(`Generated OpenAPI inventory is reproducible (${operations.length} operations).`);

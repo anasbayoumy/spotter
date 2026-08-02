@@ -3,16 +3,24 @@ import { createHash, randomUUID } from "node:crypto";
 import {
   accountabilityModelOutputSchema,
   adjustmentModelOutputSchema,
+  clientProfileSchema,
+  constraintDetailSchema,
+  constraintKindSchema,
+  contextTraceAttemptSchema,
   contextTraceSchema,
   gateResultSchema,
+  isoDateSchema,
   judgeResultSchema,
   programmeModelOutputSchema,
+  programmePayloadSchema,
+  sessionStatusSchema,
   type AccountabilityModelOutput,
   type AdjustmentModelOutput,
   type ContextTrace,
   type ProgrammeModelOutput,
 } from "@spotter/contracts";
 import { desc, eq } from "drizzle-orm";
+import { z } from "zod";
 
 import { DeterministicContextAssembler } from "../agents/context/assemble";
 import type { ContextRecord, ContextSourceInput } from "../agents/context/types";
@@ -23,6 +31,7 @@ import { PromptRegistry } from "../agents/prompts/registry";
 import { ApplicationError, type FingerprintPort } from "../application/core";
 import type {
   AgentKind,
+  AssembledContext,
   ContextAssemblerPort,
   EvaluationPort,
   EvaluatedOutput,
@@ -32,7 +41,7 @@ import type {
 import { runRecordedJudges } from "../evals/judges/run-judges";
 import { detectRedFlags } from "../evals/safety/red-flags";
 import { runDeterministicSafety } from "../evals/safety/run-gates";
-import type { SafetyExercise } from "../evals/safety/contracts";
+import type { SafetyConstraint, SafetyExercise, SafetyInput } from "../evals/safety/contracts";
 import type { DatabaseSession } from "../infrastructure/database/database-types";
 import {
   appEvents,
@@ -93,7 +102,7 @@ export class DatabaseContextAssembler implements ContextAssemblerPort {
 
   public async assemble(
     input: Parameters<ContextAssemblerPort["assemble"]>[0],
-  ): Promise<{ readonly trace: ContextTrace }> {
+  ): Promise<AssembledContext> {
     const client = await this.database.query.clients.findFirst({
       where: eq(clients.id, input.clientId),
     });
@@ -257,25 +266,20 @@ export class DatabaseContextAssembler implements ContextAssemblerPort {
       traceId: randomUUID(),
       turnId: randomUUID(),
     });
-    if (assembled.status === "hard_constraint_overflow") {
-      throw new ApplicationError(
-        "context_hard_constraints_exceed_budget",
-        "Active hard constraints exceed the context budget.",
-      );
-    }
-    return {
-      trace: contextTraceSchema.parse({
-        budget: assembled.trace.budget,
-        clientId: assembled.trace.clientId,
-        createdAt: assembled.trace.createdAt,
-        id: assembled.trace.id,
-        intent: assembled.trace.intent,
-        rendered: assembled.trace.rendered,
-        sections: assembled.trace.sections,
-        tokenCount: assembled.trace.tokenCount,
-        turnId: assembled.trace.turnId,
-      }),
-    };
+    const attempt = contextTraceAttemptSchema.parse({
+      budget: assembled.trace.budget,
+      clientId: assembled.trace.clientId,
+      createdAt: assembled.trace.createdAt,
+      id: assembled.trace.id,
+      intent: assembled.trace.intent,
+      rendered: assembled.trace.rendered,
+      sections: assembled.trace.sections,
+      tokenCount: assembled.trace.tokenCount,
+      turnId: assembled.trace.turnId,
+    });
+    return assembled.status === "hard_constraint_overflow"
+      ? { status: "hard_constraint_overflow", trace: attempt }
+      : { status: "ready", trace: contextTraceSchema.parse(attempt) };
   }
 }
 
@@ -358,18 +362,235 @@ function outputCitations(
   }));
 }
 
-function outputExercises(output: EvaluatedOutput): readonly SafetyExercise[] {
+interface SelectedTraceValue {
+  readonly id: string;
+  readonly value: unknown;
+  readonly valid: boolean;
+}
+
+const traceRecordHeader = /^\[record=([^;]+); source=([^;]+); version=([^\]]+)\]$/u;
+const hardConstraintContentSchema = z
+  .object({
+    detail: constraintDetailSchema,
+    kind: constraintKindSchema,
+    severity: z.literal("hard"),
+  })
+  .strict();
+const profileContentSchema = z
+  .object({ profile: clientProfileSchema, timezone: z.string().trim().min(1).max(100) })
+  .loose();
+const sessionContentSchema = z
+  .object({ scheduledFor: isoDateSchema, status: sessionStatusSchema })
+  .loose();
+
+function selectedTraceValues(
+  trace: ContextTrace,
+  kind: ContextTrace["sections"][number]["kind"],
+): readonly SelectedTraceValue[] {
+  const section = trace.sections.find((candidate) => candidate.kind === kind);
+  if (section === undefined) return [];
+  const lines = section.rendered.split("\n");
+  const values: SelectedTraceValue[] = [];
+  let lineIndex = 0;
+  for (const record of section.records) {
+    const header = lines[lineIndex];
+    const serialized = lines[lineIndex + 1];
+    lineIndex += 2;
+    const match = header === undefined ? null : traceRecordHeader.exec(header);
+    const expectedVersion = record.recordVersion === null ? "none" : String(record.recordVersion);
+    if (
+      match?.[1] !== record.recordId ||
+      match[2] !== record.source ||
+      match[3] !== expectedVersion ||
+      serialized === undefined
+    ) {
+      values.push({ id: record.recordId, valid: false, value: null });
+      continue;
+    }
+    try {
+      const parsed: unknown = JSON.parse(serialized);
+      values.push({ id: record.recordId, valid: true, value: parsed });
+    } catch {
+      values.push({ id: record.recordId, valid: false, value: null });
+    }
+  }
+  return values;
+}
+
+function constraintsFromTrace(trace: ContextTrace): readonly SafetyConstraint[] {
+  return selectedTraceValues(trace, "hard_constraints").map((record) => {
+    const parsed = record.valid ? hardConstraintContentSchema.safeParse(record.value) : null;
+    if (parsed?.success) {
+      return {
+        forbids: parsed.data.detail.forbids,
+        id: record.id,
+        kind: parsed.data.kind,
+        severity: "hard" as const,
+        supersededBy: null,
+        validFrom: new Date(0),
+        validUntil: null,
+      };
+    }
+    return {
+      forbids: [`unparseable_constraint_${record.id}`],
+      id: record.id,
+      kind: "medical" as const,
+      severity: "hard" as const,
+      supersededBy: null,
+      validFrom: new Date(0),
+      validUntil: null,
+    };
+  });
+}
+
+function profileFromTrace(trace: ContextTrace): z.infer<typeof profileContentSchema> | null {
+  for (const record of selectedTraceValues(trace, "goal_profile_equipment_schedule")) {
+    if (!record.valid) continue;
+    const parsed = profileContentSchema.safeParse(record.value);
+    if (parsed.success) return parsed.data;
+  }
+  return null;
+}
+
+function currentPayloadFromTrace(
+  trace: ContextTrace,
+): z.infer<typeof programmePayloadSchema> | null {
+  for (const record of selectedTraceValues(trace, "current_programme")) {
+    if (!record.valid) continue;
+    const parsed = programmePayloadSchema.safeParse(record.value);
+    if (parsed.success) return parsed.data;
+  }
+  return null;
+}
+
+function localDate(instant: Date, timezone: string): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: timezone,
+    year: "numeric",
+  }).formatToParts(instant);
+  const value = (type: Intl.DateTimeFormatPartTypes): string =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return `${value("year")}-${value("month")}-${value("day")}`;
+}
+
+function shiftIsoDate(value: string, days: number): string {
+  const shifted = new Date(`${value}T00:00:00.000Z`);
+  shifted.setUTCDate(shifted.getUTCDate() + days);
+  return shifted.toISOString().slice(0, 10);
+}
+
+function adherenceFromTrace(trace: ContextTrace, timezone: string): number | null {
+  const end = localDate(new Date(trace.createdAt), timezone);
+  const start = shiftIsoDate(end, -13);
+  const due = selectedTraceValues(trace, "recent_sessions_adherence").flatMap((record) => {
+    if (!record.valid) return [];
+    const parsed = sessionContentSchema.safeParse(record.value);
+    return parsed.success && parsed.data.scheduledFor >= start && parsed.data.scheduledFor <= end
+      ? [parsed.data]
+      : [];
+  });
+  if (due.length === 0) return null;
+  return due.filter((session) => session.status === "completed").length / due.length;
+}
+
+function setsByMuscleGroup(
+  payload: z.infer<typeof programmePayloadSchema>,
+): ReadonlyMap<string, number> {
+  const result = new Map<string, number>();
+  for (const day of payload.days) {
+    for (const exercise of day.exercises) {
+      for (const muscleGroup of new Set(exercise.muscleGroups)) {
+        result.set(muscleGroup, (result.get(muscleGroup) ?? 0) + exercise.sets);
+      }
+    }
+  }
+  return result;
+}
+
+function volumeChanges(trace: ContextTrace, output: EvaluatedOutput): SafetyInput["volumeChanges"] {
   if (!("payload" in output)) return [];
-  return output.payload.days.flatMap((day) =>
-    day.exercises.map((exercise) => ({
-      family: exercise.family,
-      id: exercise.id,
-      muscleGroups: exercise.muscleGroups,
-      name: exercise.name,
-      rpe: exercise.rpe,
-      sets: exercise.sets,
-    })),
+  const current = currentPayloadFromTrace(trace);
+  if (current === null) return [];
+  const previous = setsByMuscleGroup(current);
+  const proposed = setsByMuscleGroup(output.payload);
+  return [...new Set([...previous.keys(), ...proposed.keys()])]
+    .sort((left, right) => left.localeCompare(right))
+    .map((muscleGroup) => ({
+      muscleGroup,
+      previousSets: previous.get(muscleGroup) ?? 0,
+      proposedSets: proposed.get(muscleGroup) ?? 0,
+    }));
+}
+
+function outputExercises(trace: ContextTrace, output: EvaluatedOutput): readonly SafetyExercise[] {
+  if ("payload" in output) {
+    return output.payload.days.flatMap((day) =>
+      day.exercises.map((exercise) => ({
+        family: exercise.family,
+        id: exercise.id,
+        muscleGroups: exercise.muscleGroups,
+        name: exercise.name,
+        rpe: exercise.rpe,
+        sets: exercise.sets,
+      })),
+    );
+  }
+  if (!("operations" in output)) return [];
+  const current = currentPayloadFromTrace(trace);
+  const byId = new Map(
+    current?.days.flatMap((day) => day.exercises).map((exercise) => [exercise.id, exercise]),
   );
+  return output.operations.flatMap((operation): readonly SafetyExercise[] => {
+    if (operation.type === "swap_exercise") {
+      return [
+        {
+          family: operation.replacementFamily,
+          id: operation.exerciseId,
+          muscleGroups: byId.get(operation.exerciseId)?.muscleGroups ?? [],
+          name: operation.replacementName,
+          rpe: byId.get(operation.exerciseId)?.rpe ?? 1,
+          sets: byId.get(operation.exerciseId)?.sets ?? 1,
+        },
+      ];
+    }
+    const exercise = byId.get(operation.exerciseId);
+    return exercise === undefined
+      ? []
+      : [
+          {
+            family: exercise.family,
+            id: exercise.id,
+            muscleGroups: exercise.muscleGroups,
+            name: exercise.name,
+            rpe: exercise.rpe,
+            sets:
+              operation.type === "reduce_volume"
+                ? Math.max(1, exercise.sets - operation.setsToRemove)
+                : exercise.sets,
+          },
+        ];
+  });
+}
+
+function outputText(output: EvaluatedOutput): string {
+  if ("body" in output) return output.body;
+  if ("payload" in output) {
+    return [
+      output.payload.summary,
+      ...output.payload.days.flatMap((day) => [
+        day.focus,
+        ...day.exercises.flatMap((exercise) => [exercise.name, exercise.notes ?? ""]),
+      ]),
+    ].join("\n");
+  }
+  return output.operations
+    .flatMap((operation) => [
+      operation.rationale,
+      ...(operation.type === "swap_exercise" ? [operation.replacementName] : []),
+    ])
+    .join("\n");
 }
 
 export class DeterministicEvaluationAdapter implements EvaluationPort {
@@ -379,7 +600,9 @@ export class DeterministicEvaluationAdapter implements EvaluationPort {
     output: EvaluatedOutput,
   ): Promise<readonly ReturnType<typeof gateResultSchema.parse>[]> {
     const adjustment = "operations" in output ? output.operations : null;
+    const profile = profileFromTrace(trace);
     const evaluation = runDeterministicSafety({
+      adherence14d: adherenceFromTrace(trace, profile?.timezone ?? "UTC"),
       adjustment:
         adjustment === null
           ? null
@@ -403,8 +626,8 @@ export class DeterministicEvaluationAdapter implements EvaluationPort {
             },
       asOf: new Date(trace.createdAt),
       checkInText: "body" in output ? output.body : "",
-      constraints: [],
-      exercises: outputExercises(output),
+      constraints: constraintsFromTrace(trace),
+      exercises: outputExercises(trace, output),
       intent: kind,
       nudge:
         "tier" in output
@@ -417,9 +640,10 @@ export class DeterministicEvaluationAdapter implements EvaluationPort {
               tier: output.tier,
             }
           : null,
-      outputText: "body" in output ? output.body : "",
+      outputText: outputText(output),
+      allowedSessions: profile?.profile.sessionsPerWeek ?? null,
       plannedSessions: "payload" in output ? output.payload.days.length : 0,
-      volumeChanges: [],
+      volumeChanges: volumeChanges(trace, output),
     });
     return Promise.resolve(
       evaluation.gates.map((gate) =>
