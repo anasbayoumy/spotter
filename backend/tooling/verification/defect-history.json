@@ -1,0 +1,2685 @@
+{
+  "schemaVersion": 1,
+  "documentedOn": "2026-08-02",
+  "releaseGateStatus": "pending",
+  "records": [
+    {
+      "id": "DEF-001",
+      "title": "Adjustment review and publication capability was incomplete",
+      "classification": "product",
+      "requirements": [
+        "ADJ-006",
+        "ADJ-007",
+        "ADJ-008",
+        "ADJ-009",
+        "DAT-006",
+        "DAT-007",
+        "FLOW-002"
+      ],
+      "status": "fixed-targeted-validation",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Architecture review found missing edit/version/CAS/audit behavior, blocked-adjustment override handling, deterministic load reduction, and code-owned swap equivalence before a release run was claimed."
+      },
+      "diagnosis": "The adjustment draft existed, but the complete human-review mutation path and deterministic operation semantics were not implemented across contracts, repositories, HTTP, and UI.",
+      "fix": "Implemented versioned edit, row-locked approval/rejection, reasoned blocked override, audit evidence, deterministic loadKg reduction, a code-owned exercise-equivalence catalogue, and the coach adjustment review surface.",
+      "regressionEvidence": [
+        "backend/tests/pglite/edit-adjustment.integration.test.ts",
+        "backend/tests/postgres/database.integration.test.ts",
+        "backend/tests/concurrency/postgres-races.integration.test.ts",
+        "frontend/tests/contract/adjustment-override.contract.test.ts",
+        "frontend/src/features/adjustment-review/adjustment-review-page.test.tsx"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Targeted unit, PGlite, PostgreSQL, concurrency, contract, and presentation regressions passed; the same-content full release gate remains pending."
+      }
+    },
+    {
+      "id": "DEF-002",
+      "title": "HTTP and runtime security controls needed fail-closed hardening",
+      "classification": "security",
+      "requirements": [
+        "OPS-003",
+        "OPS-004",
+        "OPS-005",
+        "OPS-009",
+        "SEC-002",
+        "SEC-008",
+        "SEC-009",
+        "SEC-010",
+        "SEC-013",
+        "SEC-015",
+        "SEC-016",
+        "SEC-018"
+      ],
+      "status": "fixed-targeted-validation",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Threat-model review identified missing same-origin, bounded-input, rate/concurrency, secret-comparison, provider-allowlist, sanitization, and security-header controls before release certification."
+      },
+      "diagnosis": "Thin route adapters did not yet consistently enforce the documented transport threat model at the shared HTTP boundary.",
+      "fix": "Added same-origin enforcement, streamed one-megabyte request limits, bounded rate and generation concurrency, prototype-key rejection, sanitized public errors, security headers, hashed constant-time cron-secret comparison, distinct allowlisted providers, and redacted structured logging.",
+      "regressionEvidence": [
+        "frontend/tests/security/http-security.test.ts",
+        "frontend/tests/resilience/model-and-http-faults.test.ts",
+        "backend/packages/config/src/server-environment.test.ts",
+        "backend/tooling/security/run-security-suite.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The standalone HTTP security suite passed 24 checks with zero high or critical production dependency findings; Docker image, SBOM, and final full-suite proof remain pending."
+      }
+    },
+    {
+      "id": "DEF-003",
+      "title": "PostgreSQL client-detail query passed a raw Date through a driver-specific path",
+      "classification": "product",
+      "requirements": ["DAT-001", "DAT-003", "CUI-003", "QA-DB-007"],
+      "status": "fixed-targeted-validation",
+      "firstFailure": {
+        "kind": "unretained-local-run",
+        "retention": "gap-disclosed",
+        "artifacts": [],
+        "note": "The authoritative PostgreSQL regression exposed the binding mismatch, but its original raw command log was not frozen before the fix. This record does not present reconstructed text as pre-fix evidence."
+      },
+      "diagnosis": "A raw SQL expression received a JavaScript Date value. PGlite tolerated the value while the PostgreSQL driver required the typed Drizzle timestamp path.",
+      "fix": "Replaced the raw comparison with the typed Drizzle gt() predicate so timestamptz serialization is driver-correct.",
+      "regressionEvidence": [
+        "backend/tests/postgres/database.integration.test.ts",
+        "backend/tests/concurrency/postgres-races.integration.test.ts"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Authoritative PostgreSQL repository and concurrency regressions passed after the fix; final full-suite evidence remains pending."
+      }
+    },
+    {
+      "id": "DEF-004",
+      "title": "Docker build context and pnpm configuration prevented a clean web build",
+      "classification": "environment",
+      "requirements": ["QA-DKR-002", "QA-DKR-003", "QA-REL-014"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-004.json",
+            "releasePath": "reports/defects/first-failures/DEF-004.json",
+            "type": "file",
+            "sourceSha256": "sha256:5b052542e61548c6ae786974aa023ef31cb61f8a882519f9df3a2901651f685f"
+          }
+        ],
+        "note": "QA-DKR-003 failed because the clean container workspace could not resolve the Next binary; the complete failing protocol report and build log were frozen before changes."
+      },
+      "diagnosis": "The build context contained recursive generated trees while the container install omitted repository pnpm configuration needed to build the filtered workspace consistently.",
+      "fix": "Reduced the recursive Docker context, copied .npmrc into build stages, and corrected frozen workspace installation.",
+      "regressionEvidence": [
+        ".dockerignore",
+        "docker/Dockerfile.web",
+        "backend/tooling/docker/verify.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 14/14 focused Docker protocol passed QA-DKR-003 after a no-cache frozen-lockfile build produced the migrate, seed, and exact production web images; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-005",
+      "title": "Docker web build did not compile workspace dependencies before Next",
+      "classification": "environment",
+      "requirements": ["SCP-002", "SCP-004", "QA-DKR-003", "QA-REL-015"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-005.json",
+            "releasePath": "reports/defects/first-failures/DEF-005.json",
+            "type": "file",
+            "sourceSha256": "sha256:146d168b34f18f65c27d5b9f9974310e2bb82c52c3fbd01c0a7586148ff47ec8"
+          }
+        ],
+        "note": "QA-DKR-003 retained the Next module-resolution failures emitted when internal contract/backend packages had not been built first."
+      },
+      "diagnosis": "The web Docker stage invoked next build before compiling the internal workspace packages consumed by route adapters and UI clients.",
+      "fix": "Ordered workspace dependency builds before the frontend production build while retaining the single web/API deployable boundary.",
+      "regressionEvidence": ["docker/Dockerfile.web", "backend/tooling/docker/verify.mjs"],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 14/14 focused Docker protocol passed QA-DKR-003 with contracts and design tokens built before the production Next.js image, and all downstream runtime checks passed; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-006",
+      "title": "Compose returned literal null for pre-container image inventory",
+      "classification": "environment",
+      "requirements": ["QA-DKR-003", "QA-EVD-004", "QA-REL-014"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-006.json",
+            "releasePath": "reports/defects/first-failures/DEF-006.json",
+            "type": "file",
+            "sourceSha256": "sha256:4242475d7cb8cb6f266685a07c040e274eb34de2f932a613dc279aa86c35d8cf"
+          }
+        ],
+        "note": "After successful image builds, Compose 2.40.3 emitted literal null and the verifier attempted to read Service from it."
+      },
+      "diagnosis": "The JSON-lines parser assumed every decoded record was a non-null object and used pre-container Compose inventory as the sole image identity source.",
+      "fix": "Made JSON record parsing accept null, JSON lines, and arrays while rejecting scalars, then inspect deterministic project image tags for migrate, seed, and web.",
+      "regressionEvidence": [
+        "backend/tooling/docker/lib.test.mjs",
+        "backend/tooling/docker/lib.mjs",
+        "backend/tooling/docker/verify.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Parser regressions and the 14/14 focused Docker protocol passed pre-container image discovery, exact Compose topology, and clean no-cache image provenance; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-007",
+      "title": "Image scan excluded high and critical vulnerabilities without available fixes",
+      "classification": "security",
+      "requirements": ["SEC-012", "SEC-019", "SEC-020", "QA-DKR-012", "QA-REL-013"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Adversarial review found the docker scout command used --only-fixed before a release scan had been accepted."
+      },
+      "diagnosis": "The scanner option hid vulnerabilities for which an upstream fix was unavailable, contradicting the zero-high/critical release contract.",
+      "fix": "Removed --only-fixed, parse SARIF for all high/critical findings, accept only documented scanner outcomes, and fail tool, network, database, or finding errors.",
+      "regressionEvidence": [
+        "backend/tooling/docker/verify.mjs",
+        "backend/tooling/security/run-security-suite.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 14/14 focused Docker protocol passed QA-DKR-012 for the exact built image with 101 SPDX 2.3 packages and one attributable Trivy SARIF run containing zero HIGH/CRITICAL findings; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-008",
+      "title": "Browser acceptance harness leaked selection state and treated navigation cancellations as defects",
+      "classification": "test",
+      "requirements": ["MUI-001", "QA-CLI-001", "QA-CLI-009", "QA-E2E-011"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-008.json",
+            "releasePath": "reports/defects/first-failures/DEF-008.json",
+            "type": "file",
+            "sourceSha256": "sha256:af18b80baa3d38ced0c1b3b2ab80edb86f1471d011c687b78eb2a65bef30caa8"
+          }
+        ],
+        "note": "The retained Playwright traces show strict locator ambiguity and expected navigation-aborted requests being classified as browser runtime errors. Client-selection leakage was diagnosed in the same fix loop, but is not independently attributed to these retained traces."
+      },
+      "diagnosis": "Acceptance journeys shared client selection state across browser contexts, locator assertions were not uniquely scoped, and the runtime guard could not distinguish expected navigation cancellation from a failed application request.",
+      "fix": "Isolated selection per Playwright context, corrected malformed synthetic UUID links, scoped ambiguous locators, and made runtime guards lifecycle-aware without suppressing genuine request failures.",
+      "regressionEvidence": [
+        "frontend/tests/e2e/coach-journeys.spec.ts",
+        "frontend/tests/e2e/support/runtime-guards.ts",
+        "client-frontend/tests/e2e/client-web.spec.ts",
+        "client-frontend/tests/e2e/support/runtime-guards.ts"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The exact zero-retry client production gate passed all four isolated scenarios; the coach production gate and same-content full release run remain pending."
+      }
+    },
+    {
+      "id": "DEF-009",
+      "title": "UI idempotency keys outlived the exact request payload",
+      "classification": "product",
+      "requirements": [
+        "DAT-007",
+        "DAT-008",
+        "MUI-004",
+        "MUI-006",
+        "QA-E2E-003",
+        "QA-E2E-008",
+        "SEC-014"
+      ],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "unretained-local-run",
+        "retention": "gap-disclosed",
+        "artifacts": [],
+        "note": "A changed adjustment edit received HTTP 409 because the browser reused an idempotency key previously bound to a different payload. The rerun-owned Playwright output was removed before it could be snapshotted, so no existing browser artifact is claimed as proof of this defect."
+      },
+      "diagnosis": "Mutation keys were scoped only to operation/resource lifetime instead of the exact payload and retry lifecycle.",
+      "fix": "Bind keys to payload fingerprints: retain for an exact retry, rotate when editable input changes, clear generation/accountability keys after confirmed success, and preserve offline drafts only for the exact queued request.",
+      "regressionEvidence": [
+        "frontend/src/lib/api/idempotency.test.ts",
+        "client-frontend/src/lib/api/idempotency.test.ts",
+        "frontend/src/features/programme-review/programme-review-page.test.tsx",
+        "frontend/src/features/adjustment-review/adjustment-review-page.test.tsx"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Payload-fingerprint regressions and the exact client offline/retry production journey pass; coach mutation journeys and the same-content full release run remain pending."
+      }
+    },
+    {
+      "id": "DEF-010",
+      "title": "Expo static-web query timers kept the production acceptance process alive",
+      "classification": "test",
+      "requirements": ["QA-CLI-010", "QA-MOB-002", "QA-MOB-004", "QA-REL-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "unretained-local-run",
+        "retention": "gap-disclosed",
+        "artifacts": [],
+        "note": "The local static-web server hang was diagnosed before its raw process transcript was frozen; this record does not substitute a reconstructed transcript."
+      },
+      "diagnosis": "TanStack Query garbage-collection timers were created during server-side static web rendering and kept the one-shot Expo export/acceptance process alive.",
+      "fix": "Detect static web rendering and use an infinite garbage-collection lifetime there, leaving browser/native caching behavior unchanged.",
+      "regressionEvidence": [
+        "client-frontend/src/lib/query/client.ts",
+        "client-frontend/tests/e2e/start-production-server.mjs",
+        "client-frontend/tests/mobile/vitest.config.ts"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Expo Doctor, iOS/Android exports, and the exact four-scenario Expo-web production gate pass; the same-content full release run remains pending."
+      }
+    },
+    {
+      "id": "DEF-011",
+      "title": "Coverage evidence initially omitted cross-surface execution contexts",
+      "classification": "test",
+      "requirements": ["QA-COV-005", "QA-COV-006", "QA-COV-007", "QA-EVD-002", "QA-EVD-004"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-011.json",
+            "releasePath": "reports/defects/first-failures/DEF-011.json",
+            "type": "file",
+            "sourceSha256": "sha256:d568e9b332aacf38cddd560341864412853a94d21357691b779b8db0dc2f053c"
+          }
+        ],
+        "note": "The retained threshold summary records the actual repository and changed-source deficits after honest multi-context attribution; it is still a failing gate, not superseded evidence."
+      },
+      "diagnosis": "Package-only reports could not attribute frontend contract execution to imported backend source or RN component execution to Expo route modules, while remaining uncovered branches were real test gaps.",
+      "fix": "Added backend-contract and mobile coverage contexts, deterministic source merging, per-file reporting, and narrow code-only exclusions for schema constants and exact CLI bootstraps; additional branch tests remain in progress.",
+      "regressionEvidence": [
+        "vitest.backend-contract-coverage.config.ts",
+        "client-frontend/tests/mobile/vitest.config.ts",
+        "backend/tooling/verification/run-coverage.mjs",
+        "backend/tooling/verification/verify-coverage.mjs",
+        "backend/tooling/verification/coverage-allowlist.json"
+      ],
+      "validation": {
+        "status": "failing-thresholds",
+        "note": "Backend domain/application coverage passes its 90 percent thresholds, but repository and changed-source branch/function/line thresholds are not yet all green."
+      }
+    },
+    {
+      "id": "DEF-012",
+      "title": "Mutation sandboxes copied the repository-local Playwright browser cache",
+      "classification": "test",
+      "requirements": ["QA-MUT-001", "QA-MUT-005", "QA-EVD-007", "QA-REL-006"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-012.json",
+            "releasePath": "reports/defects/first-failures/DEF-012.json",
+            "type": "file",
+            "sourceSha256": "sha256:dda942ba80331eb3534313b0b7f272a45fd67c200aea4685d8c459bf1310258f"
+          }
+        ],
+        "note": "The first mutation attempt instrumented 2,207 mutants but failed before execution while copying a macOS Chromium framework link from the unrelated local browser cache."
+      },
+      "diagnosis": "Stryker's sandbox input set included the repository-local Playwright cache and unrelated generated/frontend trees. Chromium's macOS framework layout contains a link/file shape unsupported by the sandbox copy operation.",
+      "fix": "Explicitly excluded repository-local caches and unrelated frontend/generated trees from mutation sandbox inputs without changing the production mutation target or score thresholds.",
+      "regressionEvidence": ["stryker.config.mjs", "backend/vitest.mutation.config.ts"],
+      "validation": {
+        "status": "release-pending",
+        "note": "The corrected 2,207-mutant gate is running; no passing score is claimed until it completes."
+      }
+    },
+    {
+      "id": "DEF-013",
+      "title": "Docker smoke expected private approval evidence in the public programme contract",
+      "classification": "test",
+      "requirements": ["DAT-006", "DAT-009", "QA-DKR-008", "QA-EVD-007", "QA-REL-014"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-013.json",
+            "releasePath": "reports/defects/first-failures/DEF-013.json",
+            "type": "file",
+            "sourceSha256": "sha256:943798e1c4465966e4959fdd297cff9de51dce53d888fad90ed3d84f7bf75308"
+          }
+        ],
+        "note": "The cold no-cache protocol passed QA-DKR-001 through QA-DKR-007, then retained QA-DKR-008 and its exact failure message after the smoke flow rejected a contract-valid blocked override response. The older report did not retain a top-level failure object or stack."
+      },
+      "diagnosis": "The public programme schema does not expose approvalKind, but the smoke harness asserted that private database audit field on the API response. The product had persisted override approval and coach-action evidence correctly; the verifier queried the wrong boundary.",
+      "fix": "Keep the response assertion within the shared programme contract, then query authoritative PostgreSQL for approval_kind, the overrode_block action, the trimmed reason, and correlated request evidence. Retain sanitized failure details in future protocol reports.",
+      "regressionEvidence": [
+        "backend/tooling/docker/smoke-flow.mjs",
+        "backend/tooling/docker/verify.mjs",
+        "backend/tooling/docker/lib.test.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 14/14 focused Docker protocol passed QA-DKR-008 through the real 18-request generate/review/publish/client-read smoke flow using only public contract fields; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-014",
+      "title": "Expo-web reverse proxy rewrote a same-origin request to a different canonical host",
+      "classification": "test",
+      "requirements": ["QA-CLI-004", "QA-CLI-005", "QA-CLI-010", "SEC-002", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-014.json",
+            "releasePath": "reports/defects/first-failures/DEF-014.json",
+            "type": "file",
+            "sourceSha256": "sha256:3293fb50b186a8d53db46ece31f3cd80bf3bd3c8b5ea6afb10f321908e8281f9"
+          }
+        ],
+        "note": "The client session journey retained its trace and error context after a browser-same-origin POST received HTTP 403 at the reverse-proxied API boundary."
+      },
+      "diagnosis": "The browser submitted to 127.0.0.1:8081, while the static-web proxy rewrote upstream traffic to 127.0.0.1 on the API port. Next standalone canonicalized its own origin as localhost, so the shared fail-closed origin check correctly rejected the mismatched harness request.",
+      "fix": "Canonicalize the reverse-proxy upstream to localhost on the API port, matching the production server origin without weakening same-origin validation.",
+      "regressionEvidence": [
+        "client-frontend/tests/e2e/start-production-server.mjs",
+        "client-frontend/tests/e2e/client-web.spec.ts",
+        "frontend/tests/security/http-security.test.ts"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Strict types/lint and the exact four-scenario zero-retry client production gate pass with the canonical upstream host; the same-content full release run remains pending."
+      }
+    },
+    {
+      "id": "DEF-015",
+      "title": "Screenshot journey navigated before expected queue reads settled",
+      "classification": "test",
+      "requirements": ["QA-E2E-012", "QA-EVD-007", "QA-REL-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-015.json",
+            "releasePath": "reports/defects/first-failures/DEF-015.json",
+            "type": "file",
+            "sourceSha256": "sha256:c8dc3a0e364237668067784664ea77500da98275aadb39b41aed633a4ed8f3d4"
+          }
+        ],
+        "note": "The responsive screenshot journey produced all 20 images, then retained a trace showing the next navigation cancel an in-flight queue API read that the strict runtime guard classified as unexpected."
+      },
+      "diagnosis": "Heading readiness was sufficient for capture but not for request-lifecycle completion. Immediate navigation then aborted legitimate page reads, creating a harness-owned cancellation rather than a product network failure.",
+      "fix": "Wait for network idle on each captured route before taking the screenshot and navigating, while preserving strict rejection of genuine failed or unexpected requests.",
+      "regressionEvidence": [
+        "frontend/tests/e2e/coach-journeys.spec.ts",
+        "frontend/tests/e2e/support/runtime-guards.ts"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The lifecycle wait is implemented and static checks pass; the final 20-screenshot zero-retry journey awaits Docker release."
+      }
+    },
+    {
+      "id": "DEF-016",
+      "title": "Isolated PostgreSQL integration databases lacked admin-installed pgvector",
+      "classification": "test",
+      "requirements": ["DAT-001", "DAT-003", "QA-DB-007", "QA-DKR-009", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-016.json",
+            "releasePath": "reports/defects/first-failures/DEF-016.json",
+            "type": "file",
+            "sourceSha256": "sha256:d0a5e2aef7ac85089d17b55460ef39425458d7ad2afa3e11e24d103aefe214e3"
+          }
+        ],
+        "note": "The third cold Docker protocol passed QA-DKR-001 through QA-DKR-008, then retained a structured QA-DKR-009 failure when the isolated authoritative integration suite could not bootstrap vector in its temporary database."
+      },
+      "diagnosis": "The harness created an isolated database owned by the application role, while pgvector was installed only in the main database during container initialization. The non-superuser application role correctly could not substitute for the administrative extension bootstrap.",
+      "fix": "Install the pinned vector extension as PostgreSQL admin inside every isolated test database before applying migrations, then verify extension version and keep all application test traffic on the non-superuser role.",
+      "regressionEvidence": [
+        "backend/tooling/docker/verify.mjs",
+        "backend/tooling/docker/lib.test.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 14/14 focused Docker protocol passed QA-DKR-009 with the isolated PostgreSQL integration database creating pgvector and all six authoritative integration checks passing; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-017",
+      "title": "Docker restart proof used non-persistent tmpfs database storage",
+      "classification": "test",
+      "requirements": ["DAT-005", "QA-DKR-010", "QA-DKR-013", "QA-REL-014"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Adversarial protocol review found that test-postgres PGDATA used tmpfs before a restart result could be accepted; no passing durability claim had been made."
+      },
+      "diagnosis": "A PostgreSQL container restart over tmpfs cannot prove committed-state durability because the storage lifecycle is tied to the container. The release contract requires restart-persistent but project-isolated storage and explicit teardown proof.",
+      "fix": "Mount PGDATA on an explicit Compose project-scoped named test volume, compare pre/post restart state hashes, and require down --volumes plus direct post-teardown volume absence.",
+      "regressionEvidence": [
+        "compose.yaml",
+        "backend/tooling/docker/lib.test.mjs",
+        "backend/tooling/docker/verify.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 14/14 focused Docker protocol passed QA-DKR-010 with stable all-table state after web/PostgreSQL restarts and QA-DKR-013 removed the validated persistent test volume; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-018",
+      "title": "Expo-web session route rendered duplicate visible page headings",
+      "classification": "product",
+      "requirements": ["QA-CLI-004", "QA-CLI-005", "QA-A11Y-005", "QA-MOB-001"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "unretained-local-run",
+        "retention": "gap-disclosed",
+        "artifacts": [],
+        "note": "The dynamic session journey found both the Expo Stack web header and the screen H1. Its rerun-owned artifact was overwritten before freezing, so no later trace is attributed to this finding."
+      },
+      "diagnosis": "The dynamic route used Expo Stack's visible header on web while the screen already rendered its own semantic H1, producing redundant presentation and an ambiguous accessible heading locator.",
+      "fix": "Hide the Stack header only on web and retain it on native platforms, leaving one semantic page heading in the browser without removing native navigation affordances.",
+      "regressionEvidence": [
+        "client-frontend/src/app/session/[sessionId].tsx",
+        "client-frontend/tests/mobile/routes.test.tsx",
+        "client-frontend/tests/e2e/client-web.spec.ts"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Strict types, native route tests, and the exact client production gate pass with one semantic session heading; the same-content full release run remains pending."
+      }
+    },
+    {
+      "id": "DEF-019",
+      "title": "Production web readiness did not recover within budget after restart",
+      "classification": "environment",
+      "requirements": ["NFR-RES-009", "NFR-RES-013", "QA-DKR-010", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-019.json",
+            "releasePath": "reports/defects/first-failures/DEF-019.json",
+            "type": "file",
+            "sourceSha256": "sha256:3f7791de256b31c60ab1ebd06cae11ed04936a7d67019a3e5aadb37b22e20cc7"
+          }
+        ],
+        "note": "The fourth cold Docker protocol passed QA-DKR-001 through QA-DKR-009, then retained a structured timeout because /health/ready did not return HTTP 200 within 60 seconds after restarting the web service."
+      },
+      "diagnosis": "The same web container recovered to healthy internally, but Docker remapped its host port from 55063 to 55064 during restart. The verifier continued polling the stale pre-restart port, so it timed out without observing the healthy process.",
+      "fix": "Re-resolve the current mapped web port after each restart, open a fresh HTTP connection lifecycle, and persist both internal-health and host-probe transcripts before comparing state hashes.",
+      "regressionEvidence": [
+        "backend/tooling/docker/verify.mjs",
+        "backend/tooling/docker/lib.test.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 14/14 focused Docker protocol passed QA-DKR-010 by re-resolving the web port, recovering readiness after both web and PostgreSQL restarts, and preserving exact committed state; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-020",
+      "title": "Direct check-in navigation redirected before client selection restoration completed",
+      "classification": "product",
+      "requirements": ["QA-CLI-006", "QA-CLI-009", "QA-MOB-001", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-020.json",
+            "releasePath": "reports/defects/first-failures/DEF-020.json",
+            "type": "file",
+            "sourceSha256": "sha256:9b2e7858ba3a290d706143bfc338f60331101b3ecb9bb7b2e7d644a323e6d143"
+          }
+        ],
+        "note": "The direct /check-in production-web journey retained a trace and error context after a previously selected synthetic client was redirected to the selector before its persisted selection restored."
+      },
+      "diagnosis": "SelectionProvider was still loading AsyncStorage when CheckInRoute evaluated a transient null client ID as final and redirected. The surrounding tabs layout handled restoration correctly, but the route failed to distinguish loading from no selection.",
+      "fix": "Render an announced client-selection loading state until restoration completes, then evaluate redirect or the restored check-in draft without discarding input.",
+      "regressionEvidence": [
+        "client-frontend/src/app/(tabs)/check-in.tsx",
+        "client-frontend/tests/mobile/routes.test.tsx",
+        "client-frontend/tests/e2e/client-web.spec.ts"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The native route suite passes 11 of 11 and the exact client production gate passes direct-route restoration and offline draft retention; the same-content full release run remains pending."
+      }
+    },
+    {
+      "id": "DEF-021",
+      "title": "Docker runtime-log gate omitted required sensitive and dependency-error classes",
+      "classification": "test",
+      "requirements": ["DEM-003", "OPS-005", "QA-DKR-011", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Adversarial protocol review found that the Docker verifier collected redacted logs but did not deterministically scan every QA-DKR-011 class before a release result had been accepted."
+      },
+      "diagnosis": "The protocol relied on command-output redaction and container health without a dedicated content classifier for contact identity, unredacted free text, raw database/provider failures, crash signatures, and unexpected warning/error levels.",
+      "fix": "Add a value-free runtime-log scanner for every documented class, count configured secret matches before redaction, fail on findings or unhealthy services, and retain only finding identifiers and line numbers in the release report.",
+      "regressionEvidence": [
+        "backend/tooling/docker/log-scan.mjs",
+        "backend/tooling/docker/log-scan.test.mjs",
+        "backend/tooling/docker/verify.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The scanner regressions and 14/14 focused Docker protocol passed QA-DKR-011 with exact healthy service topology, zero content findings, and zero sensitive matches; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-022",
+      "title": "Docker teardown resolved the web container after stopping it",
+      "classification": "test",
+      "requirements": ["QA-DKR-013", "QA-EVD-007", "QA-REL-014"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Adversarial protocol review found the teardown lookup-order defect before a passing release Docker result had been accepted."
+      },
+      "diagnosis": "QA-DKR-013 stopped the web service before asking Compose for its container ID, while the default Compose process query excludes stopped containers and could therefore lose the exact object required for exit inspection.",
+      "fix": "Resolve and preserve the exact owned running container ID before bounded shutdown, inspect that ID after stopping, accept only graceful exit codes 0 or 143, and reject forced SIGKILL exit 137.",
+      "regressionEvidence": [
+        "backend/tooling/docker/lib.mjs",
+        "backend/tooling/docker/lib.test.mjs",
+        "backend/tooling/docker/verify.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 14/14 focused Docker protocol passed QA-DKR-013 by resolving the exact container before stop, accepting graceful exit 143, and proving no project containers, networks, or volumes remained; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-023",
+      "title": "Mutation fix loop overwrote intermediate failing reports before freezing them",
+      "classification": "test",
+      "requirements": ["QA-MUT-003", "QA-MUT-005", "QA-EVD-007", "QA-REL-003"],
+      "status": "fixed-release-validated",
+      "firstFailure": {
+        "kind": "unretained-local-run",
+        "retention": "gap-disclosed",
+        "artifacts": [],
+        "note": "The first corrected mutation result put QA-MUT-003 below its 95 percent threshold, and later survivor-review iterations exposed additional genuine assertion gaps, but the singleton Stryker JSON report was overwritten between fixes before immutable copies were frozen."
+      },
+      "diagnosis": "The mutation audit retained report hashes and score notes but allowed each Stryker run to replace reports/mutation/mutation.json before the preceding failing bytes were copied into versioned first-failure evidence.",
+      "fix": "Disclose the missing intermediate bytes, preserve the exact final mutation report, commit a classification inventory bound to that report and its source/survivor digests, and require subsequent release evidence to copy and independently validate both files.",
+      "regressionEvidence": [
+        "backend/tooling/verification/mutation-survivor-classification.json",
+        "backend/tooling/verification/run-suite.mjs",
+        "backend/tooling/verification/verify-evidence.mjs"
+      ],
+      "validation": {
+        "status": "release-pass",
+        "note": "The exact final 2,207-mutant report, per-mutant event stream, and classifier are now preserved and cryptographically bound to all 429 tests and execution inputs. The historical intermediate-byte gap remains honestly disclosed and was not reconstructed."
+      }
+    },
+    {
+      "id": "DEF-024",
+      "title": "Concurrent mutation workers produced systemic Vitest runtime errors",
+      "classification": "test",
+      "requirements": ["QA-MUT-001", "QA-MUT-005", "QA-EVD-007", "QA-REL-003"],
+      "status": "fixed-release-validated",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-024.json",
+            "releasePath": "reports/defects/first-failures/DEF-024.json",
+            "type": "file",
+            "sourceSha256": "sha256:f363897999384d3c0697c40e95e2f2c138f9da4d81aa9b76631c2afc7782c3d0"
+          }
+        ],
+        "note": "The quiet-host mutation report contained 1,556 RuntimeError mutants with the same Vitest unhandled Pool.run failure across all 22 mutated source files; 1,554 of them had covering tests."
+      },
+      "diagnosis": "Stryker still launched concurrent test runners and each Vitest runner could execute files in parallel, so the PGlite/Vitest worker pool failed systemically even though Stryker itself exited successfully. Treating these harness errors as invalid mutants would have inflated the apparent score.",
+      "fix": "Serialize Stryker test runners and Vitest workers, audit runtime-error reasons, require zero RuntimeError mutants for release, and exclude only checker-proven CompileError mutants from mutation scoring.",
+      "regressionEvidence": [
+        "stryker.config.mjs",
+        "backend/vitest.mutation.config.ts",
+        "backend/tooling/verification/mutation-survivor-classification.json",
+        "backend/tooling/verification/mutation-evidence.test.mjs"
+      ],
+      "validation": {
+        "status": "release-pass",
+        "note": "The exact current-tree rerun completed all 2,207 mutants after all 429 dry-run tests with zero RuntimeError, CompileError, and NoCoverage outcomes. The supported concurrency-one harness and immutable classifier binding prevent the earlier systemic runner errors from inflating the score."
+      }
+    },
+    {
+      "id": "DEF-025",
+      "title": "Docker protocol substituted mocked suites for live fault and drain proof",
+      "classification": "test",
+      "requirements": ["NFR-RES-001", "NFR-RES-002", "NFR-RES-008", "QA-DKR-009", "QA-REL-012"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Adversarial review proved that environment variables intended to target the Compose web service were unused by the invoked in-process security and resilience tests."
+      },
+      "diagnosis": "QA-DKR-009 described live HTTP security, database fault, and graceful-drain evidence, but the original suites used mocked in-process handlers and never exercised the running production image or its PostgreSQL connection lifecycle.",
+      "fix": "Add project-bound real HTTP probes, a PostgreSQL outage and recovery probe, and an event-driven SIGTERM scenario that holds in-flight work, observes refusal of new work, then requires the original correlated mutation to drain successfully.",
+      "regressionEvidence": [
+        "backend/tooling/docker/live-project-proof.mjs",
+        "backend/tooling/docker/live-project-proof.test.mjs",
+        "backend/tooling/docker/verify.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 14/14 focused Docker protocol passed the live QA-DKR-009 database stop/sanitized-503/recovery proof and QA-DKR-013 event-driven in-flight SIGTERM drain; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-026",
+      "title": "Docker health and log scan omitted states and earlier command streams",
+      "classification": "test",
+      "requirements": ["NFR-RES-014", "OPS-005", "QA-DKR-011", "QA-REL-012"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Source review found that only literal unhealthy or exited services and the final stdout log command could fail QA-DKR-011 before any release result was accepted."
+      },
+      "diagnosis": "Paused, dead, restarting, created, or missing-health services could pass; stderr, truncated output, and sensitive matches recorded by earlier migrate, seed, and suite commands were not aggregated into the final verdict.",
+      "fix": "Validate exact expected service state and health topology, scan stdout and stderr plus every recorded command for truncation and secret matches, classify runtime content without retaining values, and allow only correlated expected fault events.",
+      "regressionEvidence": [
+        "backend/tooling/docker/log-scan.mjs",
+        "backend/tooling/docker/log-scan.test.mjs",
+        "backend/tooling/docker/protocol-assertions.mjs",
+        "backend/tooling/docker/protocol-assertions.test.mjs",
+        "backend/tooling/docker/verify.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "State/stream regressions and the 14/14 focused Docker protocol passed QA-DKR-011 with both expected services healthy, zero raw-log findings, and zero sensitive matches; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-027",
+      "title": "Docker restart proof hashed partial state and omitted replay-response equality",
+      "classification": "test",
+      "requirements": ["NFR-RES-009", "QA-DKR-010", "QA-REL-012", "QA-REL-014"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Adversarial review found that the restart hash covered only six tables and the replay check asserted a row count without comparing the original logical response."
+      },
+      "diagnosis": "Coach actions, traces, model runs, evaluations, jobs, messages, and other public data could change across restart without affecting the partial hash, while a different replay response could still coexist with one idempotency row.",
+      "fix": "Hash a stable canonical snapshot of every public table, retain the original idempotent response, replay after web and PostgreSQL recovery, and require exact logical response equality plus one durable idempotency record.",
+      "regressionEvidence": [
+        "backend/tooling/docker/protocol-assertions.mjs",
+        "backend/tooling/docker/protocol-assertions.test.mjs",
+        "backend/tooling/docker/verify.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 14/14 focused Docker protocol passed QA-DKR-010 with canonical snapshots of every public table unchanged, exact replay equality, and one durable idempotency record; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-028",
+      "title": "Docker image evidence under-validated provenance, writable mounts, SBOM, and SARIF",
+      "classification": "security",
+      "requirements": ["QA-DKR-007", "QA-DKR-012", "QA-REL-013", "QA-REL-014", "SEC-019"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Security review found that a different running image, arbitrary writable mounts, an empty SBOM, or SARIF with no scanner run could satisfy the original assertions."
+      },
+      "diagnosis": "The protocol checked tmpfs keys and hashed scanner files but did not bind the running container to the freshly built image, reject all unexpected mounts, validate non-root identity fully, or require attributed non-empty SPDX and SARIF structures.",
+      "fix": "Bind built and running image identities, assert non-root UID/GID and exact read-only/mount policy, validate SPDX schema/package content, and require Trivy-attributed SARIF runs with structurally valid results before accepting zero findings.",
+      "regressionEvidence": [
+        "backend/tooling/docker/protocol-assertions.mjs",
+        "backend/tooling/docker/protocol-assertions.test.mjs",
+        "backend/tooling/docker/verify.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 14/14 focused Docker protocol passed QA-DKR-012 for the exact fresh image as UID/GID 65532 with read-only root, no writable mounts/socket/escalation, 101 SPDX packages, and zero Trivy findings; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-029",
+      "title": "Docker failure cleanup could leave project networks and ignore teardown failure",
+      "classification": "test",
+      "requirements": ["QA-DKR-013", "QA-EVD-007", "QA-REL-014"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Review found that success omitted network absence and the failure-finally path ignored a nonzero down result without performing post-cleanup resource checks."
+      },
+      "diagnosis": "A failed protocol could leave project containers, volumes, or networks while its report preserved only the original error, and success could claim isolation without proving the project network was removed.",
+      "fix": "Resolve exact project-owned containers, volumes, and networks before teardown; require their absence afterward; treat cleanup failure as evidence; and keep fallback cleanup active whenever absence validation fails.",
+      "regressionEvidence": [
+        "backend/tooling/docker/lib.mjs",
+        "backend/tooling/docker/lib.test.mjs",
+        "backend/tooling/docker/protocol-assertions.mjs",
+        "backend/tooling/docker/verify.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Four retained failed focused runs proved failure-path cleanup removed every owned container, network, and volume with no cleanup error, and the final 14/14 run passed QA-DKR-013; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-030",
+      "title": "Docker database and migration proof omitted empty-state, JUnit, and running-image assertions",
+      "classification": "test",
+      "requirements": ["QA-DKR-004", "QA-DKR-005", "QA-DKR-007", "QA-EVD-006", "QA-REL-014"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Protocol review found no explicit pre-migration empty-database assertion, no migration JUnit artifact promised by the evidence table, and no runtime-image equality check at web startup."
+      },
+      "diagnosis": "A pre-populated database, incomplete migration evidence, or stale container image could pass adjacent inventory and health checks without proving the documented clean-room sequence.",
+      "fix": "Assert the database has no application tables before migration, emit escaped machine-readable migration JUnit, and require the running web container image to equal the freshly built image before health and smoke validation.",
+      "regressionEvidence": [
+        "backend/tooling/docker/protocol-assertions.mjs",
+        "backend/tooling/docker/protocol-assertions.test.mjs",
+        "backend/tooling/docker/verify.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 14/14 focused Docker protocol passed QA-DKR-004..007 from an empty PostgreSQL 16 database through two committed migrations, 21 tables, 104 constraints, and the exact healthy production image; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-031",
+      "title": "Clean mutation audit exposed nine genuine behavioral assertion gaps",
+      "classification": "test",
+      "requirements": ["QA-MUT-003", "QA-MUT-005", "QA-EVD-007", "QA-REL-003"],
+      "status": "fixed-release-validated",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-031.json",
+            "releasePath": "reports/defects/first-failures/DEF-031.json",
+            "type": "file",
+            "sourceSha256": "sha256:b72c51640e9623ffdbf2002de1215e80b78c989266308ee44fe04a07792c3d42"
+          }
+        ],
+        "note": "The first harness-clean 2,207-mutant report had zero runtime, compile, and no-coverage errors, but survivor review identified nine behavioral gaps that could not be classified as equivalent."
+      },
+      "diagnosis": "Tests did not distinguish a volume-operation diagnostic, DomainError naming, fingerprint whitespace normalization, the second exercise-equivalence tuple and unknown-equivalence detail, readiness 4001 rejection, or the candidate-row FOR UPDATE lock.",
+      "fix": "Add focused assertions for every observed behavior, retain the clean pre-fix report, rerun all 2,207 mutants under the zero-runtime-error harness, and accept only an exact classified inventory with semantic equivalence proof for each remaining survivor or timeout.",
+      "regressionEvidence": [
+        "backend/src/domain/mutation-audit.test.ts",
+        "backend/tests/pglite/publish-programme.coverage.integration.test.ts",
+        "backend/tooling/verification/mutation-survivor-classification.json",
+        "backend/tooling/verification/mutation-evidence.test.mjs"
+      ],
+      "validation": {
+        "status": "release-pass",
+        "note": "The exact current-tree run completed 2,207 mutants with 2,193 killed, nine descriptor-bound proven-equivalent survivors, five exact classified timeouts, and zero runtime, compile, or no-coverage errors. Every conservative scope remains above its unchanged threshold."
+      }
+    },
+    {
+      "id": "DEF-032",
+      "title": "Raw PostgreSQL connectivity failures mapped to internal error instead of dependency unavailable",
+      "classification": "product",
+      "requirements": ["NFR-RES-001", "OPS-003", "QA-DKR-009", "QA-REL-012"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Source audit of the new live database-outage probe found that unwrapped postgres-js connectivity failures fell through the facade before Docker runtime was released."
+      },
+      "diagnosis": "The facade mapped domain, application, database-invariant, and agent errors, but an unavailable PostgreSQL socket surfaced as a raw typed driver or Node network error and therefore became generic internal_error with HTTP 500 instead of the documented sanitized dependency response.",
+      "fix": "Classify only recognized postgres-js connection codes, bounded Node network codes, and PostgreSQL connection/resource/shutdown SQLSTATEs through a cycle-safe eight-cause walk; map matches to a fixed safe dependency_unavailable error while leaving unknown or message-only errors internal.",
+      "regressionEvidence": [
+        "backend/src/infrastructure/database/database-error.ts",
+        "backend/src/infrastructure/database/database-error.test.ts",
+        "backend/src/composition/backend-facade.coverage.test.ts",
+        "backend/tooling/docker/live-project-proof.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Focused classifier regressions and the 14/14 Docker protocol passed the real QA-DKR-009 database outage with a correlated sanitized dependency_unavailable 503 followed by recovery; only the same-content full release run remains."
+      }
+    },
+    {
+      "id": "DEF-033",
+      "title": "Backend startup imported a type-only PostgresError as a named ESM runtime export",
+      "classification": "product",
+      "requirements": ["QA-CLI-006", "QA-EVD-007", "QA-STA-005", "QA-REL-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-033.json",
+            "releasePath": "reports/defects/first-failures/DEF-033.json",
+            "type": "file",
+            "sourceSha256": "sha256:20d951876ba7e9eda1ea927ad7d902fe1b8d73ab37778c9bbd0800bc251c7875"
+          }
+        ],
+        "note": "The zero-retry client production journey retained its startup report after Node 24 rejected a named PostgresError export that exists in declarations but not in the package ESM module surface."
+      },
+      "diagnosis": "Vitest module interop allowed the named import during focused tests, but the installed postgres package exposes PostgresError as a property of its default export, so the real production-server loader failed before browser acceptance began.",
+      "fix": "Use the package-supported default export and its PostgresError constructor, add a plain Node ESM runtime-import/startup check alongside focused unit/type checks, then rerun the exact client production journey without retry masking.",
+      "regressionEvidence": [
+        "backend/src/infrastructure/database/database-error.ts",
+        "backend/src/infrastructure/database/database-error.test.ts",
+        "backend/src/infrastructure/database/database-error.runtime.test.mjs",
+        "client-frontend/tests/e2e/start-production-server.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The plain Node ESM runtime regression and exact four-scenario client production gate pass after the package-supported default import fix; the same-content full release run remains pending."
+      }
+    },
+    {
+      "id": "DEF-034",
+      "title": "Stored check-in free text was omitted from the next assembled context trace",
+      "classification": "product",
+      "requirements": ["ADJ-003", "CTX-002", "QA-CLI-006", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-034.json",
+            "releasePath": "reports/defects/first-failures/DEF-034.json",
+            "type": "file",
+            "sourceSha256": "sha256:dbb639b35019e598eb2ecc91c5af75385aaeff12ad664d01df904d54dd4bbb0c"
+          }
+        ],
+        "note": "The zero-retry production client journey retained screenshot, video, trace, HTML, and error context after a successful check-in body failed to appear in the next exact context trace."
+      },
+      "diagnosis": "The check-in repository persisted and returned the exact bounded body, and the deterministic assembler preserved supplied bodies, but DatabaseContextAssembler projected only latency, readiness, and respondedAt into checkInsMetrics and dropped body between storage and rendering.",
+      "fix": "Include the stored check-in body in the protected context-record projection, add an exact-render unit assertion and a PGlite storage-to-next-context regression, while leaving structured log redaction and client-facing privacy boundaries unchanged.",
+      "regressionEvidence": [
+        "backend/src/composition/runtime-adapters.ts",
+        "backend/src/composition/runtime-adapters.coverage.test.ts",
+        "backend/tests/pglite/infrastructure-coverage.integration.test.ts",
+        "client-frontend/tests/e2e/client-web.spec.ts"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Eighteen focused unit/PGlite checks and the exact client production journey pass, including the stored free text in the next trace; the same-content full release run remains pending."
+      }
+    },
+    {
+      "id": "DEF-035",
+      "title": "Client History journey depended on an earlier test completing its session",
+      "classification": "test",
+      "requirements": ["QA-CLI-007", "QA-EVD-007", "QA-REL-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-035.json",
+            "releasePath": "reports/defects/first-failures/DEF-035.json",
+            "type": "file",
+            "sourceSha256": "sha256:02afe6c2f0b61398fc09c934c185d351fe2162749622bb5aa76b0583b2141c4e"
+          }
+        ],
+        "note": "The isolated zero-retry client run retained exact browser and network evidence when History expected session 701 completed even though the API correctly returned it as scheduled."
+      },
+      "diagnosis": "QA-CLI-007 implicitly relied on earlier QA-CLI-004/005 state mutation instead of arranging its own prerequisite, so isolated or first-failure-filtered execution made a correct History view appear defective.",
+      "fix": "Have QA-CLI-007 idempotently log and complete session 701 through the real APIs when needed, assert the backend completed state, then assert the completed row and exact RPE in the UI.",
+      "regressionEvidence": ["client-frontend/tests/e2e/client-web.spec.ts"],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Formatting, lint, client types, isolated QA-CLI-007, and the complete exact four-scenario client production gate pass; the same-content full release run remains pending."
+      }
+    },
+    {
+      "id": "DEF-036",
+      "title": "Offline-state browser assertion used an ambiguous broad-text locator",
+      "classification": "test",
+      "requirements": ["QA-CLI-009", "QA-EVD-007", "QA-REL-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-036.json",
+            "releasePath": "reports/defects/first-failures/DEF-036.json",
+            "type": "file",
+            "sourceSha256": "sha256:c63ccaa5b23cc81484864fb72c533047094ff8f9602afc8fdc5dbe4305129577"
+          }
+        ],
+        "note": "The production offline-state journey retained seven exact artifacts after the expected state rendered but a broad text regex matched both its heading and supporting copy under strict locator semantics."
+      },
+      "diagnosis": "The product presented the correct accessible offline state, but the test searched all text with /offline|could not reach/ and therefore resolved two visible elements instead of one exact semantic target.",
+      "fix": "Assert the exact accessible offline heading rather than a broad page-text regex, preserving strict locator behavior and the separate retry/input-retention assertions.",
+      "regressionEvidence": ["client-frontend/tests/e2e/client-web.spec.ts"],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The semantic locator passes static checks and the exact zero-retry QA-CLI-009 production journey, including retry and input retention; the same-content full release run remains pending."
+      }
+    },
+    {
+      "id": "DEF-037",
+      "title": "Docker security proof required a contradictory CSP default source",
+      "classification": "test",
+      "requirements": ["SEC-009", "QA-DKR-009", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-037.json",
+            "releasePath": "reports/defects/first-failures/DEF-037.json",
+            "type": "file",
+            "sourceSha256": "sha256:c7d0b7c28592479542713f7dfcea4983dd53d74f90e41616fa4e306b2b79c6ad"
+          }
+        ],
+        "note": "The first focused Docker protocol retained the exact live response headers and cleanup proof after QA-DKR-009 rejected the documented production CSP despite all required directives and hardening headers being present."
+      },
+      "diagnosis": "The live Docker assertion required default-src 'none', while the documented and shipped Next.js policy intentionally uses default-src 'self' with object-src and frame-ancestors set to 'none'. The harness therefore contradicted the application security policy rather than detecting a product defect.",
+      "fix": "Validate the documented global CSP directives and reject unsafe-eval without imposing a conflicting default source; retain exact-header adversarial regressions.",
+      "regressionEvidence": [
+        "backend/tooling/docker/live-project-proof.mjs",
+        "backend/tooling/docker/live-project-proof.test.mjs",
+        "DOCS/release/evidence/public/first-failures/DEF-037.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Focused live-proof regressions and the complete 14-step focused Docker protocol pass the documented security-header policy; the same-content full release run remains pending."
+      }
+    },
+    {
+      "id": "DEF-038",
+      "title": "Docker log scanner treated protocol-induced PostgreSQL messages as crashes",
+      "classification": "test",
+      "requirements": ["NFR-RES-014", "OPS-005", "QA-DKR-011", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-038.json",
+            "releasePath": "reports/defects/first-failures/DEF-038.json",
+            "type": "file",
+            "sourceSha256": "sha256:916baa13b99ff3176c402095abef7251de5f1efb9eef67f1d8a276be1f2bfdff"
+          }
+        ],
+        "note": "The second focused Docker protocol retained eight value-free findings and clean teardown proof after QA-DKR-011 classified exact PostgreSQL initialization, negative-invariant, and intentional stop messages as unexpected runtime failures."
+      },
+      "diagnosis": "The content scanner was message-aware only for the correlated application dependency warning. It was not service-aware, so normal test-postgres initialization, the two deliberate database-invariant integration failures, and FATAL connection termination caused by explicit QA-DKR-009/010 stops were indistinguishable from unexpected application or database faults.",
+      "fix": "Allow only the four exact protocol-induced messages when they originate from a test-postgres service, while continuing to fail altered constraints, other PostgreSQL fatal/error messages, application warnings, secrets, PII, and raw dependency failures.",
+      "regressionEvidence": [
+        "backend/tooling/docker/log-scan.mjs",
+        "backend/tooling/docker/log-scan.test.mjs",
+        "DOCS/release/evidence/public/first-failures/DEF-038.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The focused scanner suite, retained-log replay, and complete 14-step focused Docker protocol pass QA-DKR-011 with zero findings; the same-content full release run remains pending."
+      }
+    },
+    {
+      "id": "DEF-039",
+      "title": "Bundled Docker SBOM plugin was incompatible with the current daemon API",
+      "classification": "environment",
+      "requirements": ["SEC-019", "QA-DKR-012", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-039.json",
+            "releasePath": "reports/defects/first-failures/DEF-039.json",
+            "type": "file",
+            "sourceSha256": "sha256:5a49653d7f9107d703b8f77cfba87bf3cd1cf76f329705c386a4b834e02aac9e"
+          }
+        ],
+        "note": "The third focused Docker protocol retained the exact plugin incompatibility transcript and clean teardown after QA-DKR-012 reached SBOM generation with QA-DKR-001 through QA-DKR-011 already passing."
+      },
+      "diagnosis": "Docker Desktop exposed docker-sbom 0.6.0 with Syft 0.43, whose Docker API 1.41 client cannot inspect images on Docker 29 because the daemon requires API 1.44 or newer. The image and application were healthy; the obsolete bundled scanner failed before producing evidence.",
+      "fix": "Generate SPDX 2.3 from the exact locally built immutable image ID with the installed current Docker Scout plugin, record the generator command/version/image, validate the non-empty SPDX document, and keep Trivy SARIF as the independent zero-high/critical vulnerability verdict.",
+      "regressionEvidence": [
+        "backend/tooling/docker/verify.mjs",
+        "backend/tooling/docker/protocol-assertions.mjs",
+        "backend/tooling/docker/protocol-assertions.test.mjs",
+        "DOCS/release/evidence/public/first-failures/DEF-039.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The complete focused Docker protocol generated SPDX 2.3 with 101 packages for the exact local image and passed independent zero-finding Trivy SARIF validation; the same-content full release run remains pending."
+      }
+    },
+    {
+      "id": "DEF-040",
+      "title": "Trivy image scan passed a subcommand flag at global CLI scope",
+      "classification": "test",
+      "requirements": ["SEC-019", "QA-DKR-012", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-040.json",
+            "releasePath": "reports/defects/first-failures/DEF-040.json",
+            "type": "file",
+            "sourceSha256": "sha256:8c8ec1971fd172b86761de245bf776d0e009259bd52a1aa9f500b52fb8331903"
+          }
+        ],
+        "note": "The fourth focused Docker protocol retained the exact pinned-Trivy CLI failure, valid preceding SPDX proof, and clean teardown after QA-DKR-001 through QA-DKR-011 passed."
+      },
+      "diagnosis": "The harness placed --skip-version-check before the Trivy image subcommand even though pinned Trivy 0.67.2 exposes that option only in image scope. Argument parsing therefore exited 1 before the scanner could emit SARIF or a vulnerability verdict.",
+      "fix": "Remove the unnecessary flag while preserving the pinned scanner digest, non-root hardened container, exact saved-image input, HIGH/CRITICAL filter, attributable SARIF validation, and strict scanner exit semantics. Pure CLI builders now prove the version and scan arguments.",
+      "regressionEvidence": [
+        "backend/tooling/docker/verify.mjs",
+        "backend/tooling/docker/protocol-assertions.mjs",
+        "backend/tooling/docker/protocol-assertions.test.mjs",
+        "DOCS/release/evidence/public/first-failures/DEF-040.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "CLI argument regressions and the complete focused Docker protocol pass with one attributable Trivy SARIF run and zero HIGH/CRITICAL findings; the same-content full release run remains pending."
+      }
+    },
+    {
+      "id": "DEF-041",
+      "title": "Deterministic coach edits were classified as live scorecard runs",
+      "classification": "product",
+      "requirements": ["CUI-006", "OPS-006", "QA-E2E-010", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-041.json",
+            "releasePath": "reports/defects/first-failures/DEF-041.json",
+            "type": "file",
+            "sourceSha256": "sha256:4d401dfdc87a0252f3136bfc5975c765640a1f53a81bd8339d73737e03cad9d6"
+          }
+        ],
+        "note": "The exact coach Playwright run retained its screenshot, video, trace, DOM error context, HTML report, last-run result, and command summary after QA-E2E-001 through QA-E2E-009 passed and QA-E2E-010 failed with zero retries."
+      },
+      "diagnosis": "DrizzleProgrammeApplicationRepository.edit created a synthetic audit run with model identifier coach-edit. Scorecard provenance deliberately classifies agent runs whose model starts with recorded as recorded and every other identifier as live, so one deterministic human edit changed the aggregate from recorded to mixed and invalidated the honest recorded-mode UI expectation.",
+      "fix": "Classify the deterministic human mutation at its audit boundary by persisting model identifier recorded/coach-edit. Programme reject and publish, adjustment edit, approve, and reject do not synthesize agent runs, so they preserve the originating run provenance and require no analogous correction.",
+      "regressionEvidence": [
+        "backend/src/infrastructure/database/repositories/application-repositories.ts",
+        "backend/tests/pglite/infrastructure-coverage.integration.test.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-041.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The focused edit unit passes; the complete PGlite suite passes 51/51 and proves the persisted coach-edit run is recorded, the aggregate remains recorded, and a true live model still yields mixed mode. Backend typecheck, scoped ESLint/Prettier, and forbidden-pattern checks pass; the exact full coach production rerun remains pending."
+      }
+    },
+    {
+      "id": "DEF-042",
+      "title": "Coach accessibility gate exposed invalid chart semantics and ambiguous alert locators",
+      "classification": "product",
+      "requirements": [
+        "CUI-007",
+        "QA-A11Y-001",
+        "QA-A11Y-003",
+        "QA-A11Y-005",
+        "QA-A11Y-007",
+        "QA-EVD-007"
+      ],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-042.json",
+            "releasePath": "reports/defects/first-failures/DEF-042.json",
+            "type": "file",
+            "sourceSha256": "sha256:729d599141a6e0c44e115287e7e54024c03e9cddc3b3793f435de4545dfa46eb"
+          }
+        ],
+        "note": "The exact one-worker, zero-retry coach accessibility run retained three failing result trees, screenshots, traces, DOM contexts, the HTML report, and last-run result after three tests failed and two passed."
+      },
+      "diagnosis": "Scorecard chart bars and metric tracks were generic elements carrying ARIA labels, so axe reported prohibited ARIA attributes instead of meaningful graphical semantics. Two accessibility assertions also selected every alert on the page, colliding with Next.js's empty route announcer rather than uniquely targeting the intended application error or validation alert.",
+      "fix": "Expose score distributions as labelled images with decorative inner bars hidden, expose safety tracks as progress bars with bounded values and text, and scope application-alert assertions by their expected text so the framework route announcer remains present without making the locator ambiguous.",
+      "regressionEvidence": [
+        "frontend/src/features/scorecard/scorecard-page.tsx",
+        "frontend/tests/accessibility/coach-accessibility.spec.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-042.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The immediate post-fix production-browser rerun passed all DEF-042 axe, empty/error, label, announcement, focus-trap, and focus-return coverage; the later complete coach accessibility run passed 5/5 with one worker and zero retries. Same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-043",
+      "title": "Keyboard accessibility test navigated before programme reads settled",
+      "classification": "test",
+      "requirements": ["QA-A11Y-002", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-043.json",
+            "releasePath": "reports/defects/first-failures/DEF-043.json",
+            "type": "file",
+            "sourceSha256": "sha256:a49ee836f3335c82bd7844a95c19e9861d5ddb0321db4cb6d8f27046f86e25b6"
+          }
+        ],
+        "note": "The exact post-DEF-042 one-worker, zero-retry coach accessibility rerun retained the sole failing keyboard result tree, screenshot, trace, DOM context, HTML report, and last-run result after four tests passed and QA-A11Y-002 failed."
+      },
+      "diagnosis": "The keyboard journey verified the queue skip link and immediately navigated to a blocked programme while programme-detail reads started by the queue route were still active. Playwright then aborted the two prior-route API requests, and the strict runtime guard correctly rejected those non-RSC request failures even though the keyboard behavior itself completed.",
+      "fix": "Wait for the queue route to reach network idle after the skip-link focus assertion and before deliberate navigation to the blocked programme. This preserves the strict request-failure guard and proves the keyboard journey without manufacturing navigation-abort noise.",
+      "regressionEvidence": [
+        "frontend/tests/accessibility/coach-accessibility.spec.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-043.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The exact coach accessibility production-browser rerun passed 5/5 with one worker, zero retries, and a clean runtime guard after the navigation synchronization fix; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-044",
+      "title": "Expo client omitted document title and radio checked semantics",
+      "classification": "product",
+      "requirements": [
+        "QA-A11Y-001",
+        "QA-A11Y-002",
+        "QA-A11Y-003",
+        "QA-A11Y-006",
+        "QA-A11Y-007",
+        "QA-EVD-007"
+      ],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-044.json",
+            "releasePath": "reports/defects/first-failures/DEF-044.json",
+            "type": "file",
+            "sourceSha256": "sha256:9269885e05796eb06b3a664698fda125da84eb64c8fb8020f694552cb83305c4"
+          }
+        ],
+        "note": "The exact one-worker, zero-retry client accessibility run retained three failing result trees, screenshots, traces, DOM contexts, the HTML report, and last-run result after all three tests failed."
+      },
+      "diagnosis": "The exported Expo web document had an empty title because the root layout supplied no document-head title, so axe rejected every tested surface. React Native Web also rendered the five Pressable readiness choices with role radio but without the required DOM aria-checked attribute, despite their native accessibility state, leaving assistive technology without each option's selected state.",
+      "fix": "Declare Spotter Client once through expo-router/head in the root layout, and explicitly mirror each readiness option's selected boolean to aria-checked while retaining the shared native radio role and accessibility state. The accessibility suite now asserts the exact document title and scans the check-in radios in the production export.",
+      "regressionEvidence": [
+        "client-frontend/src/app/_layout.tsx",
+        "client-frontend/src/app/(tabs)/check-in.tsx",
+        "client-frontend/tests/accessibility/client-accessibility.spec.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-044.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The exact client accessibility production-browser rerun passed 3/3 with one worker, zero retries, zero serious/critical axe violations, and a clean runtime guard after the title and radio-state fixes; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-045",
+      "title": "Coverage collected a Node-native resolver regression as an empty Vitest suite",
+      "classification": "test",
+      "requirements": ["QA-COV-005", "QA-COV-006", "QA-COV-007", "QA-EVD-007", "QA-REL-002"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-045.json",
+            "releasePath": "reports/defects/first-failures/DEF-045.json",
+            "type": "file",
+            "sourceSha256": "sha256:b49b6979d663b9c13aec0ebb97fffac09858dc7f4ec80b011ab030abb5951c46"
+          }
+        ],
+        "note": "The retained configuration, coverage orchestrator, Node-native test, and command summary show Vitest reporting no suite in database-error.runtime.test.mjs after the Node runner had already passed it; 42 Vitest files and 488 tests passed before collection aborted."
+      },
+      "diagnosis": "The backend coverage scope selected the complete src tree, so Vitest collected a deliberate node:test ESM resolver regression solely because its filename ended in .test.mjs. The file correctly had no Vitest suite.",
+      "fix": "Exclude the explicitly Node-native runtime-test suffix from Vitest discovery and make the coverage orchestrator run the resolver regression explicitly with Node before executing the six Vitest coverage scopes.",
+      "regressionEvidence": [
+        "backend/vitest.coverage.config.ts",
+        "backend/tooling/verification/run-coverage.mjs",
+        "backend/src/infrastructure/database/database-error.runtime.test.mjs",
+        "DOCS/release/evidence/public/first-failures/DEF-045.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The authoritative coverage command subsequently passed the explicit Node-native regression and all six coverage scopes, with 741 tests total and unchanged thresholds; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-046",
+      "title": "Authoritative coverage exposed repository and changed-code behavior gaps",
+      "classification": "test",
+      "requirements": ["QA-COV-005", "QA-COV-006", "QA-COV-007", "QA-EVD-007", "QA-REL-002"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-046.json",
+            "releasePath": "reports/defects/first-failures/DEF-046.json",
+            "type": "file",
+            "sourceSha256": "sha256:24b0d71756cf52816f456426b566dfc61133104f9640faff91a35615da9907d1"
+          }
+        ],
+        "note": "The retained machine coverage summary records repository branches at 77.39%, changed lines at 86.87%, changed branches at 75.21%, and changed functions at 83.70% after 685 Vitest tests and the Node-native regression passed."
+      },
+      "diagnosis": "Owned presentation, client-runtime, adapter, and edge-state behavior had executable branches without direct assertions. The critical backend domain/application scopes were already complete, but aggregate repository and changed-code gates correctly rejected the uncovered behavior.",
+      "fix": "Added behavior-driven coverage for coach loading, empty, error, mutation and contract states; Expo routes, forms, selection, query policy and API configuration; and remaining backend and shared-package branches. No threshold, source scope, or coverage allowlist was weakened.",
+      "regressionEvidence": [
+        "frontend/src/features/primary-pages.coverage.test.tsx",
+        "frontend/src/features/mutation-pages.coverage.test.tsx",
+        "client-frontend/tests/mobile/forms.test.tsx",
+        "client-frontend/tests/mobile/route-branches.test.tsx",
+        "client-frontend/tests/mobile/selection-provider.test.tsx",
+        "client-frontend/src/lib/api/client.test.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-046.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The authoritative unchanged-threshold rerun passed 741 tests: changed lines 95.34%, branches 90.10%, functions 94.73%; repository branches 90.73%; and backend domain/application lines, branches, and functions 100%. Same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-047",
+      "title": "Invalid server rate-profile configuration was misclassified as client input",
+      "classification": "security",
+      "requirements": ["QA-API-003", "QA-ARC-008", "SEC-010", "QA-EVD-007", "QA-REL-013"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-047.json",
+            "releasePath": "reports/defects/first-failures/DEF-047.json",
+            "type": "file",
+            "sourceSha256": "sha256:4bfae21a59c7c1707dd0230fad3bc48bee901336f438a779547edea35f4b9470"
+          }
+        ],
+        "note": "The retained pre-fix security test and coverage configuration reproduce one failure after 15 passes: invalid load-profile activation returned the generic client-validation status rather than failing the server boundary closed."
+      },
+      "diagnosis": "Server-environment parsing occurred inside the shared request guard, but its Zod failure escaped to a boundary that interpreted every Zod error as malformed request input. A valid request against invalid server policy therefore received HTTP 400 instead of a sanitized HTTP 500.",
+      "fix": "Catch environment parsing at the request-policy boundary and convert failure to a sanitized HttpBoundaryError with internal_error and HTTP 500 before handler work, while preserving the production rate-limit defaults.",
+      "regressionEvidence": [
+        "frontend/src/server/http.ts",
+        "frontend/tests/security/http-security.test.ts",
+        "backend/packages/config/src/server-environment.test.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-047.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The frontend HTTP security suite passed 23/23, including invalid load-profile fail-closed status, sanitized output, and proof that request work was not invoked; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-048",
+      "title": "Programme load editing dereferenced a cleared React event target",
+      "classification": "product",
+      "requirements": ["CUI-004", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-048.json",
+            "releasePath": "reports/defects/first-failures/DEF-048.json",
+            "type": "file",
+            "sourceSha256": "sha256:0e6cda4d7719dc54b9c862ab9d8a197f754ac9c3f26568e9fd8694c7bca78d6f"
+          }
+        ],
+        "note": "The retained pre-fix component and behavior test reproduce TypeError: Cannot read properties of null (reading value) after two related mutation-page checks had passed."
+      },
+      "diagnosis": "The load input read event.currentTarget.value inside a deferred setState updater. React had cleared currentTarget before that updater executed, so editing a prescribed load could crash the programme editor.",
+      "fix": "Snapshot the primitive load value synchronously in the input callback, normalize it to null or valueAsNumber, and pass only that stable value into the deferred immutable state update.",
+      "regressionEvidence": [
+        "frontend/src/features/programme-review/programme-review-page.tsx",
+        "frontend/src/features/mutation-pages.coverage.test.tsx",
+        "DOCS/release/evidence/public/first-failures/DEF-048.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The complete mutation-page behavior file passed 8/8, including load edit, clear, validation, and save behavior; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-049",
+      "title": "Client query-policy coverage loaded React Native Flow syntax in the general harness",
+      "classification": "test",
+      "requirements": ["QA-COV-007", "QA-MOB-001", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-049.json",
+            "releasePath": "reports/defects/first-failures/DEF-049.json",
+            "type": "file",
+            "sourceSha256": "sha256:a2b438dd8ec78e9d2578b2ba5833a67a21aaeb7735e7781fe7bb9c1e3c510347"
+          }
+        ],
+        "note": "The retained query test and both harness configurations show a pre-collection Rollup parse failure at React Native's Flow-only import typeof declaration."
+      },
+      "diagnosis": "The source-adjacent general Vitest suite resolved React Native's package entry before its test-local mock applied. That harness does not own the established React Native transform boundary, while the native harness already provides a stable alias and collects the same production source for coverage.",
+      "fix": "Move query-policy behavior into the existing native harness so it uses the repository-owned React Native test double and still contributes coverage for client source without broadening the general harness.",
+      "regressionEvidence": [
+        "client-frontend/tests/mobile/query-client.test.ts",
+        "client-frontend/tests/mobile/vitest.config.ts",
+        "client-frontend/vitest.coverage.config.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-049.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The native query-policy regression passed 2/2 and the authoritative client-native coverage scope passed; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-050",
+      "title": "Module reset split the query-policy error constructor identity",
+      "classification": "test",
+      "requirements": ["QA-COV-007", "QA-MOB-001", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-050.json",
+            "releasePath": "reports/defects/first-failures/DEF-050.json",
+            "type": "file",
+            "sourceSha256": "sha256:88d66266e69d34aaec7d9bdcca0cf61b5dadb4011c80a63562bdf1aaa60769cc"
+          }
+        ],
+        "note": "The retained first-failing native test shows one pass and one failure because an otherwise retryable ApiClientError was not recognized after the module graph reset."
+      },
+      "diagnosis": "The test reset modules before dynamically loading the query client but constructed errors with a statically imported pre-reset ApiClientError. Production correctly uses instanceof, so the distinct constructor identities made the test fixture non-retryable.",
+      "fix": "Dynamically import ApiClientError from the same post-reset module graph as the query client, preserving the production retry policy and testing both web and native platform configurations faithfully.",
+      "regressionEvidence": [
+        "client-frontend/tests/mobile/query-client.test.ts",
+        "client-frontend/src/lib/query/client.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-050.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The native query-policy file passed 2/2, proving finite native cache lifetime and retries only for bounded retryable ApiClientError instances; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-051",
+      "title": "A server-completed session still exposed duplicate submission controls",
+      "classification": "product",
+      "requirements": ["MUI-004", "QA-MOB-001", "QA-EVD-007", "QA-REL-009"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-051.json",
+            "releasePath": "reports/defects/first-failures/DEF-051.json",
+            "type": "file",
+            "sourceSha256": "sha256:b064ab2b4289043475e095ed1e7ee8118486c734592f8fda1f605381d65d8eb9"
+          }
+        ],
+        "note": "The retained pre-fix predicate and regression show one Save and complete session control rendered for a session already returned as completed by the server after nine earlier checks passed."
+      },
+      "diagnosis": "The route showed its completion notice for either local completion or server status, but hid the form only for completion performed in the current component instance. Reloading an already-completed session therefore presented contradictory read-only and submit states.",
+      "fix": "Use both local completion and the authoritative server completed status in the form-visibility invariant, leaving completed sessions read-only while retaining their completion notice.",
+      "regressionEvidence": [
+        "client-frontend/src/app/session/[sessionId].tsx",
+        "client-frontend/tests/mobile/forms.test.tsx",
+        "DOCS/release/evidence/public/first-failures/DEF-051.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The session/form behavior suite passed 19/19 and proves a server-completed session renders no submission control; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-052",
+      "title": "Native Screen coverage lacked the safe-area boundary test double",
+      "classification": "test",
+      "requirements": ["QA-A11Y-008", "QA-MOB-001", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-052.json",
+            "releasePath": "reports/defects/first-failures/DEF-052.json",
+            "type": "file",
+            "sourceSha256": "sha256:db9ee058bf8f973232b8db157f8fdfcedc1957c1dfa8073b5d0f2144774271bb"
+          }
+        ],
+        "note": "The retained component test reached react-native-safe-area-context during collection and failed on unsupported Flow syntax before any test ran."
+      },
+      "diagnosis": "The isolated native component suite newly imported Screen but did not provide the local safe-area host double already used by route suites, so Node parsed the package's Flow-typed implementation instead of the owned test boundary.",
+      "fix": "Reuse the established react-native-safe-area-context host double inside the component suite without changing production Screen behavior or the global transform configuration.",
+      "regressionEvidence": [
+        "client-frontend/tests/mobile/components.test.tsx",
+        "client-frontend/src/components/Screen.tsx",
+        "DOCS/release/evidence/public/first-failures/DEF-052.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The native component semantics file collected and passed 5/5 under the established React Native harness; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-053",
+      "title": "Native Card test fixture rendered raw text directly under a View",
+      "classification": "test",
+      "requirements": ["QA-A11Y-008", "QA-MOB-001", "QA-EVD-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-053.json",
+            "releasePath": "reports/defects/first-failures/DEF-053.json",
+            "type": "file",
+            "sourceSha256": "sha256:08300c818622936317c74ed89bc3bfb5c4e5a12e0902e7b87e7c658ebc479748"
+          }
+        ],
+        "note": "The retained exact fixture reproduces the native renderer rejecting raw Body text below a View after four component checks passed."
+      },
+      "diagnosis": "The new optional-content fixture passed a bare string to Card even though React Native requires all text nodes below View to be wrapped by Text. Existing production Card callers already satisfied the platform invariant.",
+      "fix": "Wrap the fixture content in the React Native Text component so the test exercises the intended Card state through platform-valid markup.",
+      "regressionEvidence": [
+        "client-frontend/tests/mobile/components.test.tsx",
+        "DOCS/release/evidence/public/first-failures/DEF-053.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The native component semantics file passed 5/5 with both absent and populated optional content states; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-054",
+      "title": "Today route tests spread an unknown query-data fixture",
+      "classification": "test",
+      "requirements": ["QA-STA-004", "QA-EVD-007", "QA-REL-001"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-054.json",
+            "releasePath": "reports/defects/first-failures/DEF-054.json",
+            "type": "file",
+            "sourceSha256": "sha256:493fca42eabcc1596a86ae3f6c5481ddad858d80721819fba8c597e8127b582f"
+          }
+        ],
+        "note": "The retained Today-state transitions correspond to two TS2698 diagnostics because the shared controllable query slot was typed unknown and then spread directly."
+      },
+      "diagnosis": "A deliberately generic route mock stored query data as unknown. Two Today-state transitions derived new objects directly from that slot, which was runtime-valid but could not satisfy strict compile-time object-spread safety.",
+      "fix": "Keep an explicitly inferred Today fixture and derive both transitions from that typed value while continuing to assign results through the generic mock boundary.",
+      "regressionEvidence": [
+        "client-frontend/tests/mobile/route-branches.test.tsx",
+        "DOCS/release/evidence/public/first-failures/DEF-054.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Repository strict TypeScript passed all seven workspaces after the typed-fixture correction; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-055",
+      "title": "Behavior-coverage fixtures violated strict public contracts",
+      "classification": "test",
+      "requirements": ["QA-STA-004", "QA-STA-009", "QA-EVD-007", "QA-REL-001"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-055.json",
+            "releasePath": "reports/defects/first-failures/DEF-055.json",
+            "type": "file",
+            "sourceSha256": "sha256:a42632f475e70dffd82fa4739dd7239e329fbadce719e9940c90c152a0f8d3e7"
+          }
+        ],
+        "note": "The retained diagnostic summary records one unused import, two missing required nullable sentiment fields, and two obsolete completedAt properties in newly added coach behavior fixtures."
+      },
+      "diagnosis": "Coverage fixtures were assembled from older persistence-shaped examples instead of the current shared ClientDetail and Session response contracts, and one async-test helper remained unused.",
+      "fix": "Remove the unused waitFor import, add explicit nullable sentiment values to check-ins, and remove completedAt from public Session fixtures without changing production contracts or behavior assertions.",
+      "regressionEvidence": [
+        "frontend/src/features/mutation-pages.coverage.test.tsx",
+        "frontend/src/features/primary-pages.coverage.test.tsx",
+        "backend/packages/contracts/src/api.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-055.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Repository strict TypeScript passed all seven workspaces after the fixture-only corrections; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-056",
+      "title": "Public Session fixtures retained obsolete createdAt fields",
+      "classification": "test",
+      "requirements": ["QA-STA-004", "QA-STA-009", "QA-EVD-007", "QA-REL-001"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-056.json",
+            "releasePath": "reports/defects/first-failures/DEF-056.json",
+            "type": "file",
+            "sourceSha256": "sha256:5cf28abb9df8418fd695e49874a1b3df8f1b4ed596635dc12d3dfeb558727492"
+          }
+        ],
+        "note": "The retained two fixture assignments and TS2353 diagnostic show createdAt is not a property of the shared public Session type."
+      },
+      "diagnosis": "Once the adjacent completedAt mismatch was removed, strict excess-property checking exposed two persistence-only createdAt fields still present in the public client-detail session fixtures.",
+      "fix": "Remove the obsolete createdAt properties from the two public Session fixtures and leave the response contract unchanged.",
+      "regressionEvidence": [
+        "frontend/src/features/primary-pages.coverage.test.tsx",
+        "backend/packages/contracts/src/api.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-056.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Repository strict TypeScript passed all seven workspaces after the fixture-only removal; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-057",
+      "title": "Public Session fixtures retained non-public session keys",
+      "classification": "test",
+      "requirements": ["QA-STA-004", "QA-STA-009", "QA-EVD-007", "QA-REL-001"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-057.json",
+            "releasePath": "reports/defects/first-failures/DEF-057.json",
+            "type": "file",
+            "sourceSha256": "sha256:f113b584a48eb972f743485b14b197662023c4e91cf708d8ca940daf6c2c21a0"
+          }
+        ],
+        "note": "The retained assignments and TS2353 diagnostic show sessionKey is not exposed by the shared public Session response contract."
+      },
+      "diagnosis": "After earlier stale timestamps were removed, strict excess-property checking exposed the final persistence-only field on the same two public Session fixtures.",
+      "fix": "Remove sessionKey from both public response fixtures so tests consume the same shape delivered to the client while preserving the internal persistence model.",
+      "regressionEvidence": [
+        "frontend/src/features/primary-pages.coverage.test.tsx",
+        "backend/packages/contracts/src/api.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-057.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Repository strict TypeScript passed all seven workspaces after the fixture-only removal; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-058",
+      "title": "Lint parsed immutable evidence as live source and exposed live-test style violations",
+      "classification": "test",
+      "requirements": ["QA-STA-003", "QA-STA-006", "QA-STA-007", "QA-EVD-007", "QA-REL-001"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-058.json",
+            "releasePath": "reports/defects/first-failures/DEF-058.json",
+            "type": "file",
+            "sourceSha256": "sha256:cb826fc489aa76532eefc2f4808060dc1e9f4b8d49bea7eb3d5f2001a318f22f"
+          }
+        ],
+        "note": "The retained summary records 85 errors: 14 project-service parse failures in immutable evidence plus strict callback, hook-global, return-type, and unnecessary-assertion findings in live tests."
+      },
+      "diagnosis": "The global lint inputs did not exclude frozen pre-fix TypeScript snapshots, which are evidence rather than compilable source. Newly added live native and coach tests also violated existing strict style and hook-purity rules.",
+      "fix": "Exclude only the immutable release-evidence tree alongside generated artifacts, normalize live callbacks and return types, move selection capture from render into an effect, and replace unnecessary DOM narrowing assertions with a checked helper. No live source, lint rule, test, or threshold was excluded.",
+      "regressionEvidence": [
+        "eslint.config.mjs",
+        "client-frontend/tests/mobile/forms.test.tsx",
+        "client-frontend/tests/mobile/route-branches.test.tsx",
+        "client-frontend/tests/mobile/selection-provider.test.tsx",
+        "frontend/src/features/mutation-pages.coverage.test.tsx",
+        "DOCS/release/evidence/public/first-failures/DEF-058.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Repository ESLint and forbidden-pattern checks passed with live tests still subject to all strict rules; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-059",
+      "title": "Frontend tests imported backend internals outside approved adapters",
+      "classification": "test",
+      "requirements": ["BND-001", "QA-ARC-001", "QA-EVD-007", "QA-REL-001"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-059.json",
+            "releasePath": "reports/defects/first-failures/DEF-059.json",
+            "type": "file",
+            "sourceSha256": "sha256:191d4de5d2cf78f1a5deffa850765634faab70c1f4ef9715bb0b910eda44a0c0"
+          }
+        ],
+        "note": "The retained boundary output names two frontend test files that directly imported backend agent and server packages outside the approved frontend server/API adapter boundary."
+      },
+      "diagnosis": "Gateway resilience and logger-redaction assertions were behaviorally valid but placed in frontend-owned test files, causing presentation tests to cross the documented server-only backend boundary.",
+      "fix": "Move the backend gateway/model assertions to a backend agent test and logger-redaction assertions to a backend composition test, leaving only HTTP, public-configuration, and browser-header behavior in frontend-owned suites. No boundary exception was added.",
+      "regressionEvidence": [
+        "backend/src/agents/gateway/frontend-resilience.coverage.test.ts",
+        "backend/src/composition/logging-security.coverage.test.ts",
+        "frontend/tests/resilience/model-and-http-faults.test.ts",
+        "frontend/tests/security/config-and-logging-security.test.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-059.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The four moved backend checks and three remaining frontend checks passed, and architecture-boundary verification passed across 350 files with no allowlist expansion; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-060",
+      "title": "Ten live files required repository formatting normalization",
+      "classification": "test",
+      "requirements": ["QA-STA-002", "QA-EVD-007", "QA-REL-001"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-060.json",
+            "releasePath": "reports/defects/first-failures/DEF-060.json",
+            "type": "file",
+            "sourceSha256": "sha256:c6aa7be8a32b931aa297b2c5f18bb99f155b4819497b505c1c40db099cda4a38"
+          }
+        ],
+        "note": "The retained command summary identifies the exact ten live backend, client, frontend, and verification files that failed pnpm format:check after immutable evidence had been correctly removed from the formatter's live-source scope."
+      },
+      "diagnosis": "New and modified live test, source, configuration, and coverage-verification files had not all received the repository's deterministic Prettier normalization. Frozen pre-fix evidence also required an explicit generated-artifact exclusion rather than source rewriting.",
+      "fix": "Exclude only the immutable release-evidence subtree in .prettierignore and mechanically apply the pinned repository formatter to the exact ten live files named by the retained failure, without changing behavior or formatter rules.",
+      "regressionEvidence": [
+        ".prettierignore",
+        "backend/vitest.coverage.config.ts",
+        "client-frontend/src/lib/storage/selection.test.ts",
+        "client-frontend/tests/mobile/forms.test.tsx",
+        "client-frontend/tests/mobile/route-branches.test.tsx",
+        "client-frontend/tests/mobile/selection-provider.test.tsx",
+        "frontend/src/features/mutation-pages.coverage.test.tsx",
+        "frontend/src/features/primary-pages.coverage.test.tsx",
+        "frontend/src/features/programme-review/programme-review-page.test.tsx",
+        "frontend/src/features/programme-review/programme-review-page.tsx",
+        "backend/tooling/verification/verify-coverage.mjs",
+        "DOCS/release/evidence/public/first-failures/DEF-060.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Repository pnpm format:check passed for all matched live files after the exact mechanical normalization; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-061",
+      "title": "Tablet client detail retained nested two-column layouts that crushed profile values",
+      "classification": "product",
+      "requirements": [
+        "CUI-007",
+        "QA-A11Y-006",
+        "QA-E2E-012",
+        "QA-EVD-007",
+        "QA-REL-007",
+        "QA-REL-008"
+      ],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-061.json",
+            "releasePath": "reports/defects/first-failures/DEF-061.json",
+            "type": "file",
+            "sourceSha256": "sha256:bae0638aa5f16abbca250d8de46743fe1a23f80b5a47b726a4a84b11e45317f2"
+          }
+        ],
+        "note": "The retained responsive CSS and screenshot-review summary record the 768x1024 client-detail failure: the outer content and inner profile remained two columns, leaving coaching-profile values close to one character wide."
+      },
+      "diagnosis": "The application switched to its tablet navigation at 980px, but content-layout did not collapse until 720px. At 768px the client page therefore combined a constrained outer two-column grid with its inner two-column definition layout, producing technically non-overflowing but unreadable values.",
+      "fix": "Collapse content-layout to a single column at the existing 980px tablet breakpoint, retain the narrower grid rules, and add an exact production-browser assertion that the 768px client detail computes one outer content column before its screenshot is accepted.",
+      "regressionEvidence": [
+        "frontend/src/app/globals.css",
+        "frontend/tests/e2e/coach-journeys.spec.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-061.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The production coach E2E gate passed 12/12 with one worker and zero retries; QA-E2E-012 produced 20 visually reviewed screenshots across five pages and four required viewports, including the new clean single-column 768px client assertion. Same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-062",
+      "title": "Evidence validation rejected valid digit-bearing requirement families",
+      "classification": "test",
+      "requirements": ["QA-EVD-007", "QA-REL-007"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-062.json",
+            "releasePath": "reports/defects/first-failures/DEF-062.json",
+            "type": "file",
+            "sourceSha256": "sha256:394ddbc4c84abb25b2b1f32d52146e2afceb564a4b08ba4767674abad3e9434e"
+          }
+        ],
+        "note": "The retained independent ledger review and exact pre-fix expression show that release evidence would reject legitimate digit-bearing requirement families already mapped by the defect history, including QA-E2E-011 and QA-A11Y-005."
+      },
+      "diagnosis": "The defect-history verifier allowed uppercase letters only in intermediate requirement-ID segments, while the canonical inventory includes alphanumeric families such as E2E and A11Y. The validator was therefore narrower than the identifiers it was responsible for checking.",
+      "fix": "Extract a shared canonical requirement-ID predicate that permits each segment to begin with an uppercase letter and continue with uppercase letters or digits, use it in the release evidence verifier, and add positive and malformed-ID regression matrices.",
+      "regressionEvidence": [
+        "backend/tooling/verification/evidence-validation.mjs",
+        "backend/tooling/verification/evidence-validation.test.mjs",
+        "backend/tooling/verification/verify-evidence.mjs",
+        "DOCS/release/evidence/public/first-failures/DEF-062.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The dedicated Node-native evidence-validation suite passed 2/2, accepting QA-E2E, QA-A11Y, QA-REL, and NFR-PERF examples while rejecting malformed identifiers; same-content full release validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-063",
+      "title": "Performance load was incompatible with production rate limits and lacked a guarded QA binding",
+      "classification": "performance",
+      "requirements": [
+        "NFR-PERF-001",
+        "NFR-PERF-002",
+        "NFR-PERF-003",
+        "NFR-PERF-004",
+        "NFR-PERF-005",
+        "QA-DKR-002",
+        "QA-EVD-002",
+        "QA-EVD-003",
+        "QA-REL-011"
+      ],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Independent adversarial review found that the required load could exceed normal production request limits while no environment-bound QA profile proved that any enlarged limits were restricted to a fresh owned recorded-mode project."
+      },
+      "diagnosis": "The performance workload and ordinary production rate policy were mutually incompatible, and a generic limit expansion would have weakened the shipped control or made results depend on an undocumented bypass.",
+      "fix": "Retain unchanged production defaults and add an explicit load_test profile that is accepted only for production recorded mode, synthetic-only no-auth data, and an exact fresh SPOTTER_QA_PROJECT/run-ID pair. Pass that contract through Compose, reject release attachment overrides, record it in environment evidence, and fail invalid activation closed without header bypasses.",
+      "regressionEvidence": [
+        "backend/packages/config/src/server-environment.ts",
+        "backend/packages/config/src/server-environment.test.ts",
+        "frontend/src/server/http.ts",
+        "frontend/tests/security/http-security.test.ts",
+        "compose.yaml",
+        "backend/tooling/performance/execution-policy.mjs",
+        "backend/tooling/performance/execution-policy.test.mjs",
+        "backend/tooling/performance/run.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Performance harness tests passed 39/39, configuration and HTTP security regressions passed, and ordinary production limits remain unchanged; the isolated release performance run remains pending."
+      }
+    },
+    {
+      "id": "DEF-064",
+      "title": "Recorded generation used a mismatched week and cleanup could leak generated rows",
+      "classification": "performance",
+      "requirements": [
+        "NFR-PERF-003",
+        "NFR-PERF-004",
+        "QA-DKR-009",
+        "QA-EVD-003",
+        "QA-EVD-004",
+        "QA-REL-011"
+      ],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Independent review found that performance requests were not consistently bound to the committed recording's canonical week and repeated generation cleanup did not prove removal of every exact run-owned programme, trace, evaluation, job, and idempotency row."
+      },
+      "diagnosis": "Request dates, recording fixtures, and database assertions did not share one canonical week, while cleanup ownership was broad or incomplete across single-plan and weekly repetitions. Timings could therefore measure incorrect responses and leave state that contaminated later runs.",
+      "fix": "Centralize the recorded week as 2026-08-03, assert response payload and persisted programme dates against it, derive exact run/weekly ownership keys, clean each repetition independently, and require zero counters for all generated programmes, traces, runs, evaluations, jobs, and idempotency records.",
+      "regressionEvidence": [
+        "backend/tooling/performance/fixtures.mjs",
+        "backend/tooling/performance/fixtures.test.mjs",
+        "backend/tooling/performance/contracts.mjs",
+        "backend/tooling/performance/contracts.test.mjs",
+        "backend/tooling/performance/ownership.mjs",
+        "backend/tooling/performance/ownership.test.mjs",
+        "backend/tooling/performance/run.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 39/39 performance harness pass includes canonical-week response checks, exact ownership derivation, residue rejection, and weekly correctness matrices; isolated release runtime validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-065",
+      "title": "Performance mutation fixture violated the programme contract",
+      "classification": "performance",
+      "requirements": ["NFR-PERF-002", "QA-EVD-003", "QA-EVD-004", "QA-REL-011"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Adversarial review found that the disposable programme used by mutation timing could contain an empty or wrong-week day and an exercise unrelated to the session actual, so HTTP success would not prove a contract-valid production mutation path."
+      },
+      "diagnosis": "The load fixture was shaped for convenient database insertion rather than the shared programme/session invariant. Invalid seed state could produce misleading latency, status, retry, and side-effect evidence.",
+      "fix": "Build and validate a disposable queued programme with exactly one canonical-week day and prescribed exercise whose identity matches the session actual, then validate each initial mutation and exact retry through route-specific response contracts and exact side-effect counts.",
+      "regressionEvidence": [
+        "backend/tooling/performance/fixtures.mjs",
+        "backend/tooling/performance/fixtures.test.mjs",
+        "backend/tooling/performance/contracts.mjs",
+        "backend/tooling/performance/contracts.test.mjs",
+        "backend/tooling/performance/run.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 39/39 performance harness pass includes positive and negative programme-fixture contract cases plus mutation response and outcome validation; isolated release runtime validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-066",
+      "title": "Performance cleanup authority was destructive, incompletely armed, and could suppress Docker residue",
+      "classification": "performance",
+      "requirements": [
+        "NFR-PERF-002",
+        "NFR-PERF-003",
+        "NFR-PERF-004",
+        "NFR-PERF-009",
+        "QA-DKR-013",
+        "QA-EVD-004",
+        "QA-EVD-007",
+        "QA-REL-011"
+      ],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Independent review found overly broad cleanup, missing exact-zero ownership acquisition before seed or mutation transport could fail after commit, incomplete restoration proof, and teardown paths that could suppress Compose errors or residual containers, volumes, and networks."
+      },
+      "diagnosis": "Cleanup authorization was inferred from intended fixture scope rather than acquired from exact empty namespaces and preserved pre-run state. A lost transport response could leave committed rows unarmed for cleanup, and permissive Docker teardown reporting could hide environmental residue.",
+      "fix": "Introduce independently acquired cleanup leases, arm corpus and mutation cleanup before insertion can commit, reject destructive corpus SQL, snapshot and exactly restore canonical clients and complete message guards, delete only exact owned rows, disable only named append-only user triggers under the admin transaction while preserving foreign keys, require zero residue, and make Docker teardown errors or owned resources fatal.",
+      "regressionEvidence": [
+        "backend/tooling/performance/ownership.mjs",
+        "backend/tooling/performance/ownership.test.mjs",
+        "backend/tooling/performance/fixtures.mjs",
+        "backend/tooling/performance/fixtures.test.mjs",
+        "backend/tooling/performance/evidence.mjs",
+        "backend/tooling/performance/evidence.test.mjs",
+        "backend/tooling/performance/run.mjs",
+        "backend/tooling/docker/lib.mjs",
+        "backend/tooling/docker/lib.test.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Performance harness tests passed 39/39, including preflight/transport-leak and named-trigger cleanup regressions, and Docker harness tests prove residue and teardown failures cannot pass; isolated release cleanup proof remains pending."
+      }
+    },
+    {
+      "id": "DEF-067",
+      "title": "Performance gates validated only deciding status instead of every run and business result",
+      "classification": "performance",
+      "requirements": [
+        "NFR-PERF-001",
+        "NFR-PERF-002",
+        "NFR-PERF-003",
+        "NFR-PERF-004",
+        "NFR-PERF-005",
+        "NFR-PERF-006",
+        "NFR-PERF-009",
+        "QA-EVD-003",
+        "QA-EVD-004",
+        "QA-REL-011"
+      ],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Adversarial review found that median or final status could decide a gate without every measured response, retry, database outcome, and non-deciding run proving the required route-specific business set."
+      },
+      "diagnosis": "Timing aggregation treated HTTP success and the median run as sufficient evidence. Wrong client ownership, duplicate outcomes, malformed envelopes, failed non-deciding runs, or incomplete database effects could therefore coexist with apparently acceptable percentiles.",
+      "fix": "Validate every read, mutation, generation, weekly, and repeated database response against exact schemas and business ownership; count business-validation failures as measured errors; require every run correct; retain one real median timing run; and assert exact programmes, clients, traces, recorded runs, evaluations, jobs, retries, and idempotency effects.",
+      "regressionEvidence": [
+        "backend/tooling/performance/contracts.mjs",
+        "backend/tooling/performance/contracts.test.mjs",
+        "backend/tooling/performance/statistics.mjs",
+        "backend/tooling/performance/statistics.test.mjs",
+        "backend/tooling/performance/evidence.mjs",
+        "backend/tooling/performance/evidence.test.mjs",
+        "backend/tooling/performance/run.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 39/39 performance harness pass proves wrong-but-successful data becomes an error, every-run correctness is mandatory, and weekly/mutation database outcomes are exact; isolated release runtime validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-068",
+      "title": "Lighthouse readiness proof was detached from the measured navigation",
+      "classification": "performance",
+      "requirements": ["NFR-PERF-007", "NFR-PERF-008", "QA-EVD-003", "QA-EVD-004", "QA-REL-011"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Independent review found that a separate browser preflight could prove a route ready while Lighthouse measured a redirect, loading shell, error state, or different path, leaving performance metrics detached from the claimed page."
+      },
+      "diagnosis": "Readiness and performance were collected by different navigations. Matching a preflight selector did not establish the final URL or route-specific visible marker in the actual Lighthouse report used for the gate.",
+      "fix": "Add a custom Lighthouse gatherer and audit to each measured navigation, require its final normalized path and exact visible route marker in the same report, execute each target three times, and derive all reported metrics from that target's one real median-performance run.",
+      "regressionEvidence": [
+        "backend/tooling/performance/lighthouse-proof.mjs",
+        "backend/tooling/performance/lighthouse-proof.test.mjs",
+        "backend/tooling/performance/lighthouse.mjs",
+        "backend/tooling/performance/lighthouse.test.mjs",
+        "backend/tooling/performance/evidence.mjs",
+        "backend/tooling/performance/evidence.test.mjs",
+        "backend/tooling/performance/run.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 39/39 performance harness pass includes exact marker/path rejection, custom-audit propagation, installed Lighthouse configuration, and real-run selection tests; production Lighthouse measurement remains pending."
+      }
+    },
+    {
+      "id": "DEF-069",
+      "title": "Resource sampling and bounds could miss transient peaks and growth",
+      "classification": "performance",
+      "requirements": ["NFR-PERF-009", "QA-EVD-003", "QA-EVD-004", "QA-REL-011"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Adversarial review found endpoint-only samples and incomplete bounds that could miss transient in-batch peaks, accept non-monotonic final growth, or omit absolute heap, RSS, file-descriptor, handle, container, and OOM ceilings."
+      },
+      "diagnosis": "Sampling only before or after batches could observe recovery while hiding allocation exhaustion during work. Relative growth alone was also insufficient to prove the process stayed within its declared container resources.",
+      "fix": "Run three independent five-batch sequences, sample continuously before, during, and after every operation, retain every sample and peak, derive hard heap/RSS ceilings from the container allocation, cap file descriptors and active handles, and require healthy batch/retry/database, container, OOM, final, peak, and trend evidence.",
+      "regressionEvidence": [
+        "backend/tooling/performance/evidence.mjs",
+        "backend/tooling/performance/evidence.test.mjs",
+        "backend/tooling/performance/statistics.mjs",
+        "backend/tooling/performance/statistics.test.mjs",
+        "backend/tooling/performance/run.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 39/39 performance harness pass includes transient-peak, non-monotonic-growth, continuous-sampling, and absolute-allocation failure cases; the isolated production resource soak remains pending."
+      }
+    },
+    {
+      "id": "DEF-070",
+      "title": "Performance baseline was placeholder, unverifiable, non-atomic, and source-unbound",
+      "classification": "performance",
+      "requirements": [
+        "NFR-PERF-010",
+        "QA-EVD-002",
+        "QA-EVD-003",
+        "QA-EVD-006",
+        "QA-REL-011",
+        "QA-REL-016"
+      ],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Independent review found a placeholder-like baseline that could be compared without immutable measured bytes, compatible-environment proof, exact report/source identity, atomic index persistence, or a clean source state before and after execution and promotion."
+      },
+      "diagnosis": "A mutable baseline document could not prove that values came from a passing run on the reviewed source and compatible environment. Partial writes, manual values, changed source, or environment drift could still appear comparable.",
+      "fix": "Make baseline.json a small hash-pinned index to a canonical immutable content-addressed measurement, reject placeholders and incompatible environments, bind clean before/after source and report hashes, create candidates only after NFR-PERF-001 through 009 pass, require explicit reviewed promotion, refuse conflicting immutable writes, and replace the mutable index atomically.",
+      "regressionEvidence": [
+        "backend/tooling/performance/evidence.mjs",
+        "backend/tooling/performance/evidence.test.mjs",
+        "backend/tooling/performance/persistence.mjs",
+        "backend/tooling/performance/persistence.test.mjs",
+        "backend/tooling/performance/execution-policy.mjs",
+        "backend/tooling/performance/execution-policy.test.mjs",
+        "backend/tooling/performance/promote-baseline.mjs",
+        "backend/tooling/performance/baseline.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 39/39 harness pass rejects placeholders, byte tampering, incompatible allocation, dirty/drifted source, invalid candidates, conflicting immutable writes, and non-atomic index behavior; first measured promotion and release comparison remain pending."
+      }
+    },
+    {
+      "id": "DEF-071",
+      "title": "Performance corpus admitted extra clients and duplicate or non-queued response rows",
+      "classification": "performance",
+      "requirements": [
+        "NFR-PERF-001",
+        "NFR-PERF-004",
+        "NFR-PERF-005",
+        "QA-DKR-009",
+        "QA-EVD-003",
+        "QA-EVD-004",
+        "QA-REL-011"
+      ],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Adversarial review found that corpus checks could merely contain the intended identities, allowing extra active synthetic clients, while client and queue responses could include duplicate identities or programmes outside queued status and still satisfy coarse counts."
+      },
+      "diagnosis": "Subset and row-count checks did not prove the globally active synthetic set or returned business set was exactly the intended 50-client corpus. Extra or duplicate data could alter load, queue timing, and weekly outcome claims.",
+      "fix": "Define one immutable 50-client identity set, require the global active synthetic IDs to equal it immediately before weekly measurement, validate exact 50 unique client response identities, require exactly one queued programme per intended client and no other status, and bind corpus cardinalities to the compatible-environment evidence.",
+      "regressionEvidence": [
+        "backend/tooling/performance/fixtures.mjs",
+        "backend/tooling/performance/fixtures.test.mjs",
+        "backend/tooling/performance/contracts.mjs",
+        "backend/tooling/performance/contracts.test.mjs",
+        "backend/tooling/performance/evidence.mjs",
+        "backend/tooling/performance/evidence.test.mjs",
+        "backend/tooling/performance/run.mjs"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The 39/39 performance harness pass includes exact active-client, duplicate-client, non-queued-row, and complete corpus-cardinality rejection cases; isolated release corpus validation remains pending."
+      }
+    },
+    {
+      "id": "DEF-072",
+      "title": "Standard performance corpus used a non-contract constraint-detail key",
+      "classification": "test",
+      "requirements": ["NFR-PERF-001", "QA-EVD-007", "QA-REL-007", "QA-REL-008"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-072.json",
+            "releasePath": "reports/defects/first-failures/DEF-072.json",
+            "type": "file",
+            "sourceSha256": "sha256:152797eddaf8349c7e750a8ab61e552a9d8746701633615e4f03e8ae5b67e1c6"
+          }
+        ],
+        "note": "The first fresh-owned performance smoke retained its structured HTTP 500 failure, complete environment and corpus identity, teardown transcript, and empty container, volume, and network inventories. Fresh no-cache images and the exact 50-client corpus succeeded before the first client-detail warm-up failed, so no measurement began and cleanup completed exactly."
+      },
+      "diagnosis": "The direct-SQL standard corpus stored a preference constraint detail under the strict-invalid key preference instead of the canonical nullable note field. Client-detail output validation rejected the persisted shape and returned sanitized HTTP 500. The failure path also omitted bounded response diagnostics and pre-cleanup Compose logs that would have made the product cause directly attributable before database and container teardown.",
+      "fix": "Replace the invalid detail key with the canonical nullable note field, add a SQL regression that rejects recurrence, and make future performance failures retain a bounded response diagnostic plus redacted Compose logs before exact cleanup runs.",
+      "regressionEvidence": [
+        "backend/tooling/performance/fixtures/standard-corpus.sql",
+        "backend/tooling/performance/fixtures.test.mjs",
+        "backend/tooling/performance/ownership.test.mjs",
+        "backend/tooling/performance/run.mjs",
+        "DOCS/release/evidence/public/first-failures/DEF-072.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The SQL constraint-detail regression and complete 39/39 performance harness pass after the correction; the corrected fresh-owned Docker performance smoke rerun remains pending."
+      }
+    },
+    {
+      "id": "DEF-073",
+      "title": "Performance corpus was layered over demo queue data",
+      "classification": "test",
+      "requirements": [
+        "NFR-PERF-001",
+        "NFR-PERF-004",
+        "NFR-PERF-005",
+        "QA-EVD-003",
+        "QA-EVD-007",
+        "QA-REL-007",
+        "QA-REL-008"
+      ],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-073.json",
+            "releasePath": "reports/defects/first-failures/DEF-073.json",
+            "type": "file",
+            "sourceSha256": "sha256:37d406cf14a8367f6bfa96b691ccac24620e8994adad9875b458c06fce57862c"
+          }
+        ],
+        "note": "The second fresh-owned performance smoke retained its 52-row queue validation failure, reserved-prefix and environment cardinalities, redacted service logs, teardown transcript, and empty container, volume, and network inventories. It proved the API returned the two demo queued programmes plus all 50 performance-owned queued programmes before measurement began."
+      },
+      "diagnosis": "Fresh performance execution applied the normal seven-client demo seed before inserting the standard 50-client corpus. Prefix-scoped corpus checks still reported 50 queued programmes, but the global queue contained two additional demo programmes and therefore violated exact ownership. The bounded warm-up diagnostic serialized the large body before its validation reason, obscuring the decisive 52-row error in the retained message.",
+      "fix": "Keep building the production seed image but run only migrations in fresh performance databases, insert all 50 temporary clients from the owned corpus, prove global client/programme/queue/session cardinalities equal the fixture, and summarize failed responses with the validation reason, row counts, unique-client count, duplicates, statuses, and bounded sample IDs before any body content.",
+      "regressionEvidence": [
+        "backend/tooling/performance/run.mjs",
+        "backend/tooling/performance/fixtures/standard-corpus.sql",
+        "backend/tooling/performance/fixtures.test.mjs",
+        "backend/tooling/performance/contracts.mjs",
+        "backend/tooling/performance/contracts.test.mjs",
+        "backend/tooling/performance/evidence.mjs",
+        "backend/tooling/performance/evidence.test.mjs",
+        "backend/tooling/performance/ownership.test.mjs",
+        "DOCS/release/evidence/public/first-failures/DEF-073.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The complete 42/42 performance harness passes migration-only environment, 1-through-50 corpus, global queue cardinality, duplicate summarization, and cleanup-ownership regressions; the corrected fresh-owned Docker performance smoke rerun remains pending."
+      }
+    },
+    {
+      "id": "DEF-074",
+      "title": "Performance web started before its owned coach corpus existed",
+      "classification": "test",
+      "requirements": [
+        "NFR-PERF-001",
+        "OPS-006",
+        "QA-DKR-007",
+        "QA-EVD-007",
+        "QA-REL-007",
+        "QA-REL-008"
+      ],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-074.json",
+            "releasePath": "reports/defects/first-failures/DEF-074.json",
+            "type": "file",
+            "sourceSha256": "sha256:a060b844ec51533437ce6d4d13d41d85ef16f03c87e56eacf469cd6a71339cd0"
+          }
+        ],
+        "note": "The third fresh-owned smoke retained the unhealthy production-web wait, redacted service logs, structured command failure, safe teardown transcript, and empty container, volume, and network inventories. The no-demo migration succeeded, no performance corpus or measured gate began, and all project resources were removed."
+      },
+      "diagnosis": "After demo seeding was removed, the runner still started and health-checked the production web container before inserting its owned corpus. Production composition correctly refuses synthetic-only startup when the canonical coach is absent, so readiness remained 503 until Compose's bounded wait marked the container unhealthy.",
+      "fix": "Split environment startup into database preparation and web startup. Fresh execution now builds all artifacts, starts PostgreSQL, applies migrations, inserts and validates the full owned corpus including its coach, and only then starts and health-checks the production web container. A source-order regression pins this lifecycle.",
+      "regressionEvidence": [
+        "backend/tooling/performance/run.mjs",
+        "backend/tooling/performance/ownership.test.mjs",
+        "DOCS/testing/06-performance-resilience.md",
+        "DOCS/release/evidence/public/first-failures/DEF-074.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The complete 43/43 performance harness passes the migrations-before-corpus and corpus-before-web ordering regression; the corrected fresh-owned Docker performance smoke rerun remains pending."
+      }
+    },
+    {
+      "id": "DEF-075",
+      "title": "Queue Lighthouse loaded-state proof aborted without retaining its raw failed report",
+      "classification": "test",
+      "requirements": ["NFR-PERF-007", "QA-EVD-004", "QA-EVD-007", "QA-REL-011"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-075.json",
+            "releasePath": "reports/defects/first-failures/DEF-075.json",
+            "type": "file",
+            "sourceSha256": "sha256:d2b23944d4216a90458bae6a38d998eb40610689cb9a009ac8487ba71066b2a1"
+          }
+        ],
+        "note": "The completed fresh smoke retained the structured queue loaded-state abort, redacted pre-cleanup container log, safe teardown, and exact empty post-teardown inventories. The harness failed before persisting the raw failed Lighthouse report, and that evidence gap is explicitly disclosed rather than reconstructed."
+      },
+      "diagnosis": "The custom gatherer sampled the measured navigation once without waiting for its asynchronous loaded marker, and loaded-state extraction threw before the failed Lighthouse payload was durably written. The historical raw audit artifact remains unavailable and is disclosed; source analysis identified the unbounded single-sample lifecycle defect.",
+      "fix": "Poll the exact Lighthouse execution context at a bounded interval until the normalized route and exact visible marker validate or 30 seconds expires, and durably persist each raw Lighthouse JSON report before route, metric, or loaded-state parsing can throw.",
+      "regressionEvidence": [
+        "backend/tooling/performance/lighthouse-proof.mjs",
+        "backend/tooling/performance/lighthouse.mjs",
+        "backend/tooling/performance/run.mjs",
+        "DOCS/release/evidence/public/first-failures/DEF-075.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Delayed-marker, wrong-route, bounded-timeout, custom-audit, and persistence-before-proof-failure regressions pass in the complete 48/48 performance harness; corrected fresh-owned Lighthouse measurement remains pending."
+      }
+    },
+    {
+      "id": "DEF-076",
+      "title": "Recorded-run invariants expected a model identifier different from production persistence",
+      "classification": "test",
+      "requirements": [
+        "NFR-PERF-003",
+        "NFR-PERF-004",
+        "QA-EVD-003",
+        "QA-EVD-004",
+        "QA-EVD-007",
+        "QA-REL-011"
+      ],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-076.json",
+            "releasePath": "reports/defects/first-failures/DEF-076.json",
+            "type": "file",
+            "sourceSha256": "sha256:2f2f550d4212a09c5a55389fa8882562dc5ee436a9c92ae7e5a657b8a35e553b"
+          }
+        ],
+        "note": "All three retained single-plan and weekly reports and six exact SQL transcripts show recordedSuccessfulRuns equal to zero while every other required programme, client, trace, evaluation, job, idempotency, retry, and canonical-week count is exact."
+      },
+      "diagnosis": "The invariant SQL required agent_runs.model LIKE spotter-recorded%, but the production recorded gateway persists the exact identifier recorded/spotter-v1. Correct recorded rows were therefore excluded solely by the test predicate, making otherwise correct single-plan and weekly runs fail.",
+      "fix": "Bind both invariant queries to the exact production-owned recorded/spotter-v1 identifier and add a source regression that requires both predicates and rejects the obsolete pattern.",
+      "regressionEvidence": [
+        "backend/tooling/performance/run.mjs",
+        "backend/tooling/performance/ownership.test.mjs",
+        "backend/src/infrastructure/database/repositories/application-repositories.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-076.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The exact persisted-model source regression passes in the complete 48/48 performance harness; a fresh-owned rerun must still prove exact recorded-run counts for all three single-plan and weekly iterations."
+      }
+    },
+    {
+      "id": "DEF-077",
+      "title": "Performance corpus evaluation name violated the strict gate-result contract",
+      "classification": "test",
+      "requirements": ["NFR-PERF-006", "QA-EVD-003", "QA-EVD-004", "QA-EVD-007", "QA-REL-011"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-077.json",
+            "releasePath": "reports/defects/first-failures/DEF-077.json",
+            "type": "file",
+            "sourceSha256": "sha256:cfcfe68de61aa0b6f8be376cb17c908f2d123a6b5a5e8bf4a471d420dbde9de6"
+          }
+        ],
+        "note": "The complete database gate report retains 25 HTTP 500 validation failures in each 100-request run, all for programme 54000000-0000-4000-8000-000000000112, while the redacted container log records the matching sanitized ZodError request IDs."
+      },
+      "diagnosis": "The direct-SQL standard corpus inserted evaluation name performance_corpus_gate, which is not a member of gateResultSchema's closed name enum. Programme-detail output parsing therefore failed closed with HTTP 500 whenever the critical route read that evaluation.",
+      "fix": "Replace the synthetic evaluation name with the canonical forbidden_movement gate member, preserving the modulo-aligned pass/block evidence, and pin the corpus SQL against both the allowed name and obsolete invalid name.",
+      "regressionEvidence": [
+        "backend/tooling/performance/fixtures/standard-corpus.sql",
+        "backend/tooling/performance/fixtures.test.mjs",
+        "backend/packages/contracts/src/programmes.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-077.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "The strict corpus gate-name regression passes in the complete 48/48 performance harness; a fresh-owned rerun must return contract-valid programme detail with zero response errors before release validation."
+      }
+    },
+    {
+      "id": "DEF-078",
+      "title": "Mixed read API deciding p95 exceeded the unchanged latency budget",
+      "classification": "performance",
+      "requirements": ["NFR-PERF-001", "QA-EVD-003", "QA-EVD-004", "QA-EVD-007", "QA-REL-011"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-078.json",
+            "releasePath": "reports/defects/first-failures/DEF-078.json",
+            "type": "file",
+            "sourceSha256": "sha256:66c83e1118527f4f664a1bf379e82684478b944940d9bceca9c0a0c2ceb2247a"
+          }
+        ],
+        "note": "The exact report and environment show three real 25-VU runs with 945, 1072, and 1061 contract-valid HTTP 200 samples and zero errors. Their p95 values were 503.815125, 440.584125, and 417.389833 milliseconds; the real median deciding run exceeded 250 milliseconds."
+      },
+      "diagnosis": "The unchanged NFR-PERF-001 gate is genuinely red at 440.584125 milliseconds p95 despite zero request errors. NFR-PERF-006 in the same process proves PostgreSQL execution p95 at 0.10 milliseconds and sequential repository/API p95 at or below 22.593167 milliseconds, isolating concurrency queueing rather than slow SQL. The 25-VU mix shares a ten-connection pool while client detail performs a lookup plus a five-query fanout and today had independent reads serialized. The historical aggregate cannot honestly name one dominant route, so the corrected harness adds per-route attribution for the rerun.",
+      "fix": "Raise the still-bounded single-process postgres-js pool from 10 to 32 connections while preserving explicit overrides, overlap today's independent programme and message reads, compute client local date once, eliminate repeated session scans, and retain per-route latency/status/error distributions without response bodies. The 25-VU workload, complete corpus, response validation, and 250 millisecond budget remain unchanged.",
+      "regressionEvidence": [
+        "DOCS/testing/06-performance-resilience.md",
+        "backend/tooling/performance/run.mjs",
+        "backend/tooling/performance/statistics.mjs",
+        "backend/tooling/performance/statistics.test.mjs",
+        "backend/src/infrastructure/database/adapters/postgres-adapter.ts",
+        "backend/src/infrastructure/database/adapters/postgres-adapter.test.ts",
+        "backend/src/infrastructure/database/repositories/application-repositories.ts",
+        "backend/tests/pglite/infrastructure-coverage.integration.test.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-078.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "Twenty-one adapter/PGlite tests, backend strict typecheck, route-attribution regression, targeted lint, and formatting pass. NFR-PERF-001 remains release-blocking until a fresh route-attributed three-run measurement proves deciding p95 at or below the unchanged 250 millisecond budget."
+      }
+    },
+    {
+      "id": "DEF-079",
+      "title": "Post-optimization mixed-read p95 still exceeded the unchanged latency budget",
+      "classification": "performance",
+      "requirements": ["NFR-PERF-001", "QA-EVD-003", "QA-EVD-004", "QA-EVD-007", "QA-REL-011"],
+      "status": "fixed-partially-release-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-079.json",
+            "releasePath": "reports/defects/first-failures/DEF-079.json",
+            "type": "file",
+            "sourceSha256": "sha256:147247bedc6802c0d7ba89c68118d70cf368d75694c7bd15391660d246875b13"
+          }
+        ],
+        "note": "The exact post-DEF-078 report retains three real 25-VU runs with 1,234, 1,091, and 992 contract-valid HTTP 200 samples, aggregate p95 values of 313.850833, 371.456541, and 404.699125 milliseconds, and zero request or response-validation errors. The median deciding run's route attribution records p95 values of 220.099083 milliseconds for the active-client list, 396.712791 for client detail, 475.676875 for today, 242.197125 for the queued-programme list, and 225.819417 for trace detail."
+      },
+      "diagnosis": "The DEF-078 correction improved the deciding aggregate p95 from 440.584125 to 371.456541 milliseconds without weakening the workload, validation, or 250 millisecond budget, but NFR-PERF-001 remains genuinely red. Exact deciding-run attribution isolates the two client fanout routes above budget: client detail at 396.712791 milliseconds and today at 475.676875 milliseconds, while the other three routes remain below 250 milliseconds and all routes report zero errors.",
+      "fix": "Remove the remaining serialized repository read phases by starting the client lookup with independent detail queries and starting the Today client, programme/session, and outstanding-message reads together. Preserve the 25-VU workload, complete corpus, response validation, and 250 millisecond latency budget.",
+      "regressionEvidence": [
+        "DOCS/testing/06-performance-resilience.md",
+        "backend/tooling/performance/run.mjs",
+        "DOCS/release/evidence/public/first-failures/DEF-079.json"
+      ],
+      "validation": {
+        "status": "superseded-by-DEF-081",
+        "note": "The completed fresh smoke after the repository-phase correction improved deciding p95 from 371.456541 to 303.742083 milliseconds with zero errors. The correction is accepted as a real partial improvement; the residual unchanged-budget system-capacity miss is retained separately as DEF-081."
+      }
+    },
+    {
+      "id": "DEF-080",
+      "title": "Lighthouse extractor rejected a valid serialized loaded-state audit",
+      "classification": "test",
+      "requirements": ["NFR-PERF-007", "QA-EVD-004", "QA-EVD-007", "QA-REL-011"],
+      "status": "fixed-release-validation-pending",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-080.json",
+            "releasePath": "reports/defects/first-failures/DEF-080.json",
+            "type": "file",
+            "sourceSha256": "sha256:7c83f306626e0cc714ef088f07de25464e71e4f489b226fa56afd85df9dcb407"
+          }
+        ],
+        "note": "The recurring /queue loaded-state abort is retained with the complete parseable raw Lighthouse result, an exact normalized diagnostic and stack, the redacted failure container log, safe-teardown log, and empty post-teardown container, volume, and network inventories. The raw result reports performance 0.94, accessibility 1.00, a score-1 spotter-loaded-state audit, and exact visible valid h1 heading proof for Review queue, with no runtime error or run warnings."
+      },
+      "diagnosis": "The extractor required audit.numericValue to equal 1 even though Lighthouse's serialized LHR omitted numericValue while retaining score 1 and the exact validated loaded-state proof. The application page and custom audit succeeded; the harness rejected a valid raw report because it depended on a field that is not preserved by the serialization boundary.",
+      "fix": "Accept the serialized score together with the validated exact-path, exact-marker proof rather than depending on the absent numericValue field, and pin the behavior with a raw-report-shaped regression.",
+      "regressionEvidence": [
+        "backend/tooling/performance/lighthouse-proof.mjs",
+        "backend/tooling/performance/lighthouse-proof.test.mjs",
+        "backend/tooling/performance/lighthouse.mjs",
+        "DOCS/release/evidence/public/first-failures/DEF-080.json"
+      ],
+      "validation": {
+        "status": "targeted-pass-release-pending",
+        "note": "All 21 fresh production Lighthouse navigations completed without extractor aborts and retained exact requested/final path, marker, visibility, and validity proofs. The correction is targeted-validated; only the same-content full release gate remains pending."
+      }
+    },
+    {
+      "id": "DEF-081",
+      "title": "Residual system capacity kept mixed-read p95 above the unchanged latency budget",
+      "classification": "performance",
+      "requirements": ["NFR-PERF-001", "QA-EVD-003", "QA-EVD-004", "QA-EVD-007", "QA-REL-011"],
+      "status": "fix-in-progress",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-081.json",
+            "releasePath": "reports/defects/first-failures/DEF-081.json",
+            "type": "file",
+            "sourceSha256": "sha256:bbd619f719cfa525acc1e60594abd1623349c548c41139b0a848c7c186363ebd"
+          }
+        ],
+        "note": "The exact completed-smoke reports retain three 25-VU runs with 1,114, 1,125, and 940 contract-valid HTTP 200 samples, aggregate p95 values of 300.872000, 303.742083, and 347.797291 milliseconds, and zero request or validation errors. The deciding route p95 values were 272.299250 milliseconds for the active-client list, 322.597167 for client detail, 292.526375 for Today, 316.253958 for the queued-programme list, and 301.491375 for trace detail."
+      },
+      "diagnosis": "Removing the remaining serialized repository phases improved DEF-079's deciding p95 from 371.456541 to 303.742083 milliseconds, but every route in the fresh deciding 25-VU mix remained above the 250 millisecond system budget. The same source measured the standalone queued-programme API at 15.976083 milliseconds p95, the critical repository API at 21.996500 milliseconds p95, and its SQL at 0.134 milliseconds p95. With zero errors throughout, the residual miss is shared production-server capacity or concurrency contention rather than a slow isolated query or repository operation.",
+      "fix": "Further bounded production-server capacity and concurrency investigation is in progress. No correction or passing measurement is accepted for this residual defect, and the workload, source identity, response validation, corpus, resource allocation, and 250 millisecond threshold remain unchanged.",
+      "regressionEvidence": [
+        "DOCS/testing/06-performance-resilience.md",
+        "backend/tooling/performance/run.mjs",
+        "backend/tooling/performance/statistics.mjs",
+        "backend/src/infrastructure/database/repositories/application-repositories.ts",
+        "DOCS/release/evidence/public/first-failures/DEF-081.json"
+      ],
+      "validation": {
+        "status": "failing-thresholds",
+        "note": "The fresh-owned smoke completed all measurements and exact cleanup, but NFR-PERF-001 remains red at 303.742083 milliseconds deciding p95. A same-scope three-run rerun must prove p95 at or below the unchanged 250 millisecond budget."
+      }
+    },
+    {
+      "id": "DEF-082",
+      "title": "Expo-web main-thread blocking kept client Lighthouse scores below budget",
+      "classification": "performance",
+      "requirements": ["NFR-PERF-008", "QA-EVD-003", "QA-EVD-004", "QA-EVD-007", "QA-REL-011"],
+      "status": "fix-in-progress",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-082.json",
+            "releasePath": "reports/defects/first-failures/DEF-082.json",
+            "type": "file",
+            "sourceSha256": "sha256:5baa2d8468c831b78ec2adb5c7ba06c779c4a4348b20d68aab2856ba00a5e372"
+          }
+        ],
+        "note": "Nine retained production Expo-web Lighthouse reports show Today scores of 84, 82, and 84 and session/check-in scores of 84 in every run, below the unchanged score-85 budget. All nine have accessibility 100, CLS 0, LCP between 1,445.276367 and 1,540.915300 milliseconds, exact valid loaded-state proofs, no runtime errors, and no run warnings."
+      },
+      "diagnosis": "The client routes are ready, stable, accessible, and within the LCP budget, but total blocking time remains 614 to 715 milliseconds in the nine raw reports. Every report identifies the same 2,721,053-byte uncompressed Expo entry JavaScript resource. The repeated cross-route evidence isolates main-thread bundle execution as the focused reason performance scores remain 82 to 84 instead of the required 85.",
+      "fix": "A production Expo-web bundle and main-thread execution correction is in progress. It must reduce blocking work without weakening the score-85 threshold or regressing exact loaded-state proof, accessibility, CLS, LCP, native behavior, or the three-route production matrix; no passing rerun is accepted yet.",
+      "regressionEvidence": [
+        "DOCS/testing/06-performance-resilience.md",
+        "backend/tooling/performance/lighthouse.mjs",
+        "backend/tooling/performance/lighthouse-proof.mjs",
+        "client-frontend/src/app/_layout.tsx",
+        "DOCS/release/evidence/public/first-failures/DEF-082.json"
+      ],
+      "validation": {
+        "status": "failing-thresholds",
+        "note": "The completed fresh smoke retains all nine client reports and exact passing companion proofs, but every route's median performance score is 84 against 85. NFR-PERF-008 remains an open release blocker."
+      }
+    },
+    {
+      "id": "DEF-083",
+      "title": "Resource snapshot missed healthy workers after Next rewrote their process titles",
+      "classification": "test",
+      "requirements": ["NFR-PERF-009", "QA-DKR-007", "QA-EVD-004", "QA-EVD-007", "QA-REL-011"],
+      "status": "fix-in-progress",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-083.json",
+            "releasePath": "reports/defects/first-failures/DEF-083.json",
+            "type": "file",
+            "sourceSha256": "sha256:3990686ab5a7b3db6a4d9f860fc460d5ec341042caa34033810dc3ab4dcd1723"
+          }
+        ],
+        "note": "The retained targeted live proof shows /health/live returning HTTP 200, one web-cluster primary, and two workers with exact slots 1 and 2 and runtime titles next-server (v16.2.12). The exact pre-fix image source and repeatable exit-1 stack record Expected exactly 2 web workers, found 0 before any resource report was collected."
+      },
+      "diagnosis": "Worker discovery treated the pre-import docker/spotter-worker.mjs command line as stable process identity. Next rewrites process.title to next-server (v16.2.12) after the worker imports the standalone server, while the SPOTTER_WEB_CLUSTER_WORKER and slot environment markers remain intact. The two healthy workers therefore existed but were removed by the harness predicate.",
+      "fix": "The source-bound correction is in progress: discover worker roles from their inherited environment markers, validate the slot contract, accept only the known bootstrap or versioned next-server runtime commands, and extend topology and evidence validation regressions. No successful live resource snapshot is accepted yet.",
+      "regressionEvidence": [
+        "docker/web-resource-snapshot.mjs",
+        "docker/web-resource-snapshot.test.mjs",
+        "backend/tooling/performance/evidence.mjs",
+        "DOCS/architecture/docker-topology.md",
+        "DOCS/release/evidence/public/first-failures/DEF-083.json"
+      ],
+      "validation": {
+        "status": "fix-in-progress",
+        "note": "This record is a targeted live-image first failure, not release evidence. A source-bound rebuild must prove one primary, two contiguous marked workers, complete aggregated reports, and the unchanged NFR-PERF-009 soak before the defect can close."
+      }
+    },
+    {
+      "id": "DEF-084",
+      "title": "Concurrent mutation runners stalled the static tail and inflated timeout outcomes",
+      "classification": "test",
+      "requirements": ["QA-MUT-001", "QA-MUT-005", "QA-EVD-007", "QA-REL-003"],
+      "status": "fixed-release-validated",
+      "firstFailure": {
+        "kind": "runtime-failure",
+        "retention": "retained",
+        "artifacts": [
+          {
+            "source": "DOCS/release/evidence/public/first-failures/DEF-084.json",
+            "releasePath": "reports/defects/first-failures/DEF-084.json",
+            "type": "file",
+            "sourceSha256": "sha256:52bf4c528262696ccd278cb75c11c97a636e1f474475fdf951aebadb5f42fd1b"
+          }
+        ],
+        "note": "The rejected full run stopped after 1,994 of 2,207 mutants with 26 provisional timeouts after its counter had remained at 1,985 for sixteen minutes. The exact 18-mutant publication tail then produced 13 kills and five timeouts with dual runners, while the serialized control killed 18 of 18 with zero timeouts. Neither incomplete or contention-affected result was accepted as release evidence."
+      },
+      "diagnosis": "Stryker concurrency two began with one checker and one test runner, then converted the released checker token into a second runner. The concurrent Vitest/PGlite processes contended during database setup and full-suite static mutants, causing hook-timeout-only apparent kills, wall-clock timeouts, and an observable sixteen-minute counter stall.",
+      "fix": "Use Stryker's supported concurrency-one control, retain all static mutants, all 429 tests, related-mode false, the 15-second timeout, and unchanged thresholds, and preserve append-only plus per-mutant event evidence. The authoritative rerun completed all 2,207 mutants in 44 minutes with zero runtime, compile, no-coverage, or publication-tail timeout outcomes.",
+      "regressionEvidence": [
+        "stryker.config.mjs",
+        "backend/tooling/verification/mutation-harness.test.mjs",
+        "backend/tooling/verification/mutation-survivor-classification.json",
+        "backend/tooling/verification/mutation-evidence.mjs",
+        "DOCS/release/evidence/public/first-failures/DEF-084.json"
+      ],
+      "validation": {
+        "status": "release-pass",
+        "note": "The exact current-tree run completed 2,207 of 2,207 mutants in 2,641 seconds after a 429-test dry run: 2,193 killed, nine proven-equivalent survivors, five exact classified timeouts, and zero no-coverage, runtime-error, or compile-error outcomes. The two wall-clock red-flag timeouts were byte-mapped to a seven-mutant targeted run that killed all seven in three seconds with exact named tests."
+      }
+    },
+    {
+      "id": "DEF-085",
+      "title": "Expo public API examples duplicated the client-owned route prefix",
+      "classification": "product",
+      "requirements": ["OPS-008", "SYS-005", "QA-MOB-002", "QA-MOB-004"],
+      "status": "fixed-release-validated",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Configuration review found that the Expo example supplied /api/v1 even though every client request already owns its complete /api/v1 route. No passing release run had been accepted with that example."
+      },
+      "diagnosis": "The public configuration parser accepted an absolute URL with a pathname, while the HTTP client appends complete versioned request paths. Copying the documented value therefore formed duplicated /api/v1/api/v1 request paths.",
+      "fix": "Make the Expo public value an origin-only contract, correct the environment and playbook examples, and reject credentials, non-root paths, query strings, and fragments at the public configuration boundary.",
+      "regressionEvidence": [
+        ".env.example",
+        "playbook.md",
+        "client-frontend/src/lib/api/public-configuration.ts",
+        "client-frontend/src/lib/api/config.test.ts"
+      ],
+      "validation": {
+        "status": "release-pass",
+        "note": "The public-configuration unit suite and mobile configuration gate pass with origin-only web, iOS, and Android examples; an explicit /api/v1 pathname is now rejected before any request can be formed."
+      }
+    },
+    {
+      "id": "DEF-086",
+      "title": "Client demo boundary lacked an explicit narrow-screen width guarantee",
+      "classification": "product",
+      "requirements": [
+        "MUI-008",
+        "QA-CLI-002",
+        "QA-CLI-004",
+        "QA-CLI-006",
+        "QA-CLI-007",
+        "QA-A11Y-006",
+        "QA-MOB-001"
+      ],
+      "status": "fixed-release-validated",
+      "firstFailure": {
+        "kind": "review-finding",
+        "retention": "not-applicable",
+        "artifacts": [],
+        "note": "Responsive review found that the shared demo banner used intrinsic flex-start sizing and lacked an executable width assertion. A stale image-tool path cache exaggerated one preview into a collapsed rendering, so that preview is not claimed as raw production failure evidence."
+      },
+      "diagnosis": "The shared Screen contract depended on intrinsic banner sizing instead of guaranteeing the no-auth synthetic-data notice would span the mobile content column. The contradictory cached preview also showed that screenshots alone were insufficient acceptance evidence.",
+      "fix": "Stretch the banner to the full content width and add a production Playwright assertion requiring more than 300 pixels at a 390 by 844 viewport across Today, History, Check-in, Session, and Selector routes.",
+      "regressionEvidence": [
+        "client-frontend/src/components/Screen.tsx",
+        "client-frontend/tests/e2e/client-web.spec.ts",
+        "DOCS/assets/screenshots/client-check-in-mobile.png",
+        "DOCS/assets/screenshots/client-no-published-plan-mobile.png",
+        "DOCS/assets/screenshots/client-selector-mobile.png"
+      ],
+      "validation": {
+        "status": "release-pass",
+        "note": "The isolated production client E2E suite passed 10 of 10. Direct fresh DOM measurement recorded a 358-pixel banner with 332-pixel text content at the 390-pixel viewport, all five route assertions passed, and four narrow screenshots were freshly recaptured."
+      }
+    }
+  ]
+}

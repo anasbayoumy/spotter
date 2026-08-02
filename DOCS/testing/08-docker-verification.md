@@ -13,22 +13,22 @@ service—the Next.js `frontend` process importing `backend`—not a separate ba
 
 ## Protocol
 
-| Step/ID | Required operation and assertion | Evidence |
-|---|---|---|
-| `QA-DKR-001` | Record Docker/Compose/Node/Corepack/pnpm versions, host architecture, git/worktree hash, and redacted config. | `environment.json`, `compose.rendered.yaml` |
-| `QA-DKR-002` | `docker compose config --quiet`; assert services are exactly allowed topology (`postgres`, `migrate`, optional `seed`, `web`, test profile DB) with no backend/broker/worker. | Config log + topology assertion |
-| `QA-DKR-003` | Build web/migrate/seed images with `--pull --no-cache` and frozen lockfile. | Build log, image IDs/digests |
-| `QA-DKR-004` | Start empty PostgreSQL; wait healthy; assert version 16, non-superuser app role, expected DB, and pgvector extension. | Inspect + SQL report |
-| `QA-DKR-005` | Run the one-shot migration from empty DB; assert exit 0, committed migration checksums, and expected schema/index/constraint inventory. | Migration/JUnit/schema report |
-| `QA-DKR-006` | Run synthetic seed twice; second run changes no logical row counts/IDs and no non-synthetic record exists. | Seed logs + row/hash diff |
-| `QA-DKR-007` | Start production web image only after migrations; `/health/live` and `/health/ready` pass. Readiness includes schema/DB. | Health transcript + inspect |
-| `QA-DKR-008` | Exercise representative real HTTP read/write/generate/review/publish/client-read flow in recorded mode. | Contract/E2E JUnit + request IDs |
-| `QA-DKR-009` | Run PostgreSQL integration, concurrency, 50-case safety, security HTTP, and relevant NFR suites against this project. | Linked suite reports |
-| `QA-DKR-010` | Restart web; then restart PostgreSQL; health recovers within budget and committed data/idempotency remains correct. | Restart timeline + post-state hashes |
-| `QA-DKR-011` | Scan health/status and logs for unhealthy containers, crashes, unhandled rejections, secrets, PII, raw provider/DB errors, and unexpected warnings. | Redacted log scan report |
-| `QA-DKR-012` | Assert web image runs non-root, has no Docker socket, no privileged mode/capability escalation, minimal writable paths, and no embedded `.env`/source secret. | Inspect + image scan/SBOM |
-| `QA-DKR-013` | Stop cleanly, verify bounded graceful termination, then remove only the validated unique QA project and ephemeral volumes. | Resolved target list + teardown log |
-| `QA-DKR-014` | Run PGlite parity separately; label it fast/demo evidence and never substitute it for steps 4–10. | Parity report |
+| Step/ID      | Required operation and assertion                                                                                                                                                                  | Evidence                                    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `QA-DKR-001` | Record Docker/Compose/Node/Corepack/pnpm versions, host architecture, git/worktree hash, and redacted config.                                                                                     | `environment.json`, `compose.rendered.yaml` |
+| `QA-DKR-002` | `docker compose config --quiet`; assert services are exactly allowed topology (`postgres`, `migrate`, optional `seed`, `web`, test profile DB) with no backend/broker/worker.                     | Config log + topology assertion             |
+| `QA-DKR-003` | Build web/migrate/seed images with `--pull --no-cache` and frozen lockfile.                                                                                                                       | Build log, image IDs/digests                |
+| `QA-DKR-004` | Start empty PostgreSQL; wait healthy; assert version 16, non-superuser app role, expected DB, and pgvector extension.                                                                             | Inspect + SQL report                        |
+| `QA-DKR-005` | Run the one-shot migration from empty DB; assert exit 0, committed migration checksums, and expected schema/index/constraint inventory.                                                           | Migration/JUnit/schema report               |
+| `QA-DKR-006` | Run synthetic seed twice; second run changes no logical row counts/IDs and no non-synthetic record exists.                                                                                        | Seed logs + row/hash diff                   |
+| `QA-DKR-007` | Start production web image only after migrations; `/health/live` and `/health/ready` pass. Assert one cluster primary plus exactly two discoverable workers; readiness includes schema/DB.        | Health transcript + process/inspect report  |
+| `QA-DKR-008` | Exercise representative real HTTP read/write/generate/review/publish/client-read flow in recorded mode.                                                                                           | Contract/E2E JUnit + request IDs            |
+| `QA-DKR-009` | Run PostgreSQL integration, concurrency, 50-case safety, live security HTTP, and resilience suites against this project; link performance to the separate mandatory root `test:performance` gate. | Linked suite reports                        |
+| `QA-DKR-010` | Restart web; then restart PostgreSQL; health recovers within budget and committed data/idempotency remains correct.                                                                               | Restart timeline + post-state hashes        |
+| `QA-DKR-011` | Scan health/status and logs for unhealthy containers, crashes, unhandled rejections, secrets, PII, raw provider/DB errors, and unexpected warnings.                                               | Redacted log scan report                    |
+| `QA-DKR-012` | Assert web image runs non-root, has no Docker socket, no privileged mode/capability escalation, minimal writable paths, and no embedded `.env`/source secret.                                     | Inspect + image scan/SBOM                   |
+| `QA-DKR-013` | Stop cleanly; prove the primary forwards SIGTERM, drains both workers without respawn inside 20 s, then remove only the validated unique QA project and ephemeral volumes.                        | Resolved target list + teardown log         |
+| `QA-DKR-014` | Run PGlite parity separately; label it fast/demo evidence and never substitute it for steps 4–10.                                                                                                 | Parity report                               |
 
 ## Required smoke flow
 

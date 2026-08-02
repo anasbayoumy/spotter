@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-053",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Native Card test fixture rendered raw text directly under a View",
+    "note": "The retained exact fixture reproduces the native renderer rejecting raw Body text below a View after four component checks passed.",
+    "diagnosis": "The new optional-content fixture passed a bare string to Card even though React Native requires all text nodes below View to be wrapped by Text. Existing production Card callers already satisfied the platform invariant."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-053",
+        "type": "directory",
+        "digest": "tree-sha256:812fc6213da34a18b762d18795b7122e07e08bdc9f7d33ee293d83f02ea8c798"
+      }
+    ]
+  }
+}

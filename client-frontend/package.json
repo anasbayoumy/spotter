@@ -1,0 +1,51 @@
+{
+  "name": "@spotter/client-frontend",
+  "version": "0.0.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "dev": "expo start",
+    "build": "expo export --platform all --output-dir dist",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:unit": "vitest run src",
+    "test:e2e:client": "playwright test --config tests/e2e/playwright.config.ts",
+    "test:mobile": "node tests/mobile/run-mobile-gates.mjs",
+    "test:a11y": "playwright test --config tests/accessibility/playwright.config.ts",
+    "test:resilience": "vitest run src/lib/api/http-client.test.ts src/features/client-journeys.test.ts",
+    "coverage:changed": "vitest run src --coverage"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@spotter/contracts": "workspace:*",
+    "@spotter/design-tokens": "workspace:*",
+    "@tanstack/react-query": "5.101.4",
+    "expo": "57.0.9",
+    "expo-constants": "57.0.8",
+    "expo-font": "57.0.1",
+    "expo-linking": "57.0.4",
+    "expo-router": "57.0.9",
+    "expo-status-bar": "57.0.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.2",
+    "react-native-gesture-handler": "2.32.0",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "5.7.0",
+    "react-native-screens": "4.26.0",
+    "react-native-web": "0.21.2",
+    "react-native-worklets": "0.10.1",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.11.0",
+    "@react-native/metro-config": "0.86.2",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react-native": "14.0.1",
+    "@types/react": "19.2.18",
+    "expo-doctor": "1.20.1",
+    "test-renderer": "1.2.0",
+    "typescript": "6.0.3",
+    "vitest": "4.0.8"
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spotter.local/schemas/evidence-manifest-v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "suite",
+    "revision",
+    "startedAt",
+    "finishedAt",
+    "environment",
+    "sourceContracts",
+    "commands",
+    "requirements",
+    "exceptions",
+    "verdict"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "runId": { "type": "string", "pattern": "^[A-Za-z0-9-]+$" },
+    "suite": { "enum": ["fast", "full"] },
+    "revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["git", "dirty", "contentHash", "fileCount", "sourceStable"],
+      "properties": {
+        "git": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "dirty": { "type": "boolean" },
+        "contentHash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "fileCount": { "type": "integer", "minimum": 1 },
+        "sourceStable": { "type": "boolean" }
+      }
+    },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "finishedAt": { "type": "string", "format": "date-time" },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node", "pnpm", "docker", "compose", "git", "os"],
+      "properties": {
+        "node": { "type": "string", "minLength": 1 },
+        "pnpm": { "type": "string", "minLength": 1 },
+        "docker": { "type": "string", "minLength": 1 },
+        "compose": { "type": "string", "minLength": 1 },
+        "git": { "type": "string", "minLength": 1 },
+        "os": { "type": "string", "minLength": 1 }
+      }
+    },
+    "sourceContracts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string", "pattern": "^DOCS/" },
+          "sha256": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+        }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "command",
+          "script",
+          "startedAt",
+          "finishedAt",
+          "durationMs",
+          "exitCode",
+          "log",
+          "logSha256",
+          "attempt",
+          "testCounts"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^cmd-[0-9]{3}$" },
+          "command": { "type": "string", "minLength": 1 },
+          "script": { "type": "string", "minLength": 1 },
+          "startedAt": { "type": "string", "format": "date-time" },
+          "finishedAt": { "type": "string", "format": "date-time" },
+          "durationMs": { "type": "integer", "minimum": 0 },
+          "exitCode": { "type": "integer", "minimum": 0 },
+          "log": { "type": "string", "pattern": "^logs/cmd-[0-9]{3}\\.log$" },
+          "logSha256": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+          "attempt": { "const": 1 },
+          "testCounts": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "discovered", "executed", "skipped", "retried"],
+            "properties": {
+              "kind": { "enum": ["gate-command", "test-cases"] },
+              "discovered": { "type": "integer", "minimum": 1 },
+              "executed": { "type": "integer", "minimum": 1 },
+              "skipped": { "type": "integer", "minimum": 0 },
+              "retried": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "evidence"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Z]+(?:-[A-Z]+)*-[0-9]{3}$" },
+          "status": { "enum": ["passed", "failed", "not-run", "not-applicable"] },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "exception": { "type": "string", "pattern": "^ENV-[A-Z]+-[0-9]{3}$" }
+        }
+      }
+    },
+    "exceptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "reason"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^ENV-[A-Z]+-[0-9]{3}$" },
+          "status": { "enum": ["not-run", "not-applicable"] },
+          "reason": { "type": "string", "minLength": 20 }
+        }
+      }
+    },
+    "verdict": { "enum": ["fail", "fast-pass", "pass"] }
+  }
+}

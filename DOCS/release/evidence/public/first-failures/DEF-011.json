@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-011",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Coverage evidence initially omitted cross-surface execution contexts",
+    "note": "The retained threshold summary records the actual repository and changed-source deficits after honest multi-context attribution; it is still a failing gate, not superseded evidence.",
+    "diagnosis": "Package-only reports could not attribute frontend contract execution to imported backend source or RN component execution to Expo route modules, while remaining uncovered branches were real test gaps."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-011/coverage-threshold-first-failure.json",
+        "type": "file",
+        "digest": "sha256:1f35c8ea249f487ee1680871aae5496945e67b7b116a8ceaa5e4af4a5b3785ad"
+      }
+    ]
+  }
+}

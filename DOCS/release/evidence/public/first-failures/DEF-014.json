@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-014",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Expo-web reverse proxy rewrote a same-origin request to a different canonical host",
+    "note": "The client session journey retained its trace and error context after a browser-same-origin POST received HTTP 403 at the reverse-proxied API boundary.",
+    "diagnosis": "The browser submitted to 127.0.0.1:8081, while the static-web proxy rewrote upstream traffic to 127.0.0.1 on the API port. Next standalone canonicalized its own origin as localhost, so the shared fail-closed origin check correctly rejected the mismatched harness request."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-014",
+        "type": "directory",
+        "digest": "tree-sha256:0e41dec595c89927a4020667678a890819597c12a322fe5b9fa46028064d72e9"
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-016",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Isolated PostgreSQL integration databases lacked admin-installed pgvector",
+    "note": "The third cold Docker protocol passed QA-DKR-001 through QA-DKR-008, then retained a structured QA-DKR-009 failure when the isolated authoritative integration suite could not bootstrap vector in its temporary database.",
+    "diagnosis": "The harness created an isolated database owned by the application role, while pgvector was installed only in the main database during container initialization. The non-superuser application role correctly could not substitute for the administrative extension bootstrap."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-016/docker-protocol-report.json",
+        "type": "file",
+        "digest": "sha256:39e6419b420c2e38feed0853e3ca82040150b71504468a990d00079e3b3d5172"
+      }
+    ]
+  }
+}

@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  AI_MODE: recorded
+  APP_ENV: test
+  DATA_POLICY: synthetic_only
+  ALLOW_NO_AUTH_SYNTHETIC_DEMO: "true"
+  CI: "true"
+
+jobs:
+  deterministic:
+    name: Deterministic verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - name: Enable pinned pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.20.0 --activate
+      - name: Install frozen workspace
+        run: corepack pnpm install --frozen-lockfile
+      - name: Verify
+        run: corepack pnpm verify
+      - name: Retain verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deterministic-evidence
+          path: artifacts/verification/
+          if-no-files-found: error
+          retention-days: 14
+
+  full:
+    name: Full release candidate
+    if: github.event_name != 'pull_request'
+    needs: deterministic
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - name: Enable pinned pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.20.0 --activate
+      - name: Install frozen workspace
+        run: corepack pnpm install --frozen-lockfile
+      - name: Full verification
+        run: corepack pnpm verify:full
+      - name: Validate evidence
+        run: corepack pnpm evidence:verify
+      - name: Retain release evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-candidate-evidence
+          path: artifacts/verification/
+          if-no-files-found: error
+          retention-days: 30

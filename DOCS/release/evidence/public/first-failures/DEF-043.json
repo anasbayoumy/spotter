@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-043",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Keyboard accessibility test navigated before programme reads settled",
+    "note": "The exact post-DEF-042 one-worker, zero-retry coach accessibility rerun retained the sole failing keyboard result tree, screenshot, trace, DOM context, HTML report, and last-run result after four tests passed and QA-A11Y-002 failed.",
+    "diagnosis": "The keyboard journey verified the queue skip link and immediately navigated to a blocked programme while programme-detail reads started by the queue route were still active. Playwright then aborted the two prior-route API requests, and the strict runtime guard correctly rejected those non-RSC request failures even though the keyboard behavior itself completed."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-043",
+        "type": "directory",
+        "digest": "tree-sha256:2dc9c67d6b22afdce2c88333db0b465e2740ce804e91ffc20ce7460a8b17f4cf"
+      }
+    ]
+  }
+}

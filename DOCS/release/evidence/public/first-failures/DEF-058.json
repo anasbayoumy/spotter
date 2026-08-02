@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-058",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Lint parsed immutable evidence as live source and exposed live-test style violations",
+    "note": "The retained summary records 85 errors: 14 project-service parse failures in immutable evidence plus strict callback, hook-global, return-type, and unnecessary-assertion findings in live tests.",
+    "diagnosis": "The global lint inputs did not exclude frozen pre-fix TypeScript snapshots, which are evidence rather than compilable source. Newly added live native and coach tests also violated existing strict style and hook-purity rules."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-058",
+        "type": "directory",
+        "digest": "tree-sha256:e9a54870e85c39d5856e3ce295f40b994e199e6d0d45f0073b33fc5c62816f0a"
+      }
+    ]
+  }
+}

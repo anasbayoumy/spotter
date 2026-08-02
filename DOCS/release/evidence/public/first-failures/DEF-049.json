@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-049",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Client query-policy coverage loaded React Native Flow syntax in the general harness",
+    "note": "The retained query test and both harness configurations show a pre-collection Rollup parse failure at React Native's Flow-only import typeof declaration.",
+    "diagnosis": "The source-adjacent general Vitest suite resolved React Native's package entry before its test-local mock applied. That harness does not own the established React Native transform boundary, while the native harness already provides a stable alias and collects the same production source for coverage."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-049",
+        "type": "directory",
+        "digest": "tree-sha256:39cce1060c4bac910109a48a2020ffba8509b7e20e1169ed9c45268c09e32d48"
+      }
+    ]
+  }
+}

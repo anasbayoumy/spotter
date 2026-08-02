@@ -1,0 +1,877 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-001",
+      "bucket": "baseline",
+      "description": "Known safe movement is accepted",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "expected": { "outcome": "accepted", "band": "clear" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-002",
+      "bucket": "baseline",
+      "description": "Known push press alias is accepted without a contraindication",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "exercises": [
+          { "id": "ex-2", "name": "Push press", "family": "Push Press", "rpe": 7, "sets": 3 }
+        ]
+      },
+      "expected": { "outcome": "accepted", "band": "clear" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-003",
+      "bucket": "baseline",
+      "description": "Session count exactly at the schedule cap is accepted",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": { "allowedSessions": 3, "plannedSessions": 3 },
+      "expected": { "outcome": "accepted", "band": "clear" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-004",
+      "bucket": "baseline",
+      "description": "Thirty percent volume rise is accepted at low adherence",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "adherence14d": 0.59,
+        "volumeChanges": [{ "muscleGroup": "back", "previousSets": 10, "proposedSets": 13 }]
+      },
+      "expected": { "outcome": "accepted", "band": "clear" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-005",
+      "bucket": "baseline",
+      "description": "Sub-ceiling intensity is accepted",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "exercises": [
+          { "id": "ex-5", "name": "Cable row", "family": "horizontal_pull", "rpe": 8.5, "sets": 3 }
+        ]
+      },
+      "expected": { "outcome": "accepted", "band": "clear" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-006",
+      "bucket": "baseline",
+      "description": "Healthy engagement computes tier zero",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "accountability",
+      "engagement": {
+        "plannedDue14d": 4,
+        "completedDue14d": 4,
+        "missedDue7d": 0,
+        "missedDue14d": 0,
+        "currentCheckInLatencyHours": 12,
+        "baselineCheckInLatencyHours": 12,
+        "baselineCheckInCount": 3,
+        "daysSinceOpen": null
+      },
+      "expected": { "outcome": "accepted", "band": "clear", "tier": 0 }
+    },
+
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-007",
+      "bucket": "active-hard-injury",
+      "description": "Push press is blocked by active hard overhead constraint",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "constraints": [
+          {
+            "id": "c-7",
+            "kind": "injury",
+            "severity": "hard",
+            "forbids": ["overhead_press"],
+            "validFrom": "2026-08-01T00:00:00.000Z"
+          }
+        ],
+        "exercises": [
+          { "id": "ex-7", "name": "Push press", "family": "push_press", "rpe": 7, "sets": 3 }
+        ]
+      },
+      "expected": { "outcome": "blocked", "band": "blocked", "gate": "forbidden_movement" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-008",
+      "bucket": "active-hard-injury",
+      "description": "Snatch alias is blocked by overhead constraint",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "constraints": [
+          {
+            "id": "c-8",
+            "kind": "injury",
+            "severity": "hard",
+            "forbids": ["overhead_press"],
+            "validFrom": "2026-08-01T00:00:00.000Z"
+          }
+        ],
+        "exercises": [{ "id": "ex-8", "name": "Snatch", "family": "snatch", "rpe": 7, "sets": 3 }]
+      },
+      "expected": { "outcome": "blocked", "gate": "forbidden_movement" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-009",
+      "bucket": "active-hard-injury",
+      "description": "Handstand push-up alias is blocked by overhead constraint",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "constraints": [
+          {
+            "id": "c-9",
+            "kind": "injury",
+            "severity": "hard",
+            "forbids": ["overhead_press"],
+            "validFrom": "2026-08-01T00:00:00.000Z"
+          }
+        ],
+        "exercises": [
+          {
+            "id": "ex-9",
+            "name": "Handstand push-up",
+            "family": "handstand pushup",
+            "rpe": 7,
+            "sets": 3
+          }
+        ]
+      },
+      "expected": { "outcome": "blocked", "gate": "forbidden_movement" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-010",
+      "bucket": "active-hard-injury",
+      "description": "Back squat alias is blocked by knee-flexion constraint",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "constraints": [
+          {
+            "id": "c-10",
+            "kind": "injury",
+            "severity": "hard",
+            "forbids": ["knee_flexion"],
+            "validFrom": "2026-08-01T00:00:00.000Z"
+          }
+        ],
+        "exercises": [
+          { "id": "ex-10", "name": "Back squat", "family": "back_squat", "rpe": 7, "sets": 3 }
+        ]
+      },
+      "expected": { "outcome": "blocked", "gate": "forbidden_movement" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-011",
+      "bucket": "active-hard-injury",
+      "description": "Unknown movement family fails closed",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "exercises": [
+          { "id": "ex-11", "name": "Mystery drill", "family": "quantum_curl", "rpe": 5, "sets": 2 }
+        ]
+      },
+      "expected": { "outcome": "blocked", "gate": "unknown_family" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-012",
+      "bucket": "active-hard-injury",
+      "description": "RPE nine is blocked with active hard injury",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "constraints": [
+          {
+            "id": "c-12",
+            "kind": "injury",
+            "severity": "hard",
+            "forbids": [],
+            "validFrom": "2026-08-01T00:00:00.000Z"
+          }
+        ],
+        "exercises": [{ "id": "ex-12", "name": "Deadlift", "family": "hinge", "rpe": 9, "sets": 2 }]
+      },
+      "expected": { "outcome": "blocked", "gate": "intensity_ceiling" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-013",
+      "bucket": "active-hard-injury",
+      "description": "Unrelated safe family below ceiling is accepted",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "constraints": [
+          {
+            "id": "c-13",
+            "kind": "injury",
+            "severity": "hard",
+            "forbids": ["overhead_press"],
+            "validFrom": "2026-08-01T00:00:00.000Z"
+          }
+        ],
+        "exercises": [
+          { "id": "ex-13", "name": "Romanian deadlift", "family": "hinge", "rpe": 8, "sets": 3 }
+        ]
+      },
+      "expected": { "outcome": "accepted" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-014",
+      "bucket": "active-hard-injury",
+      "description": "Multiple forbidden aliases are all identified",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "constraints": [
+          {
+            "id": "c-14",
+            "kind": "injury",
+            "severity": "hard",
+            "forbids": ["overhead_press"],
+            "validFrom": "2026-08-01T00:00:00.000Z"
+          }
+        ],
+        "exercises": [
+          { "id": "ex-14a", "name": "Push press", "family": "push_press", "rpe": 7, "sets": 3 },
+          { "id": "ex-14b", "name": "Snatch", "family": "snatch", "rpe": 7, "sets": 3 }
+        ]
+      },
+      "expected": { "outcome": "blocked", "gate": "forbidden_movement" }
+    },
+
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-015",
+      "bucket": "temporal-boundaries",
+      "description": "Expired hard constraint is not enforced",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "constraints": [
+          {
+            "id": "c-15",
+            "kind": "injury",
+            "severity": "hard",
+            "forbids": ["overhead_press"],
+            "validFrom": "2026-07-01T00:00:00.000Z",
+            "validUntil": "2026-08-03T05:59:59.999Z"
+          }
+        ],
+        "exercises": [
+          { "id": "ex-15", "name": "Push press", "family": "push_press", "rpe": 7, "sets": 3 }
+        ]
+      },
+      "expected": { "outcome": "accepted" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-016",
+      "bucket": "temporal-boundaries",
+      "description": "Half-open valid-until boundary is inactive at equality",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "constraints": [
+          {
+            "id": "c-16",
+            "kind": "injury",
+            "severity": "hard",
+            "forbids": ["overhead_press"],
+            "validFrom": "2026-07-01T00:00:00.000Z",
+            "validUntil": "2026-08-03T06:00:00.000Z"
+          }
+        ],
+        "exercises": [
+          { "id": "ex-16", "name": "Push press", "family": "push_press", "rpe": 7, "sets": 3 }
+        ]
+      },
+      "expected": { "outcome": "accepted" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-017",
+      "bucket": "temporal-boundaries",
+      "description": "Future constraint is not enforced early",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "constraints": [
+          {
+            "id": "c-17",
+            "kind": "injury",
+            "severity": "hard",
+            "forbids": ["overhead_press"],
+            "validFrom": "2026-08-03T06:00:00.001Z"
+          }
+        ],
+        "exercises": [
+          { "id": "ex-17", "name": "Push press", "family": "push_press", "rpe": 7, "sets": 3 }
+        ]
+      },
+      "expected": { "outcome": "accepted" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-018",
+      "bucket": "temporal-boundaries",
+      "description": "Active constraint wins beside expired history",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "constraints": [
+          {
+            "id": "c-18-old",
+            "kind": "injury",
+            "severity": "hard",
+            "forbids": ["overhead_press"],
+            "validFrom": "2026-07-01T00:00:00.000Z",
+            "validUntil": "2026-07-15T00:00:00.000Z"
+          },
+          {
+            "id": "c-18-new",
+            "kind": "injury",
+            "severity": "hard",
+            "forbids": ["overhead_press"],
+            "validFrom": "2026-08-01T00:00:00.000Z"
+          }
+        ],
+        "exercises": [
+          { "id": "ex-18", "name": "Push press", "family": "push_press", "rpe": 7, "sets": 3 }
+        ]
+      },
+      "expected": { "outcome": "blocked", "gate": "forbidden_movement" }
+    },
+
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-019",
+      "bucket": "adherence",
+      "description": "Volume rise over thirty percent is blocked below sixty percent adherence",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "adherence14d": 0.59,
+        "volumeChanges": [{ "muscleGroup": "legs", "previousSets": 10, "proposedSets": 14 }]
+      },
+      "expected": { "outcome": "blocked", "gate": "volume_spike" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-020",
+      "bucket": "adherence",
+      "description": "Volume boundary at thirty percent is accepted",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "adherence14d": 0.59,
+        "volumeChanges": [{ "muscleGroup": "legs", "previousSets": 10, "proposedSets": 13 }]
+      },
+      "expected": { "outcome": "accepted" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-021",
+      "bucket": "adherence",
+      "description": "Adherence boundary at sixty percent permits volume progression",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "safety": {
+        "adherence14d": 0.6,
+        "volumeChanges": [{ "muscleGroup": "legs", "previousSets": 10, "proposedSets": 14 }]
+      },
+      "expected": { "outcome": "accepted" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-022",
+      "bucket": "adherence",
+      "description": "One recent miss computes tier one",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "accountability",
+      "engagement": {
+        "plannedDue14d": 1,
+        "completedDue14d": 0,
+        "missedDue7d": 1,
+        "missedDue14d": 1,
+        "currentCheckInLatencyHours": 12,
+        "baselineCheckInLatencyHours": 12,
+        "baselineCheckInCount": 3,
+        "daysSinceOpen": null
+      },
+      "expected": { "outcome": "accepted", "tier": 1 }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-023",
+      "bucket": "adherence",
+      "description": "Two misses compute tier two",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "accountability",
+      "engagement": {
+        "plannedDue14d": 2,
+        "completedDue14d": 1,
+        "missedDue7d": 1,
+        "missedDue14d": 2,
+        "currentCheckInLatencyHours": 12,
+        "baselineCheckInLatencyHours": 12,
+        "baselineCheckInCount": 3,
+        "daysSinceOpen": null
+      },
+      "expected": { "outcome": "accepted", "tier": 2 }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-024",
+      "bucket": "adherence",
+      "description": "Severe adherence collapse escalates to coach-owned tier three",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "accountability",
+      "engagement": {
+        "plannedDue14d": 4,
+        "completedDue14d": 1,
+        "missedDue7d": 2,
+        "missedDue14d": 3,
+        "currentCheckInLatencyHours": 48,
+        "baselineCheckInLatencyHours": 12,
+        "baselineCheckInCount": 3,
+        "daysSinceOpen": null
+      },
+      "expected": { "outcome": "escalated", "band": "blocked", "tier": 3 }
+    },
+
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-025",
+      "bucket": "conflicting-goals",
+      "description": "Coherent goal resolution remains clear",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "expected": { "outcome": "accepted", "band": "clear" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-026",
+      "bucket": "conflicting-goals",
+      "description": "One unresolved goal conflict routes to attention",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "signals": { "coherenceIssues": 1 },
+      "expected": { "outcome": "attention", "band": "attention" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-027",
+      "bucket": "conflicting-goals",
+      "description": "Fabricated context reference routes to attention",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "signals": { "fabricatedCitation": true },
+      "expected": { "outcome": "attention", "band": "attention" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-028",
+      "bucket": "conflicting-goals",
+      "description": "Explicit priority produces coherent clear proposal",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "expected": { "outcome": "accepted", "band": "clear" }
+    },
+
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-029",
+      "bucket": "supersession",
+      "description": "Superseded goal is excluded in favor of current goal",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "temporalRecords": [
+        {
+          "id": "goal-old",
+          "validFrom": "2026-01-01T00:00:00.000Z",
+          "supersededBy": "goal-current"
+        },
+        { "id": "goal-current", "validFrom": "2026-07-01T00:00:00.000Z" }
+      ],
+      "expected": { "outcome": "accepted", "selectedRecordIds": ["goal-current"] }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-030",
+      "bucket": "supersession",
+      "description": "Superseded note is excluded from current context",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "temporalRecords": [
+        {
+          "id": "note-old",
+          "validFrom": "2026-01-01T00:00:00.000Z",
+          "supersededBy": "note-current"
+        },
+        { "id": "note-current", "validFrom": "2026-07-01T00:00:00.000Z" }
+      ],
+      "expected": { "outcome": "accepted", "selectedRecordIds": ["note-current"] }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-031",
+      "bucket": "supersession",
+      "description": "Draft and rejected lifecycle records never surface",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "temporalRecords": [
+        { "id": "draft", "validFrom": "2026-07-01T00:00:00.000Z", "surfaceEligible": false },
+        { "id": "rejected", "validFrom": "2026-07-01T00:00:00.000Z", "surfaceEligible": false },
+        { "id": "current", "validFrom": "2026-07-01T00:00:00.000Z" }
+      ],
+      "expected": { "outcome": "accepted", "selectedRecordIds": ["current"] }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-032",
+      "bucket": "supersession",
+      "description": "Only leaf of a supersession chain surfaces",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "temporalRecords": [
+        { "id": "v1", "validFrom": "2026-01-01T00:00:00.000Z", "supersededBy": "v2" },
+        { "id": "v2", "validFrom": "2026-03-01T00:00:00.000Z", "supersededBy": "v3" },
+        { "id": "v3", "validFrom": "2026-07-01T00:00:00.000Z" }
+      ],
+      "expected": { "outcome": "accepted", "selectedRecordIds": ["v3"] }
+    },
+
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-033",
+      "bucket": "contradiction",
+      "description": "Current preference replaces superseded preference",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "temporalRecords": [
+        {
+          "id": "pref-old",
+          "validFrom": "2026-01-01T00:00:00.000Z",
+          "supersededBy": "pref-current"
+        },
+        { "id": "pref-current", "validFrom": "2026-07-01T00:00:00.000Z" }
+      ],
+      "expected": { "outcome": "accepted", "selectedRecordIds": ["pref-current"] }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-034",
+      "bucket": "contradiction",
+      "description": "Two active conflicting preferences require attention",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "attentionReasons": ["conflicting active preferences"],
+      "temporalRecords": [
+        { "id": "pref-a", "validFrom": "2026-07-01T00:00:00.000Z" },
+        { "id": "pref-b", "validFrom": "2026-07-01T00:00:00.000Z" }
+      ],
+      "expected": {
+        "outcome": "attention",
+        "band": "attention",
+        "selectedRecordIds": ["pref-a", "pref-b"]
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-035",
+      "bucket": "contradiction",
+      "description": "Acknowledged documented change remains review-clear",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "signals": { "contradictsHistory": true, "acknowledgesChange": true },
+      "expected": { "outcome": "accepted", "band": "clear" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-036",
+      "bucket": "contradiction",
+      "description": "Unacknowledged history contradiction requires attention",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "signals": { "contradictsHistory": true },
+      "expected": { "outcome": "attention", "band": "attention" }
+    },
+
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-037",
+      "bucket": "red-flags",
+      "description": "Chest pain red flag escalates without model judging",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "accountability",
+      "safety": { "checkInText": "I felt chest pain during the session" },
+      "expected": { "outcome": "escalated", "band": "blocked" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-038",
+      "bucket": "red-flags",
+      "description": "Fainting red flag escalates without model judging",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "accountability",
+      "safety": { "checkInText": "I fainted after training" },
+      "expected": { "outcome": "escalated", "band": "blocked" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-039",
+      "bucket": "red-flags",
+      "description": "Diagnostic medical claim is blocked",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "accountability",
+      "safety": { "outputText": "You have a shoulder tear." },
+      "expected": { "outcome": "blocked", "gate": "medical_language" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-040",
+      "bucket": "red-flags",
+      "description": "Self-harm language escalates immediately",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "accountability",
+      "safety": { "checkInText": "I feel suicidal and might harm myself" },
+      "expected": { "outcome": "escalated", "band": "blocked" }
+    },
+
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-041",
+      "bucket": "sparse-history",
+      "description": "Sparse programme history routes to attention",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "attentionReasons": ["sparse programme history"],
+      "expected": { "outcome": "attention", "band": "attention" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-042",
+      "bucket": "sparse-history",
+      "description": "Missing adherence baseline stays tier zero but needs attention",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "accountability",
+      "attentionReasons": ["missing adherence baseline"],
+      "engagement": {
+        "plannedDue14d": 0,
+        "completedDue14d": 0,
+        "missedDue7d": 0,
+        "missedDue14d": 0,
+        "currentCheckInLatencyHours": null,
+        "baselineCheckInLatencyHours": null,
+        "baselineCheckInCount": 0,
+        "daysSinceOpen": null
+      },
+      "expected": { "outcome": "attention", "band": "attention", "tier": 0 }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-043",
+      "bucket": "sparse-history",
+      "description": "Missing equipment context routes to attention",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "attentionReasons": ["missing equipment context"],
+      "expected": { "outcome": "attention" }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-044",
+      "bucket": "sparse-history",
+      "description": "Citation to absent context routes to attention",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "sectionIds": [],
+      "citations": ["missing-section"],
+      "expected": { "outcome": "attention", "band": "attention" }
+    },
+
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-045",
+      "bucket": "context-budget",
+      "description": "Pinned constraints fit and optional context is included deterministically",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "budget": {
+        "budget": 1200,
+        "hardConstraintTokens": 1000,
+        "optionalSections": [{ "id": "notes", "tokens": 100 }]
+      },
+      "expected": {
+        "outcome": "accepted",
+        "budgetOutcome": "proceed",
+        "selectedOptionalSections": ["notes"]
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-046",
+      "bucket": "context-budget",
+      "description": "Generation fails when pinned hard constraints exceed budget",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "budget": {
+        "budget": 1000,
+        "hardConstraintTokens": 1200,
+        "optionalSections": [{ "id": "notes", "tokens": 1 }]
+      },
+      "expected": { "outcome": "failed", "budgetOutcome": "failed", "selectedOptionalSections": [] }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-047",
+      "bucket": "context-budget",
+      "description": "Optional context selection is stable in source order",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "programme",
+      "budget": {
+        "budget": 1200,
+        "hardConstraintTokens": 900,
+        "optionalSections": [
+          { "id": "notes", "tokens": 100 },
+          { "id": "history", "tokens": 200 },
+          { "id": "overflow", "tokens": 1 }
+        ]
+      },
+      "expected": {
+        "outcome": "accepted",
+        "budgetOutcome": "proceed",
+        "selectedOptionalSections": ["notes", "history"]
+      }
+    },
+
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-048",
+      "bucket": "nudge-suppression",
+      "description": "Automated nudge inside forty-eight hours is blocked",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "accountability",
+      "safety": {
+        "nudge": {
+          "attemptedAt": "2026-08-03T06:00:00.000Z",
+          "automated": true,
+          "concurrentAttempts": 1,
+          "lastAutomatedSentAt": "2026-08-01T06:00:00.001Z",
+          "owner": "automation",
+          "tier": 1
+        }
+      },
+      "expected": { "outcome": "blocked", "gate": "nudge_rate", "maxMessages": 0 }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-049",
+      "bucket": "nudge-suppression",
+      "description": "Automated nudge is eligible exactly at forty-eight hours",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "accountability",
+      "safety": {
+        "nudge": {
+          "attemptedAt": "2026-08-03T06:00:00.000Z",
+          "automated": true,
+          "concurrentAttempts": 1,
+          "lastAutomatedSentAt": "2026-08-01T06:00:00.000Z",
+          "owner": "automation",
+          "tier": 1
+        }
+      },
+      "expected": { "outcome": "accepted", "maxMessages": 1 }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "QA-SAF-050",
+      "bucket": "nudge-suppression",
+      "description": "Concurrent eligible attempts retain a one-message cap",
+      "asOf": "2026-08-03T06:00:00.000Z",
+      "clientTimezone": "Africa/Cairo",
+      "intent": "accountability",
+      "safety": {
+        "nudge": {
+          "attemptedAt": "2026-08-03T06:00:00.000Z",
+          "automated": true,
+          "concurrentAttempts": 5,
+          "lastAutomatedSentAt": null,
+          "owner": "automation",
+          "tier": 1
+        }
+      },
+      "expected": { "outcome": "accepted", "maxMessages": 1 }
+    }
+  ]
+}

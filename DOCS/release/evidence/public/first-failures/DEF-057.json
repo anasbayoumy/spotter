@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-057",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Public Session fixtures retained non-public session keys",
+    "note": "The retained assignments and TS2353 diagnostic show sessionKey is not exposed by the shared public Session response contract.",
+    "diagnosis": "After earlier stale timestamps were removed, strict excess-property checking exposed the final persistence-only field on the same two public Session fixtures."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-057",
+        "type": "directory",
+        "digest": "tree-sha256:167ea47146f66728c8753c5aa28e0e095b1a6767b822c686f2975ab0765e7bd6"
+      }
+    ]
+  }
+}

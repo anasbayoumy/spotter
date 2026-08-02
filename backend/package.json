@@ -1,0 +1,49 @@
+{
+  "name": "@spotter/backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./agents": "./src/agents/index.ts",
+    "./application": "./src/application/index.ts",
+    "./domain": "./src/domain/index.ts",
+    "./database": "./src/infrastructure/database/index.ts",
+    "./evals": "./src/evals/index.ts",
+    "./jobs": "./src/jobs/index.ts",
+    "./server": "./src/composition/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "calibrate": "tsx src/cli/calibrate.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:unit": "vitest run --config vitest.unit.config.ts src/domain src/agents src/application src/evals src/jobs src/cli/*.test.ts src/composition/backend-facade.coverage.test.ts src/infrastructure/database/database-error.test.ts tests/property tests/pglite/publish-programme.coverage.integration.test.ts && node --test src/infrastructure/database/database-error.runtime.test.mjs",
+    "test:integration:pglite": "vitest run tests/pglite",
+    "test:integration": "vitest run tests/postgres",
+    "test:concurrency": "vitest run tests/concurrency",
+    "test:safety": "vitest run src/evals tests/property && tsx src/cli/report-safety.ts",
+    "test:mutation": "pnpm --dir .. exec stryker run",
+    "db:migrate": "tsx src/cli/migrate.ts",
+    "db:seed": "tsx src/cli/seed.ts",
+    "demo": "tsx src/cli/demo.ts",
+    "record:fixtures": "tsx src/cli/record-fixtures.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "2.0.63",
+    "@electric-sql/pglite": "0.3.15",
+    "@spotter/config": "workspace:*",
+    "@spotter/contracts": "workspace:*",
+    "ai": "6.0.240",
+    "drizzle-orm": "0.45.2",
+    "pino": "10.3.1",
+    "postgres": "3.4.9",
+    "server-only": "0.0.1",
+    "tsx": "4.23.1",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "4.0.8"
+  }
+}

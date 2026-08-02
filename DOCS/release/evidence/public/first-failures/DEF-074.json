@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-074",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Performance web started before its owned coach corpus existed",
+    "note": "The third fresh-owned smoke retained the unhealthy production-web wait, redacted service logs, structured command failure, safe teardown transcript, and empty container, volume, and network inventories. The no-demo migration succeeded, no performance corpus or measured gate began, and all project resources were removed.",
+    "diagnosis": "After demo seeding was removed, the runner still started and health-checked the production web container before inserting its owned corpus. Production composition correctly refuses synthetic-only startup when the canonical coach is absent, so readiness remained 503 until Compose's bounded wait marked the container unhealthy."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-074",
+        "type": "directory",
+        "digest": "tree-sha256:7c04d74dbd3219804478a731854a270067aadc071bebeb46fc04c07baeec7513"
+      }
+    ]
+  }
+}

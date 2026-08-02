@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-052",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Native Screen coverage lacked the safe-area boundary test double",
+    "note": "The retained component test reached react-native-safe-area-context during collection and failed on unsupported Flow syntax before any test ran.",
+    "diagnosis": "The isolated native component suite newly imported Screen but did not provide the local safe-area host double already used by route suites, so Node parsed the package's Flow-typed implementation instead of the owned test boundary."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-052",
+        "type": "directory",
+        "digest": "tree-sha256:ef9952fdd8de50fe6d5e3a7a2d73ff93a96b730ef473f57867f6a16483091858"
+      }
+    ]
+  }
+}

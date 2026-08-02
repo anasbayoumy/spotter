@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "labelSource": "pending_human_review",
+  "generatorModel": "ollama/qwen3.6:35b-mlx",
+  "judgeModel": null,
+  "labels": []
+}

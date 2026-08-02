@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-044",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Expo client omitted document title and radio checked semantics",
+    "note": "The exact one-worker, zero-retry client accessibility run retained three failing result trees, screenshots, traces, DOM contexts, the HTML report, and last-run result after all three tests failed.",
+    "diagnosis": "The exported Expo web document had an empty title because the root layout supplied no document-head title, so axe rejected every tested surface. React Native Web also rendered the five Pressable readiness choices with role radio but without the required DOM aria-checked attribute, despite their native accessibility state, leaving assistive technology without each option's selected state."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-044",
+        "type": "directory",
+        "digest": "tree-sha256:ffcc62079b3e60aeffe94ef665e0d621175ab84fc42fb9d3823dc4d5cc7bdc80"
+      }
+    ]
+  }
+}

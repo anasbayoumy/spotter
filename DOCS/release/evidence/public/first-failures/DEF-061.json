@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-061",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Tablet client detail retained nested two-column layouts that crushed profile values",
+    "note": "The retained responsive CSS and screenshot-review summary record the 768x1024 client-detail failure: the outer content and inner profile remained two columns, leaving coaching-profile values close to one character wide.",
+    "diagnosis": "The application switched to its tablet navigation at 980px, but content-layout did not collapse until 720px. At 768px the client page therefore combined a constrained outer two-column grid with its inner two-column definition layout, producing technically non-overflowing but unreadable values."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-061",
+        "type": "directory",
+        "digest": "tree-sha256:0c1b14b9258cae0c052263e80ed6e854ceb288571f8b6d1b2de381d6083f73a7"
+      }
+    ]
+  }
+}

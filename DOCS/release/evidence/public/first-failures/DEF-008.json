@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-008",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Browser acceptance harness leaked selection state and treated navigation cancellations as defects",
+    "note": "The retained Playwright traces show strict locator ambiguity and expected navigation-aborted requests being classified as browser runtime errors. Client-selection leakage was diagnosed in the same fix loop, but is not independently attributed to these retained traces.",
+    "diagnosis": "Acceptance journeys shared client selection state across browser contexts, locator assertions were not uniquely scoped, and the runtime guard could not distinguish expected navigation cancellation from a failed application request."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-008/client",
+        "type": "directory",
+        "digest": "tree-sha256:ccb9287cbf319748f72b139920e2a197a2845ccb78beaf194f7c765e418ee256"
+      },
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-008/coach",
+        "type": "directory",
+        "digest": "tree-sha256:ec7edecc133dbd6e7670cd681caf20751f4cdc858cac46732972ca15fdd99b4d"
+      }
+    ]
+  }
+}

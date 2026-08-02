@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-038",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Docker log scanner treated protocol-induced PostgreSQL messages as crashes",
+    "note": "The second focused Docker protocol retained eight value-free findings and clean teardown proof after QA-DKR-011 classified exact PostgreSQL initialization, negative-invariant, and intentional stop messages as unexpected runtime failures.",
+    "diagnosis": "The content scanner was message-aware only for the correlated application dependency warning. It was not service-aware, so normal test-postgres initialization, the two deliberate database-invariant integration failures, and FATAL connection termination caused by explicit QA-DKR-009/010 stops were indistinguishable from unexpected application or database faults."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-038",
+        "type": "directory",
+        "digest": "tree-sha256:6c3050ca7df6b6b70b83f141122e535f0bd507a8214d0648a75d5663486c98da"
+      }
+    ]
+  }
+}

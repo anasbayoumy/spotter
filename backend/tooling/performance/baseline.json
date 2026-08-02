@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 3,
+  "status": "pending-first-measurement",
+  "profile": "release",
+  "measurementRecord": null,
+  "maximumRegressionFraction": 0.1
+}

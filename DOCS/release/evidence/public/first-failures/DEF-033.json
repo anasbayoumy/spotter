@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-033",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Backend startup imported a type-only PostgresError as a named ESM runtime export",
+    "note": "The zero-retry client production journey retained its startup report after Node 24 rejected a named PostgresError export that exists in declarations but not in the package ESM module surface.",
+    "diagnosis": "Vitest module interop allowed the named import during focused tests, but the installed postgres package exposes PostgresError as a property of its default export, so the real production-server loader failed before browser acceptance began."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-033",
+        "type": "directory",
+        "digest": "tree-sha256:009e0a1aee22c48b48a7f7365a3fc1361253a0bac06c28ec444fb2bb50412793"
+      }
+    ]
+  }
+}

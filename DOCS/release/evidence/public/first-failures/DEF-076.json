@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-076",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Recorded-run invariants expected a model identifier different from production persistence",
+    "note": "All three retained single-plan and weekly reports and six exact SQL transcripts show recordedSuccessfulRuns equal to zero while every other required programme, client, trace, evaluation, job, idempotency, retry, and canonical-week count is exact.",
+    "diagnosis": "The invariant SQL required agent_runs.model LIKE spotter-recorded%, but the production recorded gateway persists the exact identifier recorded/spotter-v1. Correct recorded rows were therefore excluded solely by the test predicate, making otherwise correct single-plan and weekly runs fail."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-076",
+        "type": "directory",
+        "digest": "tree-sha256:8636dbb58e981c90c5130c07f8226bf62479ec7eb5d3c557de31be9e22b59011"
+      }
+    ]
+  }
+}

@@ -123,8 +123,8 @@ but it cannot choose the tier, recipient, ownership, or suppression result.
 
 ### Scorecard `/scorecard`
 
-- Shows safety results by gate, judge score distributions, calibration results, review-band accuracy,
-  cost per published plan, and p50/p95 latency where data exists.
+- Shows safety results by gate, judge score distributions, calibration results, review-band
+  accuracy, cost per published plan, and p50/p95 latency where data exists.
 - Empty/no-live-data metrics are labelled unavailable rather than displayed as zero.
 - Recorded and live modes are distinguished so deterministic fixtures are not presented as live
   production evidence.
@@ -176,4 +176,3 @@ but it cannot choose the tier, recipient, ownership, or suppression result.
 - All dates are stored as UTC instants and rendered relative to the client's IANA timezone where the
   product meaning is local date/day.
 - Every error response includes a request ID that the UI can display for diagnosis.
-

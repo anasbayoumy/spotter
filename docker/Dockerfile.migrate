@@ -1,0 +1,56 @@
+FROM node:24.11.1-bookworm-slim AS toolchain
+
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+
+RUN npm install --global corepack@0.34.2 \
+  && corepack enable \
+  && corepack prepare pnpm@10.20.0 --activate
+
+WORKDIR /workspace
+
+FROM toolchain AS manifests
+
+COPY .npmrc package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+COPY frontend/package.json frontend/package.json
+COPY backend/package.json backend/package.json
+COPY client-frontend/package.json client-frontend/package.json
+COPY backend/packages/contracts/package.json backend/packages/contracts/package.json
+COPY backend/packages/config/package.json backend/packages/config/package.json
+COPY backend/packages/design-tokens/package.json backend/packages/design-tokens/package.json
+COPY backend/packages/testkit/package.json backend/packages/testkit/package.json
+COPY backend/tooling/assert-toolchain.mjs backend/tooling/assert-toolchain.mjs
+
+FROM manifests AS production-dependencies
+
+RUN --mount=type=cache,id=spotter-pnpm-production-store,target=/pnpm/store,sharing=locked \
+  pnpm install --filter @spotter/backend... --prod --frozen-lockfile
+
+FROM manifests AS contract-build
+
+RUN --mount=type=cache,id=spotter-pnpm-build-store,target=/pnpm/store,sharing=locked \
+  pnpm install --filter @spotter/backend... --frozen-lockfile
+COPY backend/packages/contracts backend/packages/contracts
+RUN backend/node_modules/.bin/tsc -p backend/packages/contracts/tsconfig.build.json \
+  && test -s backend/packages/contracts/dist/index.js
+
+FROM node:24.11.1-bookworm-slim AS runtime
+
+ENV NODE_ENV=production
+
+WORKDIR /workspace
+
+COPY --from=production-dependencies --chown=node:node /workspace /workspace
+COPY --chown=node:node backend/src /workspace/backend/src
+COPY --chown=node:node backend/migrations /workspace/backend/migrations
+COPY --chown=node:node backend/resources /workspace/backend/resources
+COPY --chown=node:node backend/packages/config /workspace/backend/packages/config
+COPY --chown=node:node backend/packages/contracts/package.json /workspace/backend/packages/contracts/package.json
+COPY --from=contract-build --chown=node:node /workspace/backend/packages/contracts/dist /workspace/backend/packages/contracts/dist
+
+RUN test -x backend/node_modules/.bin/tsx \
+  && test -s backend/packages/contracts/dist/index.js
+
+WORKDIR /workspace/backend
+USER node
+CMD ["node_modules/.bin/tsx", "src/cli/migrate.ts"]

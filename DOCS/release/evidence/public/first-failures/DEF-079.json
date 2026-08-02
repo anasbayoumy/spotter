@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-079",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Post-optimization mixed-read p95 still exceeded the unchanged latency budget",
+    "note": "The exact post-DEF-078 report retains three real 25-VU runs with 1,234, 1,091, and 992 contract-valid HTTP 200 samples, aggregate p95 values of 313.850833, 371.456541, and 404.699125 milliseconds, and zero request or response-validation errors. The median deciding run's route attribution records p95 values of 220.099083 milliseconds for the active-client list, 396.712791 for client detail, 475.676875 for today, 242.197125 for the queued-programme list, and 225.819417 for trace detail.",
+    "diagnosis": "The DEF-078 correction improved the deciding aggregate p95 from 440.584125 to 371.456541 milliseconds without weakening the workload, validation, or 250 millisecond budget, but NFR-PERF-001 remains genuinely red. Exact deciding-run attribution isolates the two client fanout routes above budget: client detail at 396.712791 milliseconds and today at 475.676875 milliseconds, while the other three routes remain below 250 milliseconds and all routes report zero errors."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-079",
+        "type": "directory",
+        "digest": "tree-sha256:03703c8072bbc8b63f2b533a406c880ffd3e18ede0b46eb4ea71d61157feb94d"
+      }
+    ]
+  }
+}

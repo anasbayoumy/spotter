@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-073",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Performance corpus was layered over demo queue data",
+    "note": "The second fresh-owned performance smoke retained its 52-row queue validation failure, reserved-prefix and environment cardinalities, redacted service logs, teardown transcript, and empty container, volume, and network inventories. It proved the API returned the two demo queued programmes plus all 50 performance-owned queued programmes before measurement began.",
+    "diagnosis": "Fresh performance execution applied the normal seven-client demo seed before inserting the standard 50-client corpus. Prefix-scoped corpus checks still reported 50 queued programmes, but the global queue contained two additional demo programmes and therefore violated exact ownership. The bounded warm-up diagnostic serialized the large body before its validation reason, obscuring the decisive 52-row error in the retained message."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-073",
+        "type": "directory",
+        "digest": "tree-sha256:ff37449d9b117cc9767869943ff42e56d7b2cba750ab0b76892628620d40c29a"
+      }
+    ]
+  }
+}

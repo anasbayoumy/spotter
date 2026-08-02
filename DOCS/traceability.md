@@ -1,21 +1,25 @@
 # Requirements traceability
 
-This release index is updated as each implementation pool completes. A requirement is not complete until it points to implementation, automated verification, and retained evidence.
+This release index is updated as implementation and release verification progress. A requirement is
+not complete until it points to implementation, automated verification, and retained evidence.
 
-| Contract | Canonical mapping | Implementation mapping | Status |
-|---|---|---|---|
-| Product scope and behavior (`SCP`, `ACT`, `PLAN`, `REV`, `ADJ`, `ACC`, `COACH`, `CLIENT`, `API`, `OBS`, `DEMO`, `PRIV`) | [`requirements/requirements.md`](./requirements/requirements.md) and [`requirements/traceability.md`](./requirements/traceability.md) | Populated by Pools 1–6 in this file | Contract approved |
-| Architecture (`SYS`, `BND`, `DAT`, `AI`, `FLOW`, `PRV`, `OPS`) | [`architecture/requirements.md`](./architecture/requirements.md) | Populated by Pools 1–6 in this file | Contract approved |
-| Quality, safety, security, and non-functional (`QA`, `NFR`, `SEC`) | [`testing/README.md`](./testing/README.md) and [`testing/11-requirements-traceability.md`](./testing/11-requirements-traceability.md) | Populated by Pools 4–6 in this file | Contract approved |
+| Contract                                                                                                                | Canonical mapping                                                                                                                       | Implementation mapping              | Status            |
+| ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ----------------- |
+| Product scope and behavior (`SCP`, `ACT`, `PLAN`, `REV`, `ADJ`, `ACC`, `COACH`, `CLIENT`, `API`, `OBS`, `DEMO`, `PRIV`) | [`requirements/requirements.md`](./requirements/requirements.md) and [`requirements/traceability.md`](./requirements/traceability.md)   | Implementation evidence table below | Contract approved |
+| Architecture (`SYS`, `BND`, `DAT`, `AI`, `FLOW`, `PRV`, `OPS`)                                                          | [`architecture/requirements.md`](./architecture/requirements.md)                                                                        | Implementation evidence table below | Contract approved |
+| Quality, safety, security, and non-functional (`QA`, `NFR`, `SEC`)                                                      | [`testing/README.md`](./testing/README.md) and [`testing/11-requirement-command-matrix.md`](./testing/11-requirement-command-matrix.md) | Implementation evidence table below | Contract approved |
 
 ## Implementation evidence
 
-| Requirement group | Code | Tests | Evidence | Status |
-|---|---|---|---|---|
-| Workspace and boundaries | Pending Pool 1 | Pending Pool 1 | Pending | Planned |
-| Data and transactions | Pending Pool 1 | Pending Pools 1/4 | Pending | Planned |
-| Agent and evaluation pipeline | Pending Pool 2 | Pending Pools 2/4 | Pending | Planned |
-| Plan, Adjust, Accountability | Pending Pool 2 | Pending Pools 2/4 | Pending | Planned |
-| Coach and client surfaces | Pending Pool 3 | Pending Pools 3/5 | Pending | Planned |
-| Safety and security | Pending Pools 2/4/5 | Pending Pools 4/5 | Pending | Planned |
-| Release certification | Pending Pool 6 | `pnpm verify:full` | `artifacts/verification/` | Planned |
+| Requirement group                  | Code                                                                                                                                   | Reproducible command                                                                                      | Status                                                         |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Workspace and boundaries           | Root manifests, `backend/tooling/`, `compose.yaml`, `docker/`, `.github/`                                                              | `pnpm format:check && pnpm lint && pnpm typecheck`                                                        | Implemented; rerun required after each change                  |
+| Contracts and deterministic domain | `backend/packages/contracts`, `backend/src/domain`                                                                                     | `pnpm test:contract && pnpm test:unit`                                                                    | Implemented; command output is the count/coverage source       |
+| Data and transactions              | `backend/src/infrastructure/database`, committed migrations, `backend/resources/demo`                                                  | `pnpm test:integration:pglite && pnpm test:integration && pnpm test:concurrency`                          | Implemented; Docker commands are authoritative                 |
+| Agent and evaluation pipeline      | `backend/src/agents`, `backend/src/evals`, `backend/resources/recordings`, `backend/resources/calibration`, `backend/resources/golden` | `pnpm --filter backend test:unit && pnpm test:safety && pnpm --filter backend calibrate`                  | Recorded path implemented; human calibration pending           |
+| Live model path                    | Generic transport, live gateway/judges, config resolution, recording CLI                                                               | Mocked transport/config tests plus `pnpm --filter backend record:fixtures` with explicit live credentials | Generator capture verified; independent live judge not run     |
+| Plan, Adjust, Accountability       | `backend/src/application`, `backend/src/jobs`, publication transaction                                                                 | `pnpm test:unit && pnpm test:integration && pnpm test:concurrency`                                        | Implemented; current command output is authoritative           |
+| REST API and server composition    | `backend/src/composition`, database repositories, `frontend/src/app/api/v1`, health routes                                             | `pnpm test:contract && pnpm test:e2e:web`                                                                 | Implemented; current command output is authoritative           |
+| Coach and client surfaces          | `frontend/src/features`, `client-frontend/src/features`                                                                                | `pnpm test:e2e:web && pnpm test:e2e:client && pnpm test:a11y && pnpm test:mobile`                         | Implemented; current command output is authoritative           |
+| Safety and security                | Deterministic gates, movement taxonomy, red-flag escalation, judges, fail-closed orchestration                                         | `pnpm test:safety && pnpm test:security`                                                                  | Implemented; no historical count is treated as current proof   |
+| Release verification               | `backend/tooling/verification/run-suite.mjs`                                                                                           | `pnpm verify:full && pnpm evidence:verify`                                                                | Must be rerun for the final content hash before a pass verdict |

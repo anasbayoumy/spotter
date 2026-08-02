@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Spotter Client",
+    "slug": "spotter-client",
+    "scheme": "spotter",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "asyncRoutes": {
+            "web": "production"
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "dev.spotter.client"
+    },
+    "android": {
+      "package": "dev.spotter.client"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-080",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Lighthouse extractor rejected a valid serialized loaded-state audit",
+    "note": "The recurring /queue loaded-state abort is retained with the complete parseable raw Lighthouse result, an exact normalized diagnostic and stack, the redacted failure container log, safe-teardown log, and empty post-teardown container, volume, and network inventories. The raw result reports performance 0.94, accessibility 1.00, a score-1 spotter-loaded-state audit, and exact visible valid h1 heading proof for Review queue, with no runtime error or run warnings.",
+    "diagnosis": "The extractor required audit.numericValue to equal 1 even though Lighthouse's serialized LHR omitted numericValue while retaining score 1 and the exact validated loaded-state proof. The application page and custom audit succeeded; the harness rejected a valid raw report because it depended on a field that is not preserved by the serialization boundary."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-080",
+        "type": "directory",
+        "digest": "tree-sha256:a745ad280424b1a272ae03d39caf8f16b5594531d1d439f4a7518e1c1cd58597"
+      }
+    ]
+  }
+}

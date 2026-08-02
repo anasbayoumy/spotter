@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-051",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "A server-completed session still exposed duplicate submission controls",
+    "note": "The retained pre-fix predicate and regression show one Save and complete session control rendered for a session already returned as completed by the server after nine earlier checks passed.",
+    "diagnosis": "The route showed its completion notice for either local completion or server status, but hid the form only for completion performed in the current component instance. Reloading an already-completed session therefore presented contradictory read-only and submit states."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-051",
+        "type": "directory",
+        "digest": "tree-sha256:40db7a5a6daf12f6f150e604f9feab22034b151c61e64c836e5b295f0a6ef384"
+      }
+    ]
+  }
+}

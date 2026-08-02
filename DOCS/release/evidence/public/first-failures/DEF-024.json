@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-024",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Concurrent mutation workers produced systemic Vitest runtime errors",
+    "note": "The quiet-host mutation report contained 1,556 RuntimeError mutants with the same Vitest unhandled Pool.run failure across all 22 mutated source files; 1,554 of them had covering tests.",
+    "diagnosis": "Stryker still launched concurrent test runners and each Vitest runner could execute files in parallel, so the PGlite/Vitest worker pool failed systemically even though Stryker itself exited successfully. Treating these harness errors as invalid mutants would have inflated the apparent score."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-024/mutation-runtime-error-report.json",
+        "type": "file",
+        "digest": "sha256:78351ba4d75240740ba5a3aed2aa51449517f84cc4455f7e1acdfaef5f6e243f"
+      }
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+import { QueryClient } from "@tanstack/react-query";
+import { Platform } from "react-native";
+
+import { ApiClientError } from "../api/errors";
+
+const staticWebRender = Platform.OS === "web" && typeof window === "undefined";
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    mutations: { retry: false },
+    queries: {
+      gcTime: staticWebRender ? Number.POSITIVE_INFINITY : 5 * 60_000,
+      refetchOnWindowFocus: false,
+      retry: (attempt, error) => error instanceof ApiClientError && error.retryable && attempt < 2,
+      staleTime: 30_000,
+    },
+  },
+});

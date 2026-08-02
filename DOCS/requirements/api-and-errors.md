@@ -21,62 +21,65 @@
 
 ### Clients and context
 
-| Endpoint | Backend use case | Product result |
-|---|---|---|
-| `GET /api/v1/clients` | `ListDemoClients` | Active synthetic demo clients for coach/selector views. |
-| `GET /api/v1/clients/:clientId` | `GetClientDetail` | Profile, active constraints, adherence, sessions, programme, check-ins, messages. |
-| `GET /api/v1/clients/:clientId/today` | `GetClientToday` | Only current published programme/session and allowed outstanding message. |
-| `GET /api/v1/clients/:clientId/messages` | `ListClientMessages` | In-app outbox items visible to the selected client. |
+| Endpoint                                 | Backend use case     | Product result                                                                    |
+| ---------------------------------------- | -------------------- | --------------------------------------------------------------------------------- |
+| `GET /api/v1/clients`                    | `ListDemoClients`    | Active synthetic demo clients for coach/selector views.                           |
+| `GET /api/v1/clients/:clientId`          | `GetClientDetail`    | Profile, active constraints, adherence, sessions, programme, check-ins, messages. |
+| `GET /api/v1/clients/:clientId/today`    | `GetClientToday`     | Only current published programme/session and allowed outstanding message.         |
+| `GET /api/v1/clients/:clientId/messages` | `ListClientMessages` | In-app outbox items visible to the selected client.                               |
 
 ### Programmes
 
-| Endpoint | Backend use case | Product result |
-|---|---|---|
-| `GET /api/v1/programmes?clientId=&status=&band=` | `ListProgrammes` | Validated, bounded review/history query. |
-| `GET /api/v1/programmes/:programmeId` | `GetProgrammeReview` | Payload, lifecycle, gates, judges, actions, run and trace link. |
-| `POST /api/v1/programmes/generate` | `GenerateProgramme` | Idempotently assemble, trace, generate, evaluate, and queue. |
-| `PATCH /api/v1/programmes/:programmeId` | `EditProgrammeProposal` | Record diff and revalidate/re-gate an editable proposal. |
-| `POST /api/v1/programmes/:programmeId/approve` | `ApproveProgramme` | Publish a non-blocked current proposal transactionally. |
-| `POST /api/v1/programmes/:programmeId/reject` | `RejectProgramme` | Record rejection; proposal remains historical and client-invisible. |
-| `POST /api/v1/programmes/:programmeId/override` | `OverrideBlockedProgramme` | Require reason, record override, publish transactionally. |
+| Endpoint                                         | Backend use case           | Product result                                                      |
+| ------------------------------------------------ | -------------------------- | ------------------------------------------------------------------- |
+| `GET /api/v1/programmes?clientId=&status=&band=` | `ListProgrammes`           | Validated, bounded review/history query.                            |
+| `GET /api/v1/programmes/:programmeId`            | `GetProgrammeReview`       | Payload, lifecycle, gates, judges, actions, run and trace link.     |
+| `POST /api/v1/programmes/generate`               | `GenerateProgramme`        | Idempotently assemble, trace, generate, evaluate, and queue.        |
+| `PATCH /api/v1/programmes/:programmeId`          | `EditProgrammeProposal`    | Record diff and revalidate/re-gate an editable proposal.            |
+| `POST /api/v1/programmes/:programmeId/approve`   | `ApproveProgramme`         | Publish a non-blocked current proposal transactionally.             |
+| `POST /api/v1/programmes/:programmeId/reject`    | `RejectProgramme`          | Record rejection; proposal remains historical and client-invisible. |
+| `POST /api/v1/programmes/:programmeId/override`  | `OverrideBlockedProgramme` | Require reason, record override, publish transactionally.           |
 
 Generation input identifies client and target week/date. It cannot accept caller-provided context,
 gate outcomes, band, model output, approver, or publication state.
 
 ### Sessions and check-ins
 
-| Endpoint | Backend use case | Product result |
-|---|---|---|
-| `GET /api/v1/sessions?clientId=&from=&to=` | `ListSessions` | Bounded client/date query in stable chronological order. |
-| `GET /api/v1/sessions/:sessionId` | `GetSession` | Approved planned work and stored actual work. |
-| `POST /api/v1/sessions/:sessionId/log` | `LogSessionWork` | Idempotently store validated set-by-set actual work/notes. |
-| `POST /api/v1/sessions/:sessionId/complete` | `CompleteSession` | Idempotently mark performed time/RPE and evaluate adjustment trigger. |
-| `POST /api/v1/check-ins` | `CreateCheckIn` | Store readiness/text, red-flag route, and evaluate adjustment trigger. |
+| Endpoint                                    | Backend use case  | Product result                                                         |
+| ------------------------------------------- | ----------------- | ---------------------------------------------------------------------- |
+| `GET /api/v1/sessions?clientId=&from=&to=`  | `ListSessions`    | Bounded client/date query in stable chronological order.               |
+| `GET /api/v1/sessions/:sessionId`           | `GetSession`      | Approved planned work and stored actual work.                          |
+| `POST /api/v1/sessions/:sessionId/log`      | `LogSessionWork`  | Idempotently store validated set-by-set actual work/notes.             |
+| `POST /api/v1/sessions/:sessionId/complete` | `CompleteSession` | Idempotently mark performed time/RPE and evaluate adjustment trigger.  |
+| `POST /api/v1/check-ins`                    | `CreateCheckIn`   | Store readiness/text, red-flag route, and evaluate adjustment trigger. |
 
 Logging/completion is permitted only for a session belonging to the selected client context and a
 published programme version. Completion may not be moved backward by an ordinary retry.
 
 ### Adjustments and accountability
 
-| Endpoint | Backend use case | Product result |
-|---|---|---|
-| `POST /api/v1/adjustments/generate` | `GenerateAdjustment` | Idempotently draft/evaluate a proposal against current context. |
-| `GET /api/v1/adjustments?clientId=&status=` | `ListAdjustments` | Bounded proposal/history query. |
-| `POST /api/v1/adjustments/:adjustmentId/approve` | `ApproveAdjustment` | Publish a safe new coach-approved programme version. |
-| `POST /api/v1/adjustments/:adjustmentId/reject` | `RejectAdjustment` | Record rejection without changing the current programme. |
-| `GET /api/v1/accountability/:clientId` | `GetAccountabilityState` | Latest score evidence, tier, owner, messages/tasks, history summary. |
-| `POST /api/v1/accountability/run` | `RunAccountabilityForClient` | Idempotently score, transition, suppress/send/draft as policy requires. |
+| Endpoint                                          | Backend use case             | Product result                                                           |
+| ------------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------ |
+| `POST /api/v1/adjustments/generate`               | `GenerateAdjustment`         | Idempotently draft/evaluate a proposal against current context.          |
+| `GET /api/v1/adjustments?clientId=&status=`       | `ListAdjustments`            | Bounded proposal/history query.                                          |
+| `PATCH /api/v1/adjustments/:adjustmentId`         | `EditAdjustmentProposal`     | Version and audit an allowed pending operation list without applying it. |
+| `POST /api/v1/adjustments/:adjustmentId/approve`  | `ApproveAdjustment`          | Publish a safe new coach-approved programme version.                     |
+| `POST /api/v1/adjustments/:adjustmentId/override` | `OverrideBlockedAdjustment`  | Require a reason and publish only an explicitly blocked adjustment.      |
+| `POST /api/v1/adjustments/:adjustmentId/reject`   | `RejectAdjustment`           | Record rejection without changing the current programme.                 |
+| `GET /api/v1/accountability/:clientId`            | `GetAccountabilityState`     | Latest score evidence, tier, owner, messages/tasks, history summary.     |
+| `POST /api/v1/accountability/run`                 | `RunAccountabilityForClient` | Idempotently score, transition, suppress/send/draft as policy requires.  |
 
-Approval fails if the adjustment was generated from a programme that is no longer current. There is
-no `autoApply` input or endpoint in V1.
+Approval fails if the adjustment was generated from a programme that is no longer current. Ordinary
+approval also fails closed for a blocked review band; only the explicit reasoned override endpoint
+may publish it. There is no `autoApply` input or endpoint in V1.
 
 ### Traces and jobs
 
-| Endpoint | Backend use case | Product result |
-|---|---|---|
-| `GET /api/v1/traces/:traceId` | `GetContextTrace` | Exact safe trace, selected sections, budget and run metadata. |
-| `POST /api/v1/jobs/weekly-plan` | `RunWeeklyPlanJob` | One idempotent programme-generation run per active client/week. |
-| `POST /api/v1/jobs/daily-accountability` | `RunDailyAccountabilityJob` | One idempotent daily sweep per client-local date/run key. |
+| Endpoint                                 | Backend use case            | Product result                                                  |
+| ---------------------------------------- | --------------------------- | --------------------------------------------------------------- |
+| `GET /api/v1/traces/:traceId`            | `GetContextTrace`           | Exact safe trace, selected sections, budget and run metadata.   |
+| `POST /api/v1/jobs/weekly-plan`          | `RunWeeklyPlanJob`          | One idempotent programme-generation run per active client/week. |
+| `POST /api/v1/jobs/daily-accountability` | `RunDailyAccountabilityJob` | One idempotent daily sweep per client-local date/run key.       |
 
 Outside demo mode, job routes require a valid `CRON_SECRET`. This protects infrastructure triggers;
 it is not user authentication. A missing/mismatched secret returns a generic error without revealing
@@ -99,16 +102,16 @@ whether another submitted value was close.
 `details` is optional, structured, bounded, and safe for the caller. It never includes stack traces,
 SQL, secrets, full prompt content, hidden model reasoning, or provider response bodies.
 
-| HTTP | Error category | Example codes |
-|---|---|---|
-| 400 | Malformed or schema-invalid input/query | `VALIDATION_FAILED`, `INVALID_DATE_RANGE` |
-| 401 | Invalid cron infrastructure secret only | `INVALID_CRON_SECRET` |
-| 404 | Resource does not exist in demo scope | `CLIENT_NOT_FOUND`, `PROGRAMME_NOT_FOUND` |
-| 409 | Idempotency, concurrency, stale reference, or lifecycle conflict | `IDEMPOTENCY_KEY_REUSED`, `STALE_PROGRAMME`, `INVALID_TRANSITION` |
-| 422 | Valid command rejected by a domain/safety rule | `PROGRAMME_BLOCKED`, `CONTEXT_BUDGET_EXCEEDED`, `UNSUPPORTED_ADJUSTMENT` |
-| 429 | Explicit bounded-resource protection | `RATE_LIMITED` |
-| 500 | Unexpected internal failure with sanitized response | `INTERNAL_ERROR` |
-| 503 | Required database/model/provider temporarily unavailable | `DEPENDENCY_UNAVAILABLE`, `MODEL_RUN_FAILED` |
+| HTTP | Error category                                                   | Example codes                                                            |
+| ---- | ---------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| 400  | Malformed or schema-invalid input/query                          | `VALIDATION_FAILED`, `INVALID_DATE_RANGE`                                |
+| 401  | Invalid cron infrastructure secret only                          | `INVALID_CRON_SECRET`                                                    |
+| 404  | Resource does not exist in demo scope                            | `CLIENT_NOT_FOUND`, `PROGRAMME_NOT_FOUND`                                |
+| 409  | Idempotency, concurrency, stale reference, or lifecycle conflict | `IDEMPOTENCY_KEY_REUSED`, `STALE_PROGRAMME`, `INVALID_TRANSITION`        |
+| 422  | Valid command rejected by a domain/safety rule                   | `PROGRAMME_BLOCKED`, `CONTEXT_BUDGET_EXCEEDED`, `UNSUPPORTED_ADJUSTMENT` |
+| 429  | Explicit bounded-resource protection                             | `RATE_LIMITED`                                                           |
+| 500  | Unexpected internal failure with sanitized response              | `INTERNAL_ERROR`                                                         |
+| 503  | Required database/model/provider temporarily unavailable         | `DEPENDENCY_UNAVAILABLE`, `MODEL_RUN_FAILED`                             |
 
 Recorded-mode missing recordings are deterministic configuration/test failures. In the UI they map
 to a clear service failure; they may not silently fall back to a live provider.
@@ -185,17 +188,17 @@ to a clear service failure; they may not silently fall back to a live provider.
 ### UI and network
 
 - Empty data sets produce explicit empty states, never crashes or misleading zero metrics.
-- Request timeout/offline: retryable message with request ID when available; forms keep entered data.
+- Request timeout/offline: retryable message with request ID when available; forms keep entered
+  data.
 - Double-click/repeated tap: disabled in flight and safe server idempotency.
 - Stale client cache after publication: invalidate/refetch current programme and Today.
 - Direct navigation to missing/stale ID: accessible not-found state with safe navigation.
 
 ### Privacy and operations
 
-- Logs redact authorization/cron secrets, API keys, check-in text, session notes, prompts, and contact
-  identity; use handles and trace/request IDs.
+- Logs redact authorization/cron secrets, API keys, check-in text, session notes, prompts, and
+  contact identity; use handles and trace/request IDs.
 - Trace responses exclude identity/contact data even if malformed source data contains it.
 - Database errors do not return SQL/schema details.
 - Docker tests use only project-scoped database/container resources.
 - Jobs recover from partial prior runs using stable run records, without duplicating side effects.
-

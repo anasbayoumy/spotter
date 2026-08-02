@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-006",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Compose returned literal null for pre-container image inventory",
+    "note": "After successful image builds, Compose 2.40.3 emitted literal null and the verifier attempted to read Service from it.",
+    "diagnosis": "The JSON-lines parser assumed every decoded record was a non-null object and used pre-container Compose inventory as the sole image identity source."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-006/docker-protocol-report.json",
+        "type": "file",
+        "digest": "sha256:e69a73b31ca4655dcdc1dde7b4b485ca503c33da150f5c72fa389d9c9628834d"
+      },
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-006/compose-image-identities.log",
+        "type": "file",
+        "digest": "sha256:879a422d1d67a1f57001db9012c9e557fcc14d85e7a786c63475a3df4f485861"
+      }
+    ]
+  }
+}

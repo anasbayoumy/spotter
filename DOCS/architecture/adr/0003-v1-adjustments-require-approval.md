@@ -18,4 +18,3 @@ creates and publishes a new programme version. No agent/event-facing auto-apply 
 - Reductions, volume changes, and documented swaps follow the same audit/publication guarantees.
 - The auto-apply safety rule remains as a fail-closed regression guard.
 - Automatic low-risk application may be proposed later only through a new ADR and evidence.
-

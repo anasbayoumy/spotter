@@ -2,10 +2,9 @@
 
 Status: **approved implementation contract**
 
-This directory is the canonical architecture for the Spotter V1 implementation rooted at
-`/Users/anas/franz-agents/app`. The source documents in `/Users/anas/franz-agents/DOCS` remain the
-product intent. Where they conflict with this directory, the decisions recorded here take
-precedence for implementation.
+This directory is the canonical architecture for the Spotter V1 implementation at the repository
+root. The product documents committed under `DOCS/` retain product intent. Where they conflict with
+this directory, the decisions recorded here take precedence for implementation.
 
 ## Decision precedence
 
@@ -13,10 +12,10 @@ precedence for implementation.
 2. Accepted architecture decision records in [`adr/`](./adr/).
 3. Testable requirements in [`requirements.md`](./requirements.md).
 4. The detailed architecture documents in this directory.
-5. The source product documents in `/Users/anas/franz-agents/DOCS`.
+5. The source product documents committed under `DOCS/`.
 
-Changing an accepted requirement requires an ADR that identifies the affected requirement IDs,
-the migration impact, and the new verification evidence. Requirement IDs are permanent; retired
+Changing an accepted requirement requires an ADR that identifies the affected requirement IDs, the
+migration impact, and the new verification evidence. Requirement IDs are permanent; retired
 requirements remain documented as superseded rather than being reused.
 
 ## Documents
@@ -48,10 +47,14 @@ frontend/ (Next.js coach UI + route adapters) ── imports ── backend/ (se
 
 - `frontend/` owns the Next.js runtime, coach presentation, and ultra-thin REST adapters.
 - `backend/` owns all domain rules, application use cases, persistence, agent orchestration,
-  evaluations, transactions, jobs, and operational policies. It is not an independently running
-  HTTP service.
+  evaluations, transactions, jobs, and operational policies. It is not an independently running HTTP
+  service.
+- `backend/packages/`, `backend/resources/`, `backend/infra/`, and `backend/tooling/` respectively
+  own shared workspaces, deterministic committed data, infrastructure declarations, and repository
+  verification/operations scripts.
 - `client-frontend/` owns the Expo client experience and consumes only the public REST contract.
-- `packages/contracts` contains the shared Zod wire schemas. It contains no business behavior.
+- `backend/packages/contracts` contains the shared Zod wire schemas. It contains no business
+  behavior.
 - V1 has no user authentication. A production build fails closed unless it is explicitly configured
   as a synthetic-only public demo.
 
@@ -69,4 +72,3 @@ frontend/ (Next.js coach UI + route adapters) ── imports ── backend/ (se
 - Automated messages are suppressed for 48 hours after the last automated message and stop when
   ownership escalates to a coach.
 - CI and the default demo require neither a model key nor real personal data.
-

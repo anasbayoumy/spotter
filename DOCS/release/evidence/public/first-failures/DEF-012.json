@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-012",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Mutation sandboxes copied the repository-local Playwright browser cache",
+    "note": "The first mutation attempt instrumented 2,207 mutants but failed before execution while copying a macOS Chromium framework link from the unrelated local browser cache.",
+    "diagnosis": "Stryker's sandbox input set included the repository-local Playwright cache and unrelated generated/frontend trees. Chromium's macOS framework layout contains a link/file shape unsupported by the sandbox copy operation."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-012/mutation-playwright-cache-first-failure.log",
+        "type": "file",
+        "digest": "sha256:1ed58213a10e62ab37ed92b0724834a1e337ef7cb5092ac8e9142691ab7837c4"
+      }
+    ]
+  }
+}

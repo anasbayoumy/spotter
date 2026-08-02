@@ -21,4 +21,3 @@ listener and imports no Next types. `client-frontend/` consumes the Next REST AP
 - REST stays a real contract for Expo even though coach/UI calls are same-origin.
 - The Next build context includes backend and shared packages and uses the Node runtime.
 - A future service extraction remains possible at the facade/REST boundary but is not pre-built.
-

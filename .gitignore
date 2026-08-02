@@ -1,0 +1,51 @@
+# Dependencies and task caches
+node_modules/
+.pnpm-store/
+.cache/
+.turbo/
+
+# Application outputs
+.next/
+.expo/
+dist/
+build/
+out/
+coverage/
+*.tsbuildinfo
+
+# Test and verification outputs
+artifacts/
+playwright-report/
+test-results/
+reports/
+.stryker-tmp/
+.stryker-diagnostic*/
+frontend/tests/e2e/.runtime-state.json
+client-frontend/tests/e2e/.runtime-state.json
+
+# Local databases and runtime state
+.data/
+*.db
+*.db-shm
+*.db-wal
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local agent workspace state
+/Memory.md
+
+# Logs
+*.log
+pnpm-debug.log*
+npm-debug.log*

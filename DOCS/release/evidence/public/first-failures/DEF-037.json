@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-037",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Docker security proof required a contradictory CSP default source",
+    "note": "The first focused Docker protocol retained the exact live response headers and cleanup proof after QA-DKR-009 rejected the documented production CSP despite all required directives and hardening headers being present.",
+    "diagnosis": "The live Docker assertion required default-src 'none', while the documented and shipped Next.js policy intentionally uses default-src 'self' with object-src and frame-ancestors set to 'none'. The harness therefore contradicted the application security policy rather than detecting a product defect."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-037",
+        "type": "directory",
+        "digest": "tree-sha256:20762a29fe291a2ea733cd1ecbadb5051790b08c473e1a50887417fc988db480"
+      }
+    ]
+  }
+}

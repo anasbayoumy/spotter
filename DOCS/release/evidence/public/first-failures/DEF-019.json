@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "defectId": "DEF-019",
+  "kind": "compact-first-failure",
+  "failure": {
+    "title": "Production web readiness did not recover within budget after restart",
+    "note": "The fourth cold Docker protocol passed QA-DKR-001 through QA-DKR-009, then retained a structured timeout because /health/ready did not return HTTP 200 within 60 seconds after restarting the web service.",
+    "diagnosis": "The same web container recovered to healthy internally, but Docker remapped its host port from 55063 to 55064 during restart. The verifier continued polling the stale pre-restart port, so it timed out without observing the healthy process."
+  },
+  "rawEvidence": {
+    "retention": "developer-local-immutable",
+    "policy": "Raw captures remain immutable in the developer-local vault; this public summary retains reviewed failure facts and cryptographic provenance without publishing browser traces, videos, logs, or mutation payloads.",
+    "artifacts": [
+      {
+        "path": "DOCS/release/evidence/first-failures/DEF-019/docker-protocol-report.json",
+        "type": "file",
+        "digest": "sha256:cc85bb7dfffcb17adbdc48ba2c83f2562d83d0b5e297bdb9d5e19b9be916cf54"
+      }
+    ]
+  }
+}
