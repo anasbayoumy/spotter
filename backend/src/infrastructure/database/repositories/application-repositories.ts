@@ -21,7 +21,7 @@ import {
   sessionSchema,
   todaySchema,
   type Adjustment,
-  type AdjustmentModelOutput,
+  type AdjustmentOperation,
   type AdjustmentTrigger,
   type CheckIn,
   type ClientDetail,
@@ -34,7 +34,7 @@ import {
   type ReviewBand,
   type Session,
 } from "@spotter/contracts";
-import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 
 import {
@@ -61,6 +61,7 @@ import type {
   Scorecard,
   Today,
 } from "../../../application/read-models";
+import { validateDocumentedExerciseSwap } from "../../../domain/exercise-equivalences";
 import { DatabaseInvariantError, isUniqueViolation } from "../database-error";
 import type { DatabaseAdapter, DatabaseSession } from "../database-types";
 import { PublishProgrammeTransaction } from "../publish-programme";
@@ -245,6 +246,41 @@ async function currentPublishedProgramme(
   });
 }
 
+async function currentPublishedProgrammeWithSessions(
+  database: DatabaseSession,
+  clientId: string,
+): Promise<{
+  readonly programme: ProgrammeRow | undefined;
+  readonly sessions: readonly SessionRow[];
+}> {
+  const currentProgramme = database.$with("current_programme").as(
+    database
+      .select()
+      .from(programmes)
+      .where(
+        and(
+          eq(programmes.clientId, clientId),
+          eq(programmes.status, "published"),
+          isNull(programmes.supersededBy),
+        ),
+      )
+      .orderBy(desc(programmes.validFrom), desc(programmes.createdAt), desc(programmes.id))
+      .limit(1),
+  );
+  const rows = await database
+    .with(currentProgramme)
+    .select()
+    .from(currentProgramme)
+    .leftJoin(sessions, eq(sessions.programmeId, currentProgramme.id))
+    .orderBy(asc(sessions.scheduledFor), asc(sessions.id))
+    .limit(200);
+
+  return {
+    programme: rows[0]?.current_programme,
+    sessions: rows.flatMap((row) => (row.sessions === null ? [] : [row.sessions])),
+  };
+}
+
 export class DrizzleClientReadRepository implements ClientReadPort {
   public constructor(private readonly database: DatabaseSession) {}
 
@@ -258,51 +294,51 @@ export class DrizzleClientReadRepository implements ClientReadPort {
   }
 
   public async getDetail(clientId: string, effectiveAt: Date): Promise<ClientDetail | undefined> {
-    const client = await this.database.query.clients.findFirst({
-      where: and(eq(clients.id, clientId), eq(clients.dataClassification, "synthetic")),
-    });
-    if (client === undefined) return undefined;
-    const [constraintRows, programme, sessionRows, checkInRows, messageRows] = await Promise.all([
-      this.database
-        .select()
-        .from(clientConstraints)
-        .where(
-          and(
-            eq(clientConstraints.clientId, clientId),
-            isNull(clientConstraints.supersededBy),
-            lte(clientConstraints.validFrom, effectiveAt),
-            or(
-              isNull(clientConstraints.validUntil),
-              sql`${clientConstraints.validUntil} > ${effectiveAt}`,
+    const [client, constraintRows, programme, sessionRows, checkInRows, messageRows] =
+      await Promise.all([
+        this.database.query.clients.findFirst({
+          where: and(eq(clients.id, clientId), eq(clients.dataClassification, "synthetic")),
+        }),
+        this.database
+          .select()
+          .from(clientConstraints)
+          .where(
+            and(
+              eq(clientConstraints.clientId, clientId),
+              isNull(clientConstraints.supersededBy),
+              lte(clientConstraints.validFrom, effectiveAt),
+              or(
+                isNull(clientConstraints.validUntil),
+                gt(clientConstraints.validUntil, effectiveAt),
+              ),
             ),
-          ),
-        )
-        .orderBy(asc(clientConstraints.createdAt), asc(clientConstraints.id)),
-      currentPublishedProgramme(this.database, clientId),
-      this.database
-        .select()
-        .from(sessions)
-        .where(eq(sessions.clientId, clientId))
-        .orderBy(desc(sessions.scheduledFor), desc(sessions.id))
-        .limit(200),
-      this.database
-        .select()
-        .from(checkIns)
-        .where(eq(checkIns.clientId, clientId))
-        .orderBy(desc(checkIns.respondedAt), desc(checkIns.id))
-        .limit(100),
-      this.database
-        .select()
-        .from(messages)
-        .where(eq(messages.clientId, clientId))
-        .orderBy(desc(messages.createdAt), desc(messages.id))
-        .limit(100),
-    ]);
-    const due = sessionRows.filter(
-      (session) => session.scheduledFor <= localDate(effectiveAt, client.timezone),
-    );
+          )
+          .orderBy(asc(clientConstraints.createdAt), asc(clientConstraints.id)),
+        currentPublishedProgramme(this.database, clientId),
+        this.database
+          .select()
+          .from(sessions)
+          .where(eq(sessions.clientId, clientId))
+          .orderBy(desc(sessions.scheduledFor), desc(sessions.id))
+          .limit(200),
+        this.database
+          .select()
+          .from(checkIns)
+          .where(eq(checkIns.clientId, clientId))
+          .orderBy(desc(checkIns.respondedAt), desc(checkIns.id))
+          .limit(100),
+        this.database
+          .select()
+          .from(messages)
+          .where(eq(messages.clientId, clientId))
+          .orderBy(desc(messages.createdAt), desc(messages.id))
+          .limit(100),
+      ]);
+    if (client === undefined) return undefined;
+    const date = localDate(effectiveAt, client.timezone);
+    const due = sessionRows.filter((session) => session.scheduledFor <= date);
     const adherence = (days: number): number | null => {
-      const cutoff = subtractDays(localDate(effectiveAt, client.timezone), days - 1);
+      const cutoff = subtractDays(date, days - 1);
       const window = due.filter((session) => session.scheduledFor >= cutoff);
       return window.length === 0
         ? null
@@ -333,45 +369,32 @@ export class DrizzleClientReadRepository implements ClientReadPort {
   }
 
   public async getToday(clientId: string, effectiveAt: Date): Promise<Today | undefined> {
-    const client = await this.database.query.clients.findFirst({
-      where: and(eq(clients.id, clientId), eq(clients.dataClassification, "synthetic")),
-    });
+    const [client, current, outstanding] = await Promise.all([
+      this.database.query.clients.findFirst({
+        where: and(eq(clients.id, clientId), eq(clients.dataClassification, "synthetic")),
+      }),
+      currentPublishedProgrammeWithSessions(this.database, clientId),
+      this.database.query.messages.findFirst({
+        orderBy: [desc(messages.sentAt), desc(messages.id)],
+        where: and(
+          eq(messages.clientId, clientId),
+          eq(messages.status, "sent"),
+          sql`${messages.sentAt} IS NOT NULL`,
+        ),
+      }),
+    ]);
     if (client === undefined) return undefined;
-    const programme = await currentPublishedProgramme(this.database, clientId);
     const date = localDate(effectiveAt, client.timezone);
-    const programmeSessions =
-      programme === undefined
-        ? []
-        : await this.database
-            .select()
-            .from(sessions)
-            .where(eq(sessions.programmeId, programme.id))
-            .orderBy(asc(sessions.scheduledFor), asc(sessions.id));
-    const outstanding = await this.database.query.messages.findFirst({
-      orderBy: [desc(messages.sentAt), desc(messages.id)],
-      where: and(
-        eq(messages.clientId, clientId),
-        eq(messages.status, "sent"),
-        sql`${messages.sentAt} IS NOT NULL`,
-      ),
-    });
+    const { programme, sessions: programmeSessions } = current;
+    const nextSession = programmeSessions.find((session) => session.scheduledFor > date);
+    const todaySession = programmeSessions.find((session) => session.scheduledFor === date);
     return todaySchema.parse({
       clientId,
       localDate: date,
-      nextSession:
-        programmeSessions.find((session) => session.scheduledFor > date) === undefined
-          ? null
-          : sessionFromRow(
-              programmeSessions.find((session) => session.scheduledFor > date) as SessionRow,
-            ),
+      nextSession: nextSession === undefined ? null : sessionFromRow(nextSession),
       outstandingMessage: outstanding === undefined ? null : messageFromRow(outstanding),
       programme: programme === undefined ? null : programmeFromRow(programme),
-      session:
-        programmeSessions.find((session) => session.scheduledFor === date) === undefined
-          ? null
-          : sessionFromRow(
-              programmeSessions.find((session) => session.scheduledFor === date) as SessionRow,
-            ),
+      session: todaySession === undefined ? null : sessionFromRow(todaySession),
       timezone: client.timezone,
     });
   }
@@ -669,7 +692,7 @@ export class DrizzleProgrammeApplicationRepository implements ProgrammePort {
         attemptKey: `programme.edit:${input.context.idempotencyKey}`,
         id: runId,
         latencyMs: 0,
-        model: "coach-edit",
+        model: "recorded/coach-edit",
         output: jsonObject({ citations: existing.citations, payload: input.payload }),
         promptVersion: "coach-edit-v1",
         status: "succeeded",
@@ -979,10 +1002,10 @@ export class DrizzleAdjustmentTriggerRepository implements AdjustmentTriggerPort
 
 function applyOperations(
   payload: ProgrammePayload,
-  output: AdjustmentModelOutput,
+  operations: readonly AdjustmentOperation[],
 ): ProgrammePayload {
   const copy = structuredClone(payload);
-  for (const operation of output.operations) {
+  for (const operation of operations) {
     let matched = false;
     for (const day of copy.days) {
       const exercise = day.exercises.find((candidate) => candidate.id === operation.exerciseId);
@@ -997,13 +1020,23 @@ function applyOperations(
         }
         exercise.sets -= operation.setsToRemove;
       } else if (operation.type === "swap_exercise") {
+        validateDocumentedExerciseSwap({
+          equivalenceId: operation.equivalenceId,
+          replacementFamily: operation.replacementFamily,
+          replacementName: operation.replacementName,
+          sourceFamily: exercise.family,
+        });
         exercise.name = operation.replacementName;
         exercise.family = operation.replacementFamily;
       } else {
-        throw new ApplicationError(
-          "unsupported_adjustment",
-          "The programme does not store a load prescription to reduce safely.",
-        );
+        if (exercise.loadKg === undefined || exercise.loadKg === null) {
+          throw new ApplicationError(
+            "unsupported_adjustment",
+            "The programme does not store a load prescription to reduce safely.",
+          );
+        }
+        const reduced = Math.round(exercise.loadKg * (100 - operation.percent)) / 100;
+        exercise.loadKg = Object.is(reduced, -0) ? 0 : reduced;
       }
     }
     if (!matched)
@@ -1146,6 +1179,79 @@ export class DrizzleAdjustmentRepository implements AdjustmentPort {
     return row === undefined ? undefined : adjustmentFromRow(row);
   }
 
+  public async edit(input: Parameters<AdjustmentPort["edit"]>[0]): Promise<Adjustment> {
+    await this.adapter.transaction(async (database) => {
+      await database.execute(
+        sql`SELECT id FROM adjustments WHERE id = ${input.adjustmentId} FOR UPDATE`,
+      );
+      const adjustment = await database.query.adjustments.findFirst({
+        where: eq(adjustments.id, input.adjustmentId),
+      });
+      if (adjustment === undefined)
+        throw new ApplicationError("not_found", "Adjustment does not exist.");
+      if (adjustment.version !== input.expectedVersion)
+        throw new ApplicationError("version_conflict", "Adjustment version changed.");
+      if (adjustment.status !== "draft" && adjustment.status !== "queued") {
+        throw new ApplicationError(
+          "invalid_state_transition",
+          "Only pending adjustments can be edited.",
+        );
+      }
+
+      await database.execute(
+        sql`SELECT id FROM programmes WHERE id = ${adjustment.baseProgrammeId} FOR UPDATE`,
+      );
+      const base = await database.query.programmes.findFirst({
+        where: eq(programmes.id, adjustment.baseProgrammeId),
+      });
+      if (base?.status !== "published" || base.supersededBy !== null) {
+        throw new ApplicationError(
+          "stale_adjustment",
+          "Adjustment base programme is no longer current.",
+        );
+      }
+      const operations = input.operations.map((operation) => structuredClone(operation));
+      applyOperations(programmePayloadSchema.parse(base.payload), operations);
+      const updated = await database
+        .update(adjustments)
+        .set({ operations: operations.map(jsonValue), version: adjustment.version + 1 })
+        .where(
+          and(
+            eq(adjustments.id, adjustment.id),
+            eq(adjustments.version, input.expectedVersion),
+            inArray(adjustments.status, ["draft", "queued"]),
+          ),
+        )
+        .returning({ id: adjustments.id });
+      if (updated.length !== 1) {
+        throw new ApplicationError("version_conflict", "Adjustment version changed.");
+      }
+      await database.insert(coachActions).values({
+        action: "edited",
+        adjustmentId: adjustment.id,
+        clientId: adjustment.clientId,
+        coachId: input.context.actorId,
+        diff: jsonObject({
+          after: { operations, version: adjustment.version + 1 },
+          before: { operations: adjustment.operations, version: adjustment.version },
+        }),
+        id: randomUUID(),
+        reason: input.reason,
+        requestId: input.context.requestId,
+      });
+    });
+    const edited = await this.database.query.adjustments.findFirst({
+      where: eq(adjustments.id, input.adjustmentId),
+    });
+    if (edited === undefined) {
+      throw new DatabaseInvariantError(
+        "dependency_unavailable",
+        "Edited adjustment was not found.",
+      );
+    }
+    return adjustmentFromRow(edited);
+  }
+
   public async approve(input: Parameters<AdjustmentPort["approve"]>[0]): Promise<Programme> {
     const newProgrammeId = randomUUID();
     await this.adapter.transaction(async (database) => {
@@ -1164,6 +1270,27 @@ export class DrizzleAdjustmentRepository implements AdjustmentPort {
           "invalid_state_transition",
           "Only queued adjustments can be approved.",
         );
+      if (input.approval === "standard" && adjustment.reviewBand === "blocked") {
+        throw new ApplicationError(
+          "blocked_requires_override",
+          "Blocked adjustment requires an override.",
+        );
+      }
+      const reason = input.reason?.trim();
+      if (input.approval === "override") {
+        if (adjustment.reviewBand !== "blocked") {
+          throw new ApplicationError(
+            "invalid_state_transition",
+            "Only blocked adjustments can be overridden.",
+          );
+        }
+        if (reason === undefined || reason.length === 0) {
+          throw new ApplicationError(
+            "override_reason_required",
+            "Adjustment override requires a reason.",
+          );
+        }
+      }
       const base = await database.query.programmes.findFirst({
         where: eq(programmes.id, adjustment.baseProgrammeId),
       });
@@ -1177,10 +1304,10 @@ export class DrizzleAdjustmentRepository implements AdjustmentPort {
           "Adjustment base programme is no longer current.",
         );
       }
-      const adjustedPayload = applyOperations(programmePayloadSchema.parse(base.payload), {
-        citations: [],
-        operations: adjustmentSchema.parse(adjustmentFromRow(adjustment)).operations,
-      });
+      const adjustedPayload = applyOperations(
+        programmePayloadSchema.parse(base.payload),
+        adjustmentFromRow(adjustment).operations,
+      );
       await database.insert(programmes).values({
         clientId: base.clientId,
         generatedBy: adjustment.generatedBy,
@@ -1200,7 +1327,7 @@ export class DrizzleAdjustmentRepository implements AdjustmentPort {
       await database
         .update(programmes)
         .set({
-          approvalKind: "standard",
+          approvalKind: input.approval,
           approvedAt: input.context.effectiveAt,
           approvedBy: input.context.actorId,
           status: "published",
@@ -1228,12 +1355,12 @@ export class DrizzleAdjustmentRepository implements AdjustmentPort {
         })),
       );
       await database.insert(coachActions).values({
-        action: "approved",
+        action: input.approval === "override" ? "overrode_block" : "approved",
         adjustmentId: adjustment.id,
         clientId: base.clientId,
         coachId: input.context.actorId,
         id: randomUUID(),
-        reason: input.reason,
+        reason,
         requestId: input.context.requestId,
       });
     });
@@ -1249,26 +1376,43 @@ export class DrizzleAdjustmentRepository implements AdjustmentPort {
   }
 
   public async reject(input: Parameters<AdjustmentPort["reject"]>[0]): Promise<Adjustment> {
-    const row = await this.database.query.adjustments.findFirst({
-      where: eq(adjustments.id, input.adjustmentId),
-    });
-    if (row === undefined) throw new ApplicationError("not_found", "Adjustment does not exist.");
-    if (row.version !== input.expectedVersion)
-      throw new ApplicationError("version_conflict", "Adjustment version changed.");
-    if (row.status !== "draft" && row.status !== "queued")
-      throw new ApplicationError(
-        "invalid_state_transition",
-        "Only pending adjustments can be rejected.",
-      );
     await this.adapter.transaction(async (database) => {
-      await database
+      await database.execute(
+        sql`SELECT id FROM adjustments WHERE id = ${input.adjustmentId} FOR UPDATE`,
+      );
+      const adjustment = await database.query.adjustments.findFirst({
+        where: eq(adjustments.id, input.adjustmentId),
+      });
+      if (adjustment === undefined) {
+        throw new ApplicationError("not_found", "Adjustment does not exist.");
+      }
+      if (adjustment.version !== input.expectedVersion) {
+        throw new ApplicationError("version_conflict", "Adjustment version changed.");
+      }
+      if (adjustment.status !== "draft" && adjustment.status !== "queued") {
+        throw new ApplicationError(
+          "invalid_state_transition",
+          "Only pending adjustments can be rejected.",
+        );
+      }
+      const updated = await database
         .update(adjustments)
-        .set({ status: "rejected", version: row.version + 1 })
-        .where(eq(adjustments.id, row.id));
+        .set({ status: "rejected", version: adjustment.version + 1 })
+        .where(
+          and(
+            eq(adjustments.id, adjustment.id),
+            eq(adjustments.version, input.expectedVersion),
+            inArray(adjustments.status, ["draft", "queued"]),
+          ),
+        )
+        .returning({ id: adjustments.id });
+      if (updated.length !== 1) {
+        throw new ApplicationError("version_conflict", "Adjustment version changed.");
+      }
       await database.insert(coachActions).values({
         action: "rejected",
-        adjustmentId: row.id,
-        clientId: row.clientId,
+        adjustmentId: adjustment.id,
+        clientId: adjustment.clientId,
         coachId: input.context.actorId,
         id: randomUUID(),
         reason: input.reason,
@@ -1276,7 +1420,7 @@ export class DrizzleAdjustmentRepository implements AdjustmentPort {
       });
     });
     const rejected = await this.database.query.adjustments.findFirst({
-      where: eq(adjustments.id, row.id),
+      where: eq(adjustments.id, input.adjustmentId),
     });
     if (rejected === undefined)
       throw new DatabaseInvariantError(
@@ -1389,9 +1533,10 @@ export class DrizzleAccountabilityRepository implements AccountabilityPort {
         .orderBy(desc(sessions.performedAt))
         .limit(5),
     ]);
-    const seven = sessionRows.filter((session) => session.scheduledFor >= cutoff7);
+    const dueRows = sessionRows.filter((session) => session.status !== "scheduled");
+    const seven = dueRows.filter((session) => session.scheduledFor >= cutoff7);
     const completed7 = seven.filter((session) => session.status === "completed").length;
-    const completed14 = sessionRows.filter((session) => session.status === "completed").length;
+    const completed14 = dueRows.filter((session) => session.status === "completed").length;
     const latencies = checkInRows
       .map((checkIn) => checkIn.latencyHours)
       .filter((value): value is number => value !== null && value > 0);
@@ -1420,9 +1565,9 @@ export class DrizzleAccountabilityRepository implements AccountabilityPort {
       completedDue7d: completed7,
       currentCheckInLatencyHours: latencies[0] ?? null,
       daysSinceOpen,
-      missedDue14d: sessionRows.length - completed14,
-      missedDue7d: seven.length - completed7,
-      plannedDue14d: sessionRows.length,
+      missedDue14d: dueRows.filter((session) => session.status === "missed").length,
+      missedDue7d: seven.filter((session) => session.status === "missed").length,
+      plannedDue14d: dueRows.length,
       plannedDue7d: seven.length,
       rpeDrift:
         rpes.length < 2

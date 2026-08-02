@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import { apiContracts } from "@spotter/contracts";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
@@ -16,7 +18,7 @@ describe("real PGlite route smoke", () => {
       APP_ENV: "demo",
       DATABASE_MODE: "pglite",
       DATA_POLICY: "synthetic_only",
-      MIGRATIONS_DIR: "../backend/migrations",
+      MIGRATIONS_DIR: path.resolve(import.meta.dirname, "../../../backend/migrations"),
       PGLITE_DATA_DIR: "memory://",
     });
   });

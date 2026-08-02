@@ -1,0 +1,471 @@
+{
+  "schemaVersion": "1.0.0",
+  "reviewedOn": "2026-08-02",
+  "reviewer": "/root/mutation_audit (Pool 5)",
+  "reportBinding": {
+    "path": "reports/mutation/mutation.json",
+    "rawSha256": "d699b4795872b5b50a51ee993a07b27e261476f545796b50034624f180b986e9",
+    "canonicalReportSha256": "c3594ebb222dce54afd2b5755e24624f6a5cf1cd02a0a1d74a4981e370e58c33",
+    "selectedFileSetSha256": "4b41eed68734ac59f459459a6a3233fbe5662a0d131d0bfa3da87f45fdd87328",
+    "selectedTestFileSetSha256": "e74534376610d333a52e11b092474ae1a554adadcb75bf206683e2111ee68b7e",
+    "testSourceSetSha256": "b1e8e2c518666f58eff4e020c1e47cac80a8cb6f256569b3e5d541bcdca5144e",
+    "mutationExecutionInputsSha256": "bbe325f0781d84a69dde4c830208dd6631692265a0ec9f6f35393d50ae07cfd8",
+    "mutatedSourceSetSha256": "0f24a0f4b4f7154ea8c03d91f9c001ff56c1efb75a13dde89245022646e33886",
+    "survivorInventorySha256": "9e622817bfd3d118e7e5e5da130fb8b9b57dc6c775d353e746d75123b3e5e7fc",
+    "timeoutInventorySha256": "7361f467d2bca16292dc8a9447539a60c6f71ff462e1ff1fd0345a6dbe119579",
+    "strykerVersion": "9.2.0",
+    "configSha256": "2898df117c219e32081bd3a29eb1b504e6cdc8a1d05287d4791461cb835ec0a5",
+    "digestAlgorithms": {
+      "canonicalReportSha256": "Recursively sort all report object keys, replace only the exact repository-root string with <REPOSITORY_ROOT>, JSON.stringify the complete report, then SHA-256 the UTF-8 payload.",
+      "selectedFileSetSha256": "Sort every exact report file path, JSON.stringify the array, then SHA-256 the UTF-8 payload; validation also derives the current file set from the pinned Stryker selectors.",
+      "selectedTestFileSetSha256": "Sort every reported mutation test path, JSON.stringify the array, then SHA-256 the UTF-8 payload; validation also derives the complete current candidate set from the pinned Vitest include with related-mode disabled.",
+      "testSourceSetSha256": "Sort every reported mutation test file by path, join each path + NUL + exact source with NUL, then SHA-256 the UTF-8 payload; validation also compares every test byte with the current repository.",
+      "mutationExecutionInputsSha256": "SHA-256 sorted path-and-file-digest lines for all backend, shared-package, fixture, toolchain, workspace, TypeScript, Turbo, Stryker, and Vitest execution inputs, excluding only generated runtime output directories.",
+      "mutatedSourceSetSha256": "Sort report files by path, join each path + NUL + source with NUL, then SHA-256 the UTF-8 payload.",
+      "survivorInventorySha256": "Sort exact Survived/NoCoverage descriptors by their JSON encoding, SHA-256 JSON.stringify(array).",
+      "timeoutInventorySha256": "Sort exact Timeout descriptors including statusReason by their JSON encoding, SHA-256 JSON.stringify(array)."
+    }
+  },
+  "scoringPolicy": {
+    "denominatorStatuses": ["Killed", "Survived", "NoCoverage", "Timeout"],
+    "canonicalNumerator": "Killed plus Timeout only when a timeout classification names the bounded detecting test.",
+    "conservativeNumerator": "Killed only.",
+    "runtimeErrorPolicy": "Any RuntimeError invalidates the report.",
+    "compileErrorPolicy": "Only checker-proven CompileError may be excluded; the accepted report has none.",
+    "equivalentPolicy": "Equivalent survivors remain in the reported denominator and count as undetected in both scores.",
+    "scorePrecisionDecimals": 6
+  },
+  "runtimeAudit": {
+    "acceptedReport": {
+      "generatedMutants": 2207,
+      "dryRunTests": 374,
+      "elapsedSeconds": 690,
+      "statusCounts": {
+        "Killed": 2195,
+        "Survived": 9,
+        "Timeout": 3,
+        "NoCoverage": 0,
+        "RuntimeError": 0,
+        "CompileError": 0
+      },
+      "workerCrashObserved": false,
+      "harness": {
+        "strykerConcurrency": 2,
+        "disableBail": true,
+        "testRunnerProcesses": 1,
+        "checkerProcesses": 1,
+        "vitestFileParallelism": false,
+        "vitestMaxWorkers": 1
+      }
+    },
+    "rejectedHarnessRun": {
+      "statusCounts": {
+        "RuntimeError": 1556
+      },
+      "reasonTaxonomy": [
+        {
+          "category": "vitest_reused_pool_cancelled_after_bail",
+          "count": 1556,
+          "signature": "An error occurred outside of a test run ... Unhandled Error ... Pool.run",
+          "productionFilesAffected": 22,
+          "mutatorKindsAffected": 14,
+          "withCoveredByTests": 1554,
+          "withoutCoveredByTests": 2
+        }
+      ],
+      "rawReportPreserved": true,
+      "preservedAs": "DOCS/release/evidence/first-failures/DEF-024/mutation-runtime-error-report.json",
+      "rawSha256": "78351ba4d75240740ba5a3aed2aa51449517f84cc4455f7e1acdfaef5f6e243f",
+      "disposition": "Rejected as a systemic runner failure; none of these entries were treated as invalid mutants or included in accepted scoring."
+    },
+    "stabilizationProbe": {
+      "scope": "backend/src/domain/safety.ts",
+      "generatedMutants": 141,
+      "RuntimeError": 0,
+      "CompileError": 0,
+      "elapsedSeconds": 18
+    }
+  },
+  "scopes": [
+    {
+      "id": "QA-MUT-001",
+      "selectors": ["backend/src/evals/safety/**"],
+      "thresholdPercent": 95,
+      "counts": {
+        "killed": 471,
+        "survived": 2,
+        "noCoverage": 0,
+        "timeout": 0,
+        "denominator": 473
+      },
+      "canonicalScorePercent": 99.577167,
+      "conservativeScorePercent": 99.577167,
+      "pass": true,
+      "additionalRule": {
+        "rule": "No surviving blocker-removal mutant.",
+        "pass": true,
+        "basis": "Both survivors are locally proven normalization/null-map equivalents."
+      }
+    },
+    {
+      "id": "QA-MUT-002",
+      "selectors": ["backend/src/agents/context/**", "backend/src/domain/temporal.ts"],
+      "thresholdPercent": 95,
+      "counts": {
+        "killed": 229,
+        "survived": 2,
+        "noCoverage": 0,
+        "timeout": 3,
+        "denominator": 234
+      },
+      "canonicalScorePercent": 99.145299,
+      "conservativeScorePercent": 97.863248,
+      "pass": true,
+      "additionalRule": {
+        "rule": "No surviving boundary/comparison mutant.",
+        "pass": true,
+        "basis": "The two null-timestamp sort survivors are equivalent; each timeout is a bounded nontermination detection."
+      }
+    },
+    {
+      "id": "QA-MUT-003",
+      "selectors": [
+        "backend/src/domain/programme.ts",
+        "backend/src/application/programmes.ts",
+        "backend/src/infrastructure/database/publish-programme.ts"
+      ],
+      "thresholdPercent": 95,
+      "counts": {
+        "killed": 509,
+        "survived": 0,
+        "noCoverage": 0,
+        "timeout": 0,
+        "denominator": 509
+      },
+      "canonicalScorePercent": 100,
+      "conservativeScorePercent": 100,
+      "pass": true,
+      "additionalRule": {
+        "rule": "No surviving authorization/state mutant.",
+        "pass": true,
+        "basis": "No survivor, no-coverage, timeout, runtime-error, or compile-error entry remains in scope."
+      }
+    },
+    {
+      "id": "QA-MUT-004",
+      "selectors": [
+        "backend/src/domain/accountability.ts",
+        "backend/src/application/accountability.ts"
+      ],
+      "thresholdPercent": 95,
+      "counts": {
+        "killed": 308,
+        "survived": 2,
+        "noCoverage": 0,
+        "timeout": 0,
+        "denominator": 310
+      },
+      "canonicalScorePercent": 99.354839,
+      "conservativeScorePercent": 99.354839,
+      "pass": true,
+      "additionalRule": {
+        "rule": "No surviving time/ownership mutant.",
+        "pass": true,
+        "basis": "Both survivors are proven equivalent under validated latency and preceding equality invariants."
+      }
+    },
+    {
+      "id": "QA-MUT-005",
+      "selectors": ["Every production file selected by stryker.config.mjs"],
+      "thresholdPercent": 90,
+      "counts": {
+        "killed": 2195,
+        "survived": 9,
+        "noCoverage": 0,
+        "timeout": 3,
+        "denominator": 2207
+      },
+      "canonicalScorePercent": 99.592207,
+      "conservativeScorePercent": 99.456275,
+      "pass": true,
+      "additionalRule": {
+        "rule": "Every survivor is classified.",
+        "pass": true,
+        "basis": "All 9 survivors and all 3 timeouts have exact descriptor-bound classifications."
+      }
+    }
+  ],
+  "classifications": [
+    {
+      "file": "backend/src/agents/context/filter-rank.ts",
+      "id": "74",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "location": {
+        "start": { "line": 11, "column": 20 },
+        "end": { "line": 11, "column": 43 }
+      },
+      "scopeIds": ["QA-MUT-002", "QA-MUT-005"],
+      "riskCategory": "deterministic_null_timestamp_ordering",
+      "classification": "equivalent",
+      "proof": "For createdAt=null, new Date(null).valueOf() is exactly 0, matching the removed true branch. For non-null values both versions execute the same Date conversion.",
+      "reviewer": "/root/mutation_audit (Pool 5)",
+      "reviewedOn": "2026-08-02",
+      "expiresOn": "2026-11-02",
+      "disposition": "approved-equivalent-until-expiry",
+      "countedAsDetected": false
+    },
+    {
+      "file": "backend/src/agents/context/filter-rank.ts",
+      "id": "77",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "location": {
+        "start": { "line": 12, "column": 21 },
+        "end": { "line": 12, "column": 45 }
+      },
+      "scopeIds": ["QA-MUT-002", "QA-MUT-005"],
+      "riskCategory": "deterministic_null_timestamp_ordering",
+      "classification": "equivalent",
+      "proof": "The right-hand timestamp has the same exhaustive cases as the left: null converts to epoch 0 and every non-null value follows the unchanged Date conversion.",
+      "reviewer": "/root/mutation_audit (Pool 5)",
+      "reviewedOn": "2026-08-02",
+      "expiresOn": "2026-11-02",
+      "disposition": "approved-equivalent-until-expiry",
+      "countedAsDetected": false
+    },
+    {
+      "file": "backend/src/domain/accountability.ts",
+      "id": "501",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "location": {
+        "start": { "line": 57, "column": 5 },
+        "end": { "line": 57, "column": 47 }
+      },
+      "scopeIds": ["QA-MUT-004", "QA-MUT-005"],
+      "riskCategory": "validated_nullable_latency",
+      "classification": "equivalent",
+      "proof": "A non-null baseline is validated finite and >0. When current latency is null, JavaScript coerces it to 0 and 0 >= positive*2 is false; when non-null, both versions evaluate the unchanged comparison.",
+      "reviewer": "/root/mutation_audit (Pool 5)",
+      "reviewedOn": "2026-08-02",
+      "expiresOn": "2026-11-02",
+      "disposition": "approved-equivalent-until-expiry",
+      "countedAsDetected": false
+    },
+    {
+      "file": "backend/src/domain/accountability.ts",
+      "id": "563",
+      "status": "Survived",
+      "mutatorName": "EqualityOperator",
+      "replacement": "computedTier <= this.#value.tier",
+      "location": {
+        "start": { "line": 95, "column": 42 },
+        "end": { "line": 95, "column": 73 }
+      },
+      "scopeIds": ["QA-MUT-004", "QA-MUT-005"],
+      "riskCategory": "sticky_coach_ownership",
+      "classification": "equivalent",
+      "proof": "The preceding line returns when computedTier equals the stored tier. At this comparison the values are therefore unequal, making < and <= identical for the finite tier enum.",
+      "reviewer": "/root/mutation_audit (Pool 5)",
+      "reviewedOn": "2026-08-02",
+      "expiresOn": "2026-11-02",
+      "disposition": "approved-equivalent-until-expiry",
+      "countedAsDetected": false
+    },
+    {
+      "file": "backend/src/domain/safety.ts",
+      "id": "1234",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "location": {
+        "start": { "line": 40, "column": 6 },
+        "end": { "line": 40, "column": 27 }
+      },
+      "scopeIds": ["QA-MUT-005"],
+      "riskCategory": "validated_nullable_adherence",
+      "classification": "equivalent",
+      "proof": "For null, both null < 0 and null > 1 are false after numeric coercion, matching the guard. For non-null values both versions execute the same lower/upper validation.",
+      "reviewer": "/root/mutation_audit (Pool 5)",
+      "reviewedOn": "2026-08-02",
+      "expiresOn": "2026-11-02",
+      "disposition": "approved-equivalent-until-expiry",
+      "countedAsDetected": false
+    },
+    {
+      "file": "backend/src/domain/safety.ts",
+      "id": "1257",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "location": {
+        "start": { "line": 45, "column": 10 },
+        "end": { "line": 45, "column": 28 }
+      },
+      "scopeIds": ["QA-MUT-005"],
+      "riskCategory": "zero_baseline_volume_arithmetic",
+      "classification": "equivalent",
+      "proof": "Inputs are non-negative integers. At previousSets=0, proposedSets=0 yields NaN > 0.3=false and proposedSets>0 yields Infinity > 0.3=true, exactly matching proposedSets>0. For previousSets>0 the unchanged division branch runs.",
+      "reviewer": "/root/mutation_audit (Pool 5)",
+      "reviewedOn": "2026-08-02",
+      "expiresOn": "2026-11-02",
+      "disposition": "approved-equivalent-until-expiry",
+      "countedAsDetected": false
+    },
+    {
+      "file": "backend/src/domain/session.ts",
+      "id": "1550",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "true",
+      "location": {
+        "start": { "line": 175, "column": 11 },
+        "end": { "line": 175, "column": 29 }
+      },
+      "scopeIds": ["QA-MUT-005"],
+      "riskCategory": "completed_session_invariant",
+      "classification": "equivalent",
+      "proof": "This branch is nested under performedAt!==null. The TrainingSession constructor enforces performedAt and rpe nullness together, so rpe cannot be null at this point and the guard is always true.",
+      "reviewer": "/root/mutation_audit (Pool 5)",
+      "reviewedOn": "2026-08-02",
+      "expiresOn": "2026-11-02",
+      "disposition": "approved-equivalent-until-expiry",
+      "countedAsDetected": false
+    },
+    {
+      "file": "backend/src/evals/safety/gates/gates.ts",
+      "id": "1776",
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "location": {
+        "start": { "line": 78, "column": 9 },
+        "end": { "line": 78, "column": 24 }
+      },
+      "scopeIds": ["QA-MUT-001", "QA-MUT-005"],
+      "riskCategory": "unknown_family_map_lookup",
+      "classification": "equivalent",
+      "proof": "Under single-mutant execution the forbidden map is populated only with resolved non-null family strings. If an exercise resolves to null, forbidden.get(null) is undefined and produces no finding, exactly matching the removed continue.",
+      "reviewer": "/root/mutation_audit (Pool 5)",
+      "reviewedOn": "2026-08-02",
+      "expiresOn": "2026-11-02",
+      "disposition": "approved-equivalent-until-expiry",
+      "countedAsDetected": false
+    },
+    {
+      "file": "backend/src/evals/safety/movement-taxonomy.ts",
+      "id": "2000",
+      "status": "Survived",
+      "mutatorName": "MethodExpression",
+      "replacement": "value",
+      "location": {
+        "start": { "line": 33, "column": 10 },
+        "end": { "line": 34, "column": 12 }
+      },
+      "scopeIds": ["QA-MUT-001", "QA-MUT-005"],
+      "riskCategory": "movement_identifier_normalization",
+      "classification": "equivalent",
+      "proof": "Every leading/trailing whitespace character is non-[a-z0-9], the subsequent + regex collapses each edge run to one underscore, and the final edge regex removes it. Removing trim therefore cannot change the normalized output.",
+      "reviewer": "/root/mutation_audit (Pool 5)",
+      "reviewedOn": "2026-08-02",
+      "expiresOn": "2026-11-02",
+      "disposition": "approved-equivalent-until-expiry",
+      "countedAsDetected": false
+    }
+  ],
+  "timeouts": [
+    {
+      "file": "backend/src/agents/context/stable-json.ts",
+      "id": "141",
+      "status": "Timeout",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "location": {
+        "start": { "line": 7, "column": 7 },
+        "end": { "line": 7, "column": 50 }
+      },
+      "scopeIds": ["QA-MUT-002", "QA-MUT-005"],
+      "classification": "proven-nontermination-timeout",
+      "statusReason": "Hit limit reached (44944/18800)",
+      "boundedTest": {
+        "file": "backend/src/agents/context/context-edge-cases.test.ts",
+        "name": "context edge cases normalizes nested JSON and estimates empty and multi-byte context deterministically",
+        "vitestTimeoutMs": 10000,
+        "strykerTimeoutMs": 15000
+      },
+      "proof": "The mutation removes the primitive/null base case. The bounded nested-JSON test supplies a string scalar, whose Object.entries recursion repeats the same scalar until Stryker's hit limit detects nontermination.",
+      "reviewer": "/root/mutation_audit (Pool 5)",
+      "reviewedOn": "2026-08-02",
+      "expiresOn": "2026-11-02",
+      "disposition": "accepted-detected-nontermination",
+      "countedAsDetected": true
+    },
+    {
+      "file": "backend/src/agents/context/stable-json.ts",
+      "id": "142",
+      "status": "Timeout",
+      "mutatorName": "LogicalOperator",
+      "replacement": "value === null && typeof value !== \"object\"",
+      "location": {
+        "start": { "line": 7, "column": 7 },
+        "end": { "line": 7, "column": 50 }
+      },
+      "scopeIds": ["QA-MUT-002", "QA-MUT-005"],
+      "classification": "proven-nontermination-timeout",
+      "statusReason": "Hit limit reached (44944/18800)",
+      "boundedTest": {
+        "file": "backend/src/agents/context/context-edge-cases.test.ts",
+        "name": "context edge cases normalizes nested JSON and estimates empty and multi-byte context deterministically",
+        "vitestTimeoutMs": 10000,
+        "strykerTimeoutMs": 15000
+      },
+      "proof": "Changing OR to AND rejects every non-null primitive base case. The named test's string scalar recursively expands through Object.entries until the instrumenter hit limit detects the mutation.",
+      "reviewer": "/root/mutation_audit (Pool 5)",
+      "reviewedOn": "2026-08-02",
+      "expiresOn": "2026-11-02",
+      "disposition": "accepted-detected-nontermination",
+      "countedAsDetected": true
+    },
+    {
+      "file": "backend/src/agents/context/stable-json.ts",
+      "id": "145",
+      "status": "Timeout",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false",
+      "location": {
+        "start": { "line": 7, "column": 25 },
+        "end": { "line": 7, "column": 50 }
+      },
+      "scopeIds": ["QA-MUT-002", "QA-MUT-005"],
+      "classification": "proven-nontermination-timeout",
+      "statusReason": "Hit limit reached (44744/18700)",
+      "boundedTest": {
+        "file": "backend/src/agents/context/context-edge-cases.test.ts",
+        "name": "context edge cases normalizes nested JSON and estimates empty and multi-byte context deterministically",
+        "vitestTimeoutMs": 10000,
+        "strykerTimeoutMs": 15000
+      },
+      "proof": "For every non-null primitive the mutated condition is false, so normalization recursively re-enters the scalar through Object.entries. The exact hit-limit reason is direct bounded evidence of changed nontermination.",
+      "reviewer": "/root/mutation_audit (Pool 5)",
+      "reviewedOn": "2026-08-02",
+      "expiresOn": "2026-11-02",
+      "disposition": "accepted-detected-nontermination",
+      "countedAsDetected": true
+    }
+  ],
+  "inventorySummary": {
+    "survived": 9,
+    "noCoverage": 0,
+    "timeout": 3,
+    "runtimeError": 0,
+    "compileError": 0,
+    "classifiedSurvived": 9,
+    "classifiedNoCoverage": 0,
+    "classifiedTimeout": 3,
+    "unclassified": 0
+  }
+}

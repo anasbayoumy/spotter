@@ -15,6 +15,8 @@
     "src/**/*.tsx",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "next.config.ts"
+    "next.config.ts",
+    "vitest.config.ts",
+    "vitest.coverage.config.ts"
   ]
 }

@@ -7,6 +7,7 @@ dist
 build
 coverage
 artifacts
+DOCS/release/evidence
 playwright-report
 test-results
 pnpm-lock.yaml

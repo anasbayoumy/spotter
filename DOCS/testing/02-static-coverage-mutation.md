@@ -78,10 +78,40 @@ integrity guarantee. It does not mutate generated schemas, presentation markup, 
 | `QA-MUT-004` | Engagement tier and 48-hour suppression logic          |                    95% | No surviving time/ownership mutant      | `pnpm test:mutation` |
 | `QA-MUT-005` | Combined selected critical scope                       |                    90% | Every survivor is classified            | `pnpm test:mutation` |
 
+The committed scope selectors are:
+
+- `QA-MUT-001`: `backend/src/evals/safety/**`.
+- `QA-MUT-002`: `backend/src/agents/context/**` and `backend/src/domain/temporal.ts`.
+- `QA-MUT-003`: `backend/src/domain/programme.ts`, `backend/src/application/programmes.ts`, and
+  `backend/src/infrastructure/database/publish-programme.ts`.
+- `QA-MUT-004`: `backend/src/domain/accountability.ts` and
+  `backend/src/application/accountability.ts`.
+- `QA-MUT-005`: every production file selected by `stryker.config.mjs`.
+
+For each scope, the denominator is killed + survived + no-coverage + timeout mutants. A timeout is
+included in the numerator only when its classification names the bounded test that detects the
+changed behavior; otherwise it remains undetected. Any Stryker `RuntimeError` is a release-blocking
+harness failure and the accepted report must contain zero. A `CompileError` may be excluded from
+either side of the score only when the configured TypeScript checker proves that exact replacement
+cannot compile; its count and inventory remain visible in the classification evidence.
+
 An equivalent mutant may be excluded only with a code reference, explanation, reviewer, and expiry.
 A timeout counts as not killed until the harness proves the production test detects the mutation.
 Mutation evidence includes tool configuration, tested commit, scores by file, killed/survived list,
-and every exclusion.
+and every exclusion. `backend/tooling/verification/mutation-survivor-classification.json` binds that
+review to the exact mutation-report SHA-256 and to a canonical digest of the complete parsed report,
+including every killed-mutant descriptor and result. Canonicalization sorts object keys and permits
+only replacement of the exact repository-root string with the documented `<REPOSITORY_ROOT>` token;
+it does not discard reporter fields or mutant details. The verifier independently derives the
+current production file set from the pinned `stryker.config.mjs` selectors, requires an exact match
+with the report, compares every reported production and mutation-participating test source byte with
+the current repository, and enumerates every survived, no-coverage, and timeout mutant. Vitest
+related-mode is disabled for release mutation runs, so every test matching the pinned mutation
+configuration is discovered and the report must contain that complete candidate set. A separate
+execution-input digest binds the backend, shared packages, fixtures, package/lock/toolchain files,
+TypeScript configuration, Turbo task graph, Stryker configuration, and Vitest configuration chain.
+Any file, source, test, transitive input, mutant, result, score, review-date, expiry, selector, or
+configuration drift requires a new reviewed classification and fails release evidence.
 
 ## Static-gate failure policy
 

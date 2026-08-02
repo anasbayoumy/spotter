@@ -14,7 +14,7 @@ import { maximumAutomatedMessages, runDeterministicSafety } from "../safety/run-
 import { aggregateScorecard } from "../scorecard/aggregate-scorecard.js";
 import type { GateResult, JudgeResult } from "../types.js";
 
-const manifestUrl = new URL("../../../../fixtures/golden/safety/manifest.json", import.meta.url);
+const manifestUrl = new URL("../../../resources/golden/safety/manifest.json", import.meta.url);
 const rawManifest: unknown = JSON.parse(await readFile(manifestUrl, "utf8"));
 const manifest = goldenManifestSchema.parse(rawManifest);
 

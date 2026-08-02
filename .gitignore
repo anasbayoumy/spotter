@@ -1,6 +1,7 @@
 # Dependencies and task caches
 node_modules/
 .pnpm-store/
+.cache/
 .turbo/
 
 # Application outputs
@@ -18,6 +19,8 @@ playwright-report/
 test-results/
 reports/
 .stryker-tmp/
+frontend/tests/e2e/.runtime-state.json
+client-frontend/tests/e2e/.runtime-state.json
 
 # Local databases and runtime state
 .data/
@@ -37,6 +40,9 @@ reports/
 .idea/
 .vscode/
 *.swp
+
+# Local agent workspace state
+/Memory.md
 
 # Logs
 *.log

@@ -2,7 +2,7 @@
 
 ## Canonical repository shape
 
-`/Users/anas/franz-agents/app` is the workspace and repository root (`SYS-001`).
+The checkout root is the workspace and repository root (`SYS-001`).
 
 ```text
 app/
@@ -26,7 +26,14 @@ app/
 │   │   ├── modules/
 │   │   └── index.ts
 │   ├── migrations/
-│   ├── drizzle.config.ts
+│   ├── packages/                 # cross-surface workspaces, physically backend-owned
+│   │   ├── config/
+│   │   ├── contracts/
+│   │   ├── design-tokens/
+│   │   └── testkit/
+│   ├── resources/                # synthetic demo, recording, calibration, and golden data
+│   ├── infra/                    # PostgreSQL init and evidence schemas
+│   ├── tooling/                  # repository verification and operational commands
 │   └── package.json
 │
 ├── client-frontend/              # Expo application
@@ -37,29 +44,9 @@ app/
 │   ├── eas.json
 │   └── package.json
 │
-├── packages/
-│   ├── contracts/
-│   ├── design-tokens/
-│   ├── eslint-config/
-│   ├── typescript-config/
-│   └── testkit/
-├── fixtures/
-│   ├── demo/
-│   ├── golden/
-│   ├── calibration/
-│   └── recordings/
-├── tests/
-│   ├── architecture/
-│   ├── contract/
-│   ├── integration/
-│   ├── safety/
-│   ├── e2e-web/
-│   └── e2e-mobile/
-├── infra/
-│   └── docker/
 ├── DOCS/
 │   └── architecture/
-├── scripts/
+├── docker/
 ├── .github/workflows/
 ├── compose.yaml
 ├── .env.example
@@ -71,9 +58,10 @@ app/
 └── package.json
 ```
 
-`frontend/`, `backend/`, and `client-frontend/` are the only application folders (`SYS-002`). Shared
-packages are deliberately few. A new shared package requires evidence that at least two surfaces
-need the same stable concern; convenience is not sufficient.
+`frontend/`, `backend/`, and `client-frontend/` are the only application folders (`SYS-002`). The
+cross-surface workspaces are physically nested under `backend/packages/` but remain independent
+package boundaries. A new shared package requires evidence that at least two surfaces need the same
+stable concern; convenience is not sufficient.
 
 ## `frontend/` ownership
 
@@ -252,7 +240,7 @@ app.
 
 ## Shared package boundaries
 
-### `packages/contracts`
+### `backend/packages/contracts`
 
 Contains Zod 4 schemas and inferred JSON-safe types for:
 
@@ -267,7 +255,7 @@ Contains Zod 4 schemas and inferred JSON-safe types for:
 Database row types, Drizzle schemas, prompts, entities, repository interfaces, React hooks, and
 formatting utilities do not belong here.
 
-### `packages/design-tokens`
+### `backend/packages/design-tokens`
 
 Exports platform-neutral values for color, spacing, radius, typography, and semantic state. Web and
 React Native map these values into their own styling systems; no React component is shared between

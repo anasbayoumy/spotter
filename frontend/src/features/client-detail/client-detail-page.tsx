@@ -28,13 +28,8 @@ import { Card } from "../../components/ui/card";
 import { DefinitionList } from "../../components/ui/definition-list";
 import { PageHeader } from "../../components/ui/page-header";
 import { EmptyState, ErrorState, InlineStatus, LoadingState } from "../../components/ui/states";
-import {
-  ApiClientError,
-  createIdempotencyKey,
-  requestApi,
-  toApiClientError,
-  type ApiResult,
-} from "../../lib/api/client";
+import { ApiClientError, requestApi, toApiClientError, type ApiResult } from "../../lib/api/client";
+import { PayloadIdempotencyRegistry } from "../../lib/api/idempotency";
 import { useResource } from "../../lib/api/use-resource";
 import {
   formatDate,
@@ -286,8 +281,7 @@ export function ClientDetailPage({ clientId }: { readonly clientId: string }): R
   const [generation, setGeneration] = useState<ActionState<ProgrammeReview>>(emptyActionState);
   const [accountability, setAccountability] =
     useState<ActionState<AccountabilityDetail>>(emptyActionState);
-  const generationKey = useRef<string | null>(null);
-  const accountabilityKey = useRef<string | null>(null);
+  const keys = useRef(new PayloadIdempotencyRegistry());
 
   async function generateProgramme(): Promise<void> {
     const parsed = generateProgrammeRequestSchema.safeParse({
@@ -308,15 +302,14 @@ export function ClientDetailPage({ clientId }: { readonly clientId: string }): R
       });
       return;
     }
-    generationKey.current ??= createIdempotencyKey("programme.generate", clientId);
     setGeneration((state) => ({ ...state, busy: true, error: null }));
     try {
       const result = await requestApi("/api/v1/programmes/generate", programmeReviewSchema, {
         body: parsed.data,
-        idempotencyKey: generationKey.current,
+        idempotencyKey: keys.current.keyFor("programme.generate", clientId, parsed.data),
         method: "POST",
       });
-      generationKey.current = null;
+      keys.current.clear("programme.generate", clientId);
       setGeneration({ busy: false, error: null, result: result.data });
     } catch (error: unknown) {
       setGeneration({ busy: false, error: toApiClientError(error), result: null });
@@ -325,15 +318,14 @@ export function ClientDetailPage({ clientId }: { readonly clientId: string }): R
 
   async function runAccountability(): Promise<void> {
     const input = runAccountabilityRequestSchema.parse({ clientId });
-    accountabilityKey.current ??= createIdempotencyKey("accountability.run", clientId);
     setAccountability((state) => ({ ...state, busy: true, error: null }));
     try {
       const result = await requestApi("/api/v1/accountability/run", accountabilityDetailSchema, {
         body: input,
-        idempotencyKey: accountabilityKey.current,
+        idempotencyKey: keys.current.keyFor("accountability.run", clientId, input),
         method: "POST",
       });
-      accountabilityKey.current = null;
+      keys.current.clear("accountability.run", clientId);
       setAccountability({ busy: false, error: null, result: result.data });
       resource.reload();
     } catch (error: unknown) {

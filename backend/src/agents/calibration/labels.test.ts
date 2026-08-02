@@ -6,7 +6,7 @@ import { calibrationLabelsSchema } from "./labels.js";
 describe("calibration labels", () => {
   it("validates hand labels and enforces generator/judge independence", async () => {
     const text = await readFile(
-      new URL("../../../../fixtures/calibration/labels.json", import.meta.url),
+      new URL("../../../resources/calibration/labels.json", import.meta.url),
       "utf8",
     );
     const value: unknown = JSON.parse(text);

@@ -17,6 +17,8 @@ interface VersionRow extends Record<string, unknown> {
   readonly migration_version: string | null;
 }
 
+const defaultMaximumConnections = 32;
+
 export class PostgresDatabaseAdapter implements DatabaseAdapter {
   readonly capabilities: DatabaseCapabilities = {
     advisoryLocks: true,
@@ -40,7 +42,7 @@ export class PostgresDatabaseAdapter implements DatabaseAdapter {
     const client = postgres(connectionString, {
       connect_timeout: 10,
       idle_timeout: 20,
-      max: 10,
+      max: defaultMaximumConnections,
       max_lifetime: 60 * 30,
       prepare: false,
       ...options,

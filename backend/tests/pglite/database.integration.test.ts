@@ -1,7 +1,7 @@
 import { count, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { DEMO_ANCHOR, demoSeedDataset } from "../../../fixtures/demo/index.js";
+import { DEMO_ANCHOR, demoSeedDataset } from "../../resources/demo/index.js";
 import {
   ClientRepository,
   ContextRepository,

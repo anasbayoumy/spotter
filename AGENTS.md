@@ -16,8 +16,8 @@ These rules apply to the entire repository.
 - `backend/` is a server-only modular package imported by those adapters; it is not a second
   deployable.
 - `client-frontend/` is the Expo client application and communicates only through REST contracts.
-- `packages/contracts` contains cross-surface Zod schemas. UI packages must never import backend
-  internals.
+- `backend/packages/contracts` contains cross-surface Zod schemas. UI packages must never import
+  backend internals.
 - PostgreSQL 16 with pgvector in Docker is the authoritative integration database. PGlite is limited
   to fast tests and the keyless demo adapter.
 - Every V1 programme and adjustment requires coach approval before client visibility.

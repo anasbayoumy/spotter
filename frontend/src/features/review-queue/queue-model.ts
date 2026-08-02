@@ -75,7 +75,7 @@ export function buildQueueItems(
       clientId: adjustment.clientId,
       createdAt: adjustment.createdAt,
       finding: adjustmentFinding(adjustment),
-      href: `/clients/${adjustment.clientId}`,
+      href: `/adjustments/${adjustment.id}`,
       id: adjustment.id,
       kind: "adjustment",
       title: `Adjustment · v${String(adjustment.version)}`,

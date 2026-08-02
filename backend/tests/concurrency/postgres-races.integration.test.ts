@@ -2,7 +2,7 @@ import type { ActualExercise } from "@spotter/contracts";
 import { and, count, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { DEMO_COACH_ID, demoSeedDataset } from "../../../fixtures/demo/index.js";
+import { DEMO_COACH_ID, demoSeedDataset } from "../../resources/demo/index.js";
 import {
   ApplicationError,
   CreateCheckIn,
@@ -16,6 +16,7 @@ import {
   PostgresDatabaseAdapter,
   PublishProgrammeTransaction,
   accountabilityStates,
+  adjustments,
   adjustmentTriggers,
   checkIns,
   clients,
@@ -36,6 +37,7 @@ import {
 import {
   BufferedAgentAuditRepository,
   DrizzleAccountabilityRepository,
+  DrizzleAdjustmentRepository,
   DrizzleAdjustmentTriggerRepository,
   DrizzleApplicationIdempotencyRepository,
   DrizzleCheckInRepository,
@@ -275,6 +277,21 @@ describe("authoritative PostgreSQL race invariants", () => {
     const release = deferred();
     const done = adapter.client.begin(async (transaction) => {
       await transaction`SELECT id FROM sessions WHERE id = ${sessionId} FOR UPDATE`;
+      acquired.resolve();
+      await release.promise;
+    });
+    await acquired.promise;
+    return { done, release: release.resolve };
+  }
+
+  async function holdAdjustmentRow(adjustmentId: string): Promise<{
+    readonly done: Promise<unknown>;
+    readonly release: () => void;
+  }> {
+    const acquired = deferred();
+    const release = deferred();
+    const done = adapter.client.begin(async (transaction) => {
+      await transaction`SELECT id FROM adjustments WHERE id = ${adjustmentId} FOR UPDATE`;
       acquired.resolve();
       await release.promise;
     });
@@ -929,5 +946,136 @@ describe("authoritative PostgreSQL race invariants", () => {
     expect(storedSessions).toHaveLength(1);
     expect(claims).toHaveLength(1);
     expect(claims[0]?.state).toBe("completed");
+  });
+
+  it("serializes competing adjustment edits and preserves one audited version", async () => {
+    const fixture = await createFixture(13, "published");
+    const adjustmentId = uuid(901_399);
+    await adapter.database.insert(adjustments).values({
+      baseProgrammeId: fixture.programmeId,
+      clientId: fixture.clientId,
+      generatedBy: fixture.runId,
+      id: adjustmentId,
+      operations: [
+        {
+          exerciseId,
+          rationale: "Initial synthetic proposal.",
+          setsToRemove: 1,
+          type: "reduce_volume",
+        },
+      ],
+      reviewBand: "clear",
+      sourceEventKey: `adjustment-race:${adjustmentId}`,
+      status: "queued",
+      trigger: { coachId: DEMO_COACH_ID, type: "explicit_coach" },
+      version: 1,
+    });
+    const blocker = await holdAdjustmentRow(adjustmentId);
+    const repository = new DrizzleAdjustmentRepository(
+      adapter,
+      new BufferedAgentAuditRepository(adapter.database),
+    );
+    const attempts = [1, 2].map((setsToRemove) =>
+      outcome(
+        repository.edit({
+          adjustmentId,
+          context: {
+            actorId: DEMO_COACH_ID,
+            effectiveAt,
+            idempotencyKey: `adjustment-edit-${String(setsToRemove)}`,
+            requestId: `request-adjustment-edit-${String(setsToRemove)}`,
+          },
+          expectedVersion: 1,
+          operations: [
+            {
+              exerciseId,
+              rationale: `Synthetic edit ${String(setsToRemove)}.`,
+              setsToRemove,
+              type: "reduce_volume",
+            },
+          ],
+          reason: `Coach chose edit ${String(setsToRemove)}.`,
+        }),
+      ),
+    );
+    await waitForLockWaiters(2);
+    blocker.release();
+    await blocker.done;
+    const results = await Promise.all(attempts);
+
+    expect(results.filter((result) => result.ok)).toHaveLength(1);
+    expect(results.filter((result) => codeOf(result) === "version_conflict")).toHaveLength(1);
+    const [stored, actions] = await Promise.all([
+      adapter.database.query.adjustments.findFirst({
+        where: eq(adjustments.id, adjustmentId),
+      }),
+      adapter.database
+        .select()
+        .from(coachActions)
+        .where(eq(coachActions.adjustmentId, adjustmentId)),
+    ]);
+    expect(stored?.version).toBe(2);
+    expect(stored?.status).toBe("queued");
+    expect(actions).toHaveLength(1);
+    expect(actions[0]?.action).toBe("edited");
+  });
+
+  it("serializes blocked adjustment overrides as one reasoned publication", async () => {
+    const fixture = await createFixture(14, "published");
+    const adjustmentId = uuid(901_499);
+    await adapter.database.insert(adjustments).values({
+      baseProgrammeId: fixture.programmeId,
+      clientId: fixture.clientId,
+      generatedBy: fixture.runId,
+      id: adjustmentId,
+      operations: [
+        {
+          exerciseId,
+          rationale: "Blocked synthetic proposal.",
+          setsToRemove: 1,
+          type: "reduce_volume",
+        },
+      ],
+      reviewBand: "blocked",
+      sourceEventKey: `adjustment-override-race:${adjustmentId}`,
+      status: "queued",
+      trigger: { coachId: DEMO_COACH_ID, type: "explicit_coach" },
+      version: 1,
+    });
+    const blocker = await holdAdjustmentRow(adjustmentId);
+    const repository = new DrizzleAdjustmentRepository(
+      adapter,
+      new BufferedAgentAuditRepository(adapter.database),
+    );
+    const attempts = [1, 2].map((discriminator) =>
+      outcome(
+        repository.approve({
+          adjustmentId,
+          approval: "override",
+          context: {
+            actorId: DEMO_COACH_ID,
+            effectiveAt,
+            idempotencyKey: `adjustment-override-${String(discriminator)}`,
+            requestId: `request-adjustment-override-${String(discriminator)}`,
+          },
+          expectedVersion: 1,
+          reason: `Coach accepted blocked finding ${String(discriminator)}.`,
+        }),
+      ),
+    );
+    await waitForLockWaiters(2);
+    blocker.release();
+    await blocker.done;
+    const results = await Promise.all(attempts);
+
+    expect(results.filter((result) => result.ok)).toHaveLength(1);
+    expect(results.filter((result) => codeOf(result) === "version_conflict")).toHaveLength(1);
+    const actions = await adapter.database
+      .select()
+      .from(coachActions)
+      .where(eq(coachActions.adjustmentId, adjustmentId));
+    expect(actions).toHaveLength(1);
+    expect(actions[0]).toMatchObject({ action: "overrode_block" });
+    expect(actions[0]?.reason).toMatch(/^Coach accepted blocked finding [12]\.$/u);
   });
 });

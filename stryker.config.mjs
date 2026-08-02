@@ -1,7 +1,10 @@
 /** @type {import("@stryker-mutator/api/core").PartialStrykerOptions} */
 const config = {
   checkers: ["typescript"],
+  concurrency: 2,
   coverageAnalysis: "perTest",
+  disableBail: true,
+  ignorePatterns: ["/.cache", "/artifacts", "/client-frontend", "/coverage", "/frontend"],
   plugins: ["@stryker-mutator/typescript-checker", "@stryker-mutator/vitest-runner"],
   mutate: [
     "backend/src/domain/**/*.ts",
@@ -19,6 +22,7 @@ const config = {
   timeoutMS: 15_000,
   vitest: {
     configFile: "backend/vitest.mutation.config.ts",
+    related: false,
   },
 };
 

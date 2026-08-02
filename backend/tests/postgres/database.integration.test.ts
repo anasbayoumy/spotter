@@ -1,9 +1,10 @@
 import { count, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { DEMO_ANCHOR, DEMO_COACH_ID, demoSeedDataset } from "../../../fixtures/demo/index.js";
+import { DEMO_ANCHOR, DEMO_COACH_ID, demoSeedDataset } from "../../resources/demo/index.js";
 import {
   ClientRepository,
+  DrizzleClientReadRepository,
   PostgresDatabaseAdapter,
   coaches,
   contextTraces,
@@ -54,6 +55,17 @@ describe("authoritative PostgreSQL database", () => {
     expect(programmeCount?.value).toBe(7);
     expect(await clients.listActiveSynthetic()).toHaveLength(7);
     expect(await clients.hasActiveNonSyntheticData()).toBe(false);
+  });
+
+  it("loads the seeded client detail through PostgreSQL query semantics", async () => {
+    const detail = await new DrizzleClientReadRepository(adapter.database).getDetail(
+      "00000000-0000-4000-8000-000000000101",
+      DEMO_ANCHOR,
+    );
+
+    expect(detail).toMatchObject({
+      client: { id: "00000000-0000-4000-8000-000000000101" },
+    });
   });
 
   it("enforces publication approval metadata in PostgreSQL", async () => {

@@ -83,8 +83,13 @@ export function InlineStatus({
   readonly children: ReactNode;
   readonly tone?: "danger" | "info" | "success" | "warning";
 }): React.JSX.Element {
+  const danger = tone === "danger";
   return (
-    <div aria-live="polite" className={`inline-status inline-status--${tone}`} role="status">
+    <div
+      aria-live={danger ? "assertive" : "polite"}
+      className={`inline-status inline-status--${tone}`}
+      role={danger ? "alert" : "status"}
+    >
       {children}
     </div>
   );

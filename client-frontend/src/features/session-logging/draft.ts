@@ -24,9 +24,11 @@ const exerciseDraftSchema = z
 export const sessionDraftSchema = z
   .object({
     completeKey: z.string().min(8).max(128),
+    completePayloadFingerprint: z.string().nullable().default(null),
     exercises: z.array(exerciseDraftSchema).max(limits.exercisesPerDay),
     expectedVersion: z.number().int().min(1),
     logKey: z.string().min(8).max(128),
+    logPayloadFingerprint: z.string().nullable().default(null),
     notes: z.string().max(limits.longText),
     performedAt: z.string().nullable(),
     sessionRpe: z.string().max(10),
@@ -54,6 +56,7 @@ export function createSessionDraft(session: Session): SessionDraft {
   );
   return {
     completeKey: createIdempotencyKey("session-complete", session.id),
+    completePayloadFingerprint: null,
     exercises: session.planned.map((exercise) => {
       const recorded = actualByExercise.get(exercise.id);
       return {
@@ -78,6 +81,7 @@ export function createSessionDraft(session: Session): SessionDraft {
     }),
     expectedVersion: session.version,
     logKey: createIdempotencyKey("session-log", session.id),
+    logPayloadFingerprint: null,
     notes: session.notes ?? "",
     performedAt: null,
     sessionRpe: session.rpe === null ? "" : String(session.rpe),

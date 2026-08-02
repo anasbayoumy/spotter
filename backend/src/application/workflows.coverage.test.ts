@@ -16,11 +16,18 @@ import {
 import { describe, expect, it, vi } from "vitest";
 
 import { DomainError } from "../domain/index.js";
-import { ApproveAdjustment, GenerateAdjustment, RejectAdjustment } from "./adjustments.js";
+import {
+  ApproveAdjustment,
+  EditAdjustmentProposal,
+  GenerateAdjustment,
+  OverrideBlockedAdjustment,
+  RejectAdjustment,
+} from "./adjustments.js";
 import {
   ApplicationError,
   type ExecutionContext,
   type FingerprintPort,
+  type IdempotencyClaim,
   type IdempotencyPort,
 } from "./core.js";
 import type {
@@ -193,6 +200,26 @@ function idempotency(): IdempotencyPort {
   };
 }
 
+class CompletedReplayIdempotency implements IdempotencyPort {
+  public constructor(private readonly storedValue: unknown) {}
+
+  public claim<T>(): Promise<IdempotencyClaim<T>> {
+    return Promise.resolve({
+      kind: "completed",
+      recordId: ids.run,
+      value: structuredClone(this.storedValue) as T,
+    });
+  }
+
+  public complete(): Promise<void> {
+    return Promise.reject(new Error("A completed replay must not complete again."));
+  }
+
+  public fail(): Promise<void> {
+    return Promise.reject(new Error("A completed replay must not fail."));
+  }
+}
+
 interface IdempotentDependencies {
   readonly idempotency: IdempotencyPort;
   readonly fingerprint: FingerprintPort;
@@ -223,6 +250,7 @@ function adjustmentPort(overrides: Partial<AdjustmentPort> = {}): AdjustmentPort
       }),
     queueGenerated: () => Promise.resolve(queuedAdjustment),
     get: () => Promise.resolve(queuedAdjustment),
+    edit: () => Promise.resolve(queuedAdjustment),
     approve: () => Promise.resolve(publishedProgramme),
     reject: () => Promise.resolve({ ...queuedAdjustment, status: "rejected" }),
     ...overrides,
@@ -398,15 +426,15 @@ describe("programme workflow edge coverage", () => {
       },
       audit: { recordFailure },
     });
-    await expect(
-      new GenerateProgramme(dependencies).execute(
-        { clientId: ids.client, targetWeekStart: "2026-08-03" },
-        context,
-      ),
-    ).rejects.toMatchObject({
+    const execution = new GenerateProgramme(dependencies).execute(
+      { clientId: ids.client, targetWeekStart: "2026-08-03" },
+      context,
+    );
+    await expect(execution).rejects.toMatchObject({
       code: "model_output_invalid",
       message: "Programme output did not match the required schema.",
     });
+    await expect(execution).rejects.toHaveProperty("cause", expect.any(Error));
     expect(recordFailure).toHaveBeenCalledWith({
       kind: "programme",
       traceId: ids.trace,
@@ -638,6 +666,59 @@ describe("programme workflow edge coverage", () => {
 });
 
 describe("adjustment workflow edge coverage", () => {
+  it("edits an adjustment through the idempotent boundary", async () => {
+    const edit = vi
+      .fn<AdjustmentPort["edit"]>()
+      .mockResolvedValue({ ...queuedAdjustment, version: 2 });
+    const scopes: string[] = [];
+    const useCase = new EditAdjustmentProposal(adjustmentPort({ edit }), {
+      fingerprint,
+      idempotency: {
+        claim: (input) => {
+          scopes.push(input.scope);
+          return Promise.resolve({ kind: "claimed", recordId: ids.run });
+        },
+        complete: () => Promise.resolve(),
+        fail: () => Promise.resolve(),
+      },
+    });
+    const operations = [
+      {
+        type: "reduce_volume" as const,
+        exerciseId: ids.exercise,
+        setsToRemove: 1,
+        rationale: "Retain the synthetic session with less volume.",
+      },
+    ];
+    await expect(
+      useCase.execute(
+        ids.adjustment,
+        { expectedVersion: 1, operations, reason: "Coach edited the proposal." },
+        context,
+      ),
+    ).resolves.toMatchObject({ version: 2 });
+    expect(scopes).toEqual(["adjustment.edit"]);
+    expect(edit).toHaveBeenCalledWith({
+      adjustmentId: ids.adjustment,
+      expectedVersion: 1,
+      operations,
+      reason: "Coach edited the proposal.",
+      context,
+    });
+  });
+
+  it("rejects structurally invalid adjustment edits before persistence", async () => {
+    const edit = vi.fn<AdjustmentPort["edit"]>();
+    await expect(
+      new EditAdjustmentProposal(adjustmentPort({ edit }), idempotent()).execute(
+        ids.adjustment,
+        { expectedVersion: 1, operations: [] },
+        context,
+      ),
+    ).rejects.toThrow();
+    expect(edit).not.toHaveBeenCalled();
+  });
+
   it("generates and queues a reviewed adjustment", async () => {
     await expect(
       new GenerateAdjustment(generationDependencies()).execute({ clientId: ids.client }, context),
@@ -720,6 +801,65 @@ describe("adjustment workflow edge coverage", () => {
         context,
       ),
     ).resolves.toMatchObject({ status: "rejected" });
+  });
+
+  it("fails ordinary blocked approval and permits only a reasoned blocked override", async () => {
+    const blocked = { ...queuedAdjustment, reviewBand: "blocked" as const };
+    await expect(
+      new ApproveAdjustment(
+        adjustmentPort({ get: () => Promise.resolve(blocked) }),
+        idempotent(),
+      ).execute(ids.adjustment, { expectedVersion: 1 }, context),
+    ).rejects.toMatchObject({ code: "blocked_requires_override" });
+
+    await expect(
+      new OverrideBlockedAdjustment(adjustmentPort(), idempotent()).executeOverride(
+        ids.adjustment,
+        { expectedVersion: 1, reason: "Not blocked" },
+        context,
+      ),
+    ).rejects.toMatchObject({ code: "invalid_state_transition" });
+
+    const approve = vi
+      .fn<AdjustmentPort["approve"]>()
+      .mockResolvedValue({ ...publishedProgramme, reviewBand: "blocked" });
+    const useCase = new OverrideBlockedAdjustment(
+      adjustmentPort({ get: () => Promise.resolve(blocked), approve }),
+      idempotent(),
+    );
+    await expect(
+      useCase.executeOverride(ids.adjustment, { expectedVersion: 1, reason: "  " }, context),
+    ).rejects.toMatchObject({ code: "override_reason_required" });
+    await expect(
+      useCase.executeOverride(
+        ids.adjustment,
+        { expectedVersion: 1, reason: "  Coach accepts the blocked finding.  " },
+        context,
+      ),
+    ).resolves.toMatchObject({ status: "published" });
+    expect(approve).toHaveBeenCalledWith({
+      adjustmentId: ids.adjustment,
+      approval: "override",
+      context,
+      expectedVersion: 1,
+      reason: "Coach accepts the blocked finding.",
+    });
+  });
+
+  it("replays a completed adjustment override before rechecking mutated state", async () => {
+    const get = vi.fn<AdjustmentPort["get"]>();
+    const replayed = { ...publishedProgramme, reviewBand: "blocked" as const };
+    await expect(
+      new OverrideBlockedAdjustment(adjustmentPort({ get }), {
+        fingerprint,
+        idempotency: new CompletedReplayIdempotency(replayed),
+      }).executeOverride(
+        ids.adjustment,
+        { expectedVersion: 1, reason: "Coach accepts the blocked finding." },
+        context,
+      ),
+    ).resolves.toEqual(replayed);
+    expect(get).not.toHaveBeenCalled();
   });
 });
 

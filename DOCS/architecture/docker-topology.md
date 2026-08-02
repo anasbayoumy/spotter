@@ -3,8 +3,8 @@
 ## Principles
 
 - There is one server deployable: the Next.js application in `frontend/` (`SYS-003`).
-- `backend/` runs in that process as a server-only imported package; Compose must not define a
-  backend service (`SYS-004`).
+- `backend/` runs inside each supervised Next worker as a server-only imported package; Compose must
+  not define a backend service (`SYS-004`).
 - Docker PostgreSQL + pgvector is authoritative for integration and release verification.
 - PGlite remains available for fast isolated tests and a keyless, Docker-free demo.
 - Expo native tooling runs on the host/simulator and calls the same Next REST API.
@@ -23,6 +23,13 @@ The root `compose.yaml` defines:
 
 There is no `backend`, Redis, broker, worker, or production notification service. Optional tooling
 cannot be required by the main stack.
+
+The single `web` container has one lightweight Node cluster primary and exactly two Next workers,
+matching its fixed two-CPU allocation. The primary owns deployment-wide request windows and
+generation concurrency through bounded, fail-closed IPC, so adding a worker does not multiply the
+documented limits. Worker crashes are replaced only while the container is running normally; once
+shutdown starts, the primary forwards the signal, never respawns, and enforces an 18-second bound
+inside Compose's 20-second grace period.
 
 ## Dependency and readiness order
 
@@ -65,8 +72,8 @@ The web Dockerfile uses a multi-stage build:
 
 1. dependency stage installs the frozen pnpm lockfile;
 2. build stage runs required code generation and `next build`;
-3. runtime stage contains only the standalone Next output, required workspace runtime files, and a
-   non-root user.
+3. runtime stage contains only the standalone Next output, cluster/admission/resource entrypoints,
+   required workspace runtime files, and a non-root user.
 
 The build context is `app/` because Next must bundle `backend/` and shared packages. `.dockerignore`
 excludes `.git`, local data, coverage, test artifacts, Expo build output, caches, secrets, and host
@@ -85,8 +92,9 @@ global Drizzle version is prohibited.
 4. web readiness after migration;
 5. representative REST health/read/write flow;
 6. pgvector extension availability;
-7. concurrency invariants for publication, idempotency, jobs, and nudge suppression; and
-8. clean shutdown/restart with persisted development data.
+7. concurrency invariants for publication, idempotency, jobs, and nudge suppression;
+8. exactly one primary plus two discoverable workers with deployment-wide admission semantics; and
+9. clean bounded cluster shutdown/restart with persisted development data.
 
 `pnpm verify:full` includes Docker verification. PGlite-only success cannot satisfy a release
 (`DAT-001`, `OPS-005`).

@@ -11,9 +11,9 @@
     "test:unit": "vitest run src",
     "test:contract": "vitest run tests/contract",
     "test:e2e:web": "playwright test --config tests/e2e/playwright.config.ts",
-    "test:a11y": "vitest run tests/accessibility",
-    "test:performance": "vitest run tests/performance",
+    "test:a11y": "playwright test --config tests/accessibility/playwright.config.ts",
     "test:resilience": "vitest run tests/resilience",
+    "test:security": "vitest run tests/security",
     "coverage:changed": "vitest run src --coverage"
   },
   "dependencies": {
@@ -30,6 +30,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.11.0",
     "@tailwindcss/postcss": "4.3.3",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "7.0.0",

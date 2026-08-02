@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DEMO_ANCHOR, demoSeedDataset } from "../../../fixtures/demo/index.js";
+import { DEMO_ANCHOR, demoSeedDataset } from "../../resources/demo/index.js";
 import {
   DatabaseInvariantError,
   DrizzleUnitOfWork,
@@ -136,6 +136,7 @@ class PublicationConflictPgliteUnitOfWork implements UnitOfWork {
 
 class NonAdvisoryTracingPgliteUnitOfWork implements UnitOfWork {
   public sawAdvisoryLock = false;
+  public sawCandidateRowLock = false;
   public sawPublishedSlotRowLock = false;
   public readonly capabilities: DatabaseCapabilities = {
     advisoryLocks: false,
@@ -152,6 +153,12 @@ class NonAdvisoryTracingPgliteUnitOfWork implements UnitOfWork {
       vi.spyOn(database, "execute").mockImplementation((statement) => {
         const rendered = renderedSql(statement);
         if (rendered.includes("pg_advisory_xact_lock")) this.sawAdvisoryLock = true;
+        if (
+          rendered.includes("SELECT id FROM programmes WHERE id") &&
+          rendered.includes("FOR UPDATE")
+        ) {
+          this.sawCandidateRowLock = true;
+        }
         if (rendered.includes("status = 'published'") && rendered.includes("FOR UPDATE")) {
           this.sawPublishedSlotRowLock = true;
         }
@@ -260,6 +267,7 @@ describe("PGlite programme publication coverage", () => {
     await expectDatabaseError(
       publisher.execute(command({ candidateProgrammeId: missingId })),
       "not_found",
+      "Programme does not exist.",
     );
     expect(
       await adapter.database.query.idempotencyRecords.findFirst({
@@ -274,6 +282,7 @@ describe("PGlite programme publication coverage", () => {
     await expectDatabaseError(
       publisher.execute(command({ candidateProgrammeId: PUBLISHED_PROGRAMME_ID })),
       "invalid_state_transition",
+      "Only a queued programme can be published.",
     );
   });
 
@@ -311,6 +320,7 @@ describe("PGlite programme publication coverage", () => {
       publisher.execute(command({ candidateProgrammeId: CANDIDATE_ID })),
     ).resolves.toEqual({ programmeId: CANDIDATE_ID, status: "published" });
     expect(unitOfWork.sawAdvisoryLock).toBe(false);
+    expect(unitOfWork.sawCandidateRowLock).toBe(true);
     expect(unitOfWork.sawPublishedSlotRowLock).toBe(true);
   });
 
@@ -320,6 +330,7 @@ describe("PGlite programme publication coverage", () => {
     await expectDatabaseError(
       publisher.execute(command({ approval: "override" })),
       "override_reason_required",
+      "Override requires a non-empty reason.",
     );
     await expectDatabaseError(
       publisher.execute(
@@ -333,6 +344,7 @@ describe("PGlite programme publication coverage", () => {
         }),
       ),
       "override_reason_required",
+      "Override requires a non-empty reason.",
     );
   });
 
@@ -457,7 +469,12 @@ describe("PGlite programme publication coverage", () => {
       ],
     });
 
-    await expectDatabaseError(publisher.execute(publish), "publication_conflict");
+    const publicationError = await expectDatabaseError(
+      publisher.execute(publish),
+      "publication_conflict",
+      "Another publication won this programme slot.",
+    );
+    expect(isUniqueViolation(publicationError.cause)).toBe(true);
 
     const previous = await adapter.database.query.programmes.findFirst({
       where: eq(programmes.id, PUBLISHED_PROGRAMME_ID),

@@ -72,6 +72,7 @@
     },
     "test:mutation": {
       "cache": false,
+      "dependsOn": ["^build"],
       "outputs": ["reports/mutation/**"]
     },
     "test:e2e:web": {

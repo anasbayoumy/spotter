@@ -13,7 +13,7 @@ const manifestSchema = z
 
 async function recordings(): Promise<readonly unknown[]> {
   const text = await readFile(
-    new URL("../../../../fixtures/recordings/recordings.json", import.meta.url),
+    new URL("../../../resources/recordings/recordings.json", import.meta.url),
     "utf8",
   );
   const value: unknown = JSON.parse(text);

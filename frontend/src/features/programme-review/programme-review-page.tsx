@@ -10,33 +10,19 @@ import {
   type ProgrammePayload,
   type ProgrammeReview,
 } from "@spotter/contracts";
-import {
-  Ban,
-  Check,
-  CircleAlert,
-  ExternalLink,
-  PencilLine,
-  Save,
-  ShieldCheck,
-  ShieldX,
-  X,
-} from "lucide-react";
+import { Ban, Check, ExternalLink, PencilLine, Save, ShieldCheck, ShieldX, X } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 
 import { BandBadge } from "../../components/ui/band-badge";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
+import { ConfirmationDialog } from "../../components/ui/confirmation-dialog";
 import { DefinitionList } from "../../components/ui/definition-list";
 import { PageHeader } from "../../components/ui/page-header";
 import { EmptyState, ErrorState, InlineStatus, LoadingState } from "../../components/ui/states";
-import {
-  ApiClientError,
-  createIdempotencyKey,
-  requestApi,
-  toApiClientError,
-  type ApiResult,
-} from "../../lib/api/client";
+import { ApiClientError, requestApi, toApiClientError, type ApiResult } from "../../lib/api/client";
+import { PayloadIdempotencyRegistry } from "../../lib/api/idempotency";
 import { useResource } from "../../lib/api/use-resource";
 import { formatDateTime, formatLabel } from "../../lib/format";
 
@@ -79,6 +65,7 @@ function ProgrammeDisplay({ payload }: { readonly payload: ProgrammePayload }): 
                     <th scope="col">Exercise</th>
                     <th scope="col">Sets</th>
                     <th scope="col">Reps</th>
+                    <th scope="col">Load</th>
                     <th scope="col">RPE</th>
                     <th scope="col">Rest</th>
                   </tr>
@@ -95,6 +82,11 @@ function ProgrammeDisplay({ payload }: { readonly payload: ProgrammePayload }): 
                         {typeof exercise.reps === "number"
                           ? exercise.reps
                           : `${String(exercise.reps.min)}–${String(exercise.reps.max)}`}
+                      </td>
+                      <td>
+                        {exercise.loadKg === undefined || exercise.loadKg === null
+                          ? "—"
+                          : `${String(exercise.loadKg)} kg`}
                       </td>
                       <td>{exercise.rpe}</td>
                       <td>
@@ -215,6 +207,39 @@ function ProgrammeEditor({
                     }}
                     type="number"
                     value={exercise.sets}
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor={`load-${exercise.id}`}>Load kg</label>
+                  <input
+                    id={`load-${exercise.id}`}
+                    min={0}
+                    onChange={(event) => {
+                      const loadKg =
+                        event.currentTarget.value === "" ? null : event.currentTarget.valueAsNumber;
+                      setPayload((current) => ({
+                        ...current,
+                        days: current.days.map((currentDay) =>
+                          currentDay.dayIndex === day.dayIndex
+                            ? {
+                                ...currentDay,
+                                exercises: currentDay.exercises.map((currentExercise) =>
+                                  currentExercise.id === exercise.id
+                                    ? {
+                                        ...currentExercise,
+                                        loadKg,
+                                      }
+                                    : currentExercise,
+                                ),
+                              }
+                            : currentDay,
+                        ),
+                      }));
+                    }}
+                    placeholder="Not prescribed"
+                    step="0.25"
+                    type="number"
+                    value={exercise.loadKg ?? ""}
                   />
                 </div>
                 <div className="field">
@@ -375,61 +400,52 @@ function ConfirmationPanel({
 }: ConfirmationPanelProps): React.JSX.Element {
   const [reason, setReason] = useState("");
   const requiresReason = kind === "override";
+  const title =
+    kind === "approve"
+      ? "Publish this programme?"
+      : kind === "reject"
+        ? "Reject this proposal?"
+        : "Override the safety block?";
+  const description =
+    kind === "approve"
+      ? "This becomes the client-visible current plan and supersedes the prior version."
+      : kind === "reject"
+        ? "The proposal leaves the actionable queue and cannot later be approved."
+        : "This publishes a blocked plan. Your written reason is retained in the audit trail.";
   return (
-    <div className={`confirmation-panel confirmation-panel--${kind}`}>
-      <CircleAlert aria-hidden="true" size={19} />
-      <div>
-        <strong>
-          {kind === "approve"
-            ? "Publish this programme?"
-            : kind === "reject"
-              ? "Reject this proposal?"
-              : "Override the safety block?"}
-        </strong>
-        <p>
-          {kind === "approve"
-            ? "This becomes the client-visible current plan and supersedes the prior version."
-            : kind === "reject"
-              ? "The proposal leaves the actionable queue and cannot later be approved."
-              : "This publishes a blocked plan. Your written reason is retained in the audit trail."}
-        </p>
-        {kind === "approve" ? null : (
-          <div className="field">
-            <label htmlFor={`${kind}-reason`}>
-              {requiresReason ? "Override reason" : "Rejection reason (optional)"}
-            </label>
-            <textarea
-              aria-invalid={requiresReason && reason.trim().length === 0}
-              id={`${kind}-reason`}
-              maxLength={1000}
-              onChange={(event) => {
-                setReason(event.currentTarget.value);
-              }}
-              value={reason}
-            />
-          </div>
-        )}
-        <div className="form-actions">
-          <Button onClick={onCancel} variant="ghost">
-            Cancel
-          </Button>
-          <Button
-            busy={busy}
-            disabled={requiresReason && reason.trim().length === 0}
-            onClick={() => {
-              void onConfirm(reason);
+    <ConfirmationDialog
+      busy={busy}
+      confirmDisabled={requiresReason && reason.trim().length === 0}
+      confirmLabel={
+        kind === "approve"
+          ? "Confirm publication"
+          : kind === "reject"
+            ? "Confirm rejection"
+            : "Publish with override"
+      }
+      description={description}
+      kind={kind}
+      onCancel={onCancel}
+      onConfirm={() => void onConfirm(reason)}
+      title={title}
+    >
+      {kind === "approve" ? null : (
+        <div className="field">
+          <label htmlFor={`${kind}-reason`}>
+            {requiresReason ? "Override reason" : "Rejection reason (optional)"}
+          </label>
+          <textarea
+            aria-invalid={requiresReason && reason.trim().length === 0}
+            id={`${kind}-reason`}
+            maxLength={1000}
+            onChange={(event) => {
+              setReason(event.currentTarget.value);
             }}
-            variant={kind === "approve" ? "primary" : "danger"}
-          >
-            {kind === "approve"
-              ? "Confirm publication"
-              : kind === "reject"
-                ? "Confirm rejection"
-                : "Publish with override"}
-          </Button>
+            value={reason}
+          />
         </div>
-      </div>
-    </div>
+      )}
+    </ConfirmationDialog>
   );
 }
 
@@ -442,17 +458,9 @@ function ReviewWorkspace({
   const [editing, setEditing] = useState(false);
   const [confirmation, setConfirmation] = useState<Confirmation>(null);
   const [mutation, setMutation] = useState<MutationState>(idleMutation);
-  const keys = useRef(new Map<string, string>());
+  const keys = useRef(new PayloadIdempotencyRegistry());
   const actionable = review.programme.status === "queued";
   const blocked = review.programme.reviewBand === "blocked";
-
-  function keyFor(action: string): string {
-    const existing = keys.current.get(action);
-    if (existing !== undefined) return existing;
-    const created = createIdempotencyKey(`programme.${action}`, review.programme.id);
-    keys.current.set(action, created);
-    return created;
-  }
 
   async function save(payload: ProgrammePayload, reason: string): Promise<void> {
     const input = editProgrammeRequestSchema.safeParse({
@@ -481,11 +489,11 @@ function ReviewWorkspace({
         programmeReviewSchema,
         {
           body: input.data,
-          idempotencyKey: keyFor("edit"),
+          idempotencyKey: keys.current.keyFor("programme.edit", review.programme.id, input.data),
           method: "PATCH",
         },
       );
-      keys.current.delete("edit");
+      keys.current.clear("programme.edit", review.programme.id);
       setReview(result.data);
       setEditing(false);
       setMutation({
@@ -528,11 +536,15 @@ function ReviewWorkspace({
         programmeSchema,
         {
           body: input.data,
-          idempotencyKey: keyFor(action),
+          idempotencyKey: keys.current.keyFor(
+            `programme.${action}`,
+            review.programme.id,
+            input.data,
+          ),
           method: "POST",
         },
       );
-      keys.current.delete(action);
+      keys.current.clear(`programme.${action}`, review.programme.id);
       setReview((current) => ({ ...current, programme: result.data }));
       setConfirmation(null);
       setMutation({

@@ -167,7 +167,7 @@ export function ReviewQueuePage(): React.JSX.Element {
           action={
             <Link
               className="button button--secondary"
-              href="/clients/00000000-0000-0000-0000-000000000101"
+              href="/clients/00000000-0000-4000-8000-000000000101"
             >
               Open client c_001
             </Link>

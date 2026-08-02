@@ -1,6 +1,14 @@
 import { createHash } from "node:crypto";
 
 import type { AgentIntent } from "../context/types";
+import { documentedExerciseEquivalences } from "../../domain/exercise-equivalences";
+
+const documentedSwapCatalogue = documentedExerciseEquivalences
+  .map(
+    (equivalence) =>
+      `${equivalence.id} | source=${equivalence.sourceFamily} | replacement=${equivalence.replacementName} | family=${equivalence.replacementFamily}`,
+  )
+  .join("\n");
 
 const prompts = {
   programme: `You draft one weekly coaching programme from the supplied context only.
@@ -11,7 +19,10 @@ claim. You cannot approve or publish the programme.`,
   adjustment: `You draft a programme adjustment from the supplied context only.
 Return only enumerated load reduction, volume reduction, or documented equivalent swap operations.
 Never increase load, volume, frequency, or intensity. Never set auto-apply behavior. Cite supplied
-section and record IDs. You cannot approve, apply, or publish the adjustment.`,
+section and record IDs. You cannot approve, apply, or publish the adjustment.
+For swap_exercise, use only one exact ID/source/replacement/family tuple from this code-owned
+catalogue; never invent or alter an equivalence:
+${documentedSwapCatalogue}`,
   accountability: `You draft wording for the deterministic accountability tier supplied by code.
 You may draft a tier-1 client nudge, tier-2 reduced-plan offer, or tier-3 coach context brief only.
 Do not choose or lower a tier, resume automation, contact tier 4, diagnose, or invent history. Cite

@@ -1,0 +1,36 @@
+{
+  "entries": [
+    {
+      "pattern": "**/*.d.ts",
+      "reason": "TypeScript declaration files contain no executable runtime behavior."
+    },
+    {
+      "pattern": "**/*.test.{ts,tsx}",
+      "reason": "Test implementations are verification inputs, not owned production source."
+    },
+    {
+      "pattern": "**/__tests__/**",
+      "reason": "Test implementations are verification inputs, not owned production source."
+    },
+    {
+      "pattern": "**/generated/**",
+      "reason": "Generated outputs are reproducibility-checked by pnpm verify:generated."
+    },
+    {
+      "pattern": "backend/src/infrastructure/database/schema.ts",
+      "reason": "This file is an exhaustive Drizzle schema constant: its executable-looking callbacks declare tables, indexes, and SQL constraints rather than application branches. Migration and database integration tests verify the resulting schema and constraint behavior."
+    },
+    {
+      "pattern": "backend/src/cli/demo.ts",
+      "reason": "This top-level framework bootstrap delegates to environment contract tests, PGlite migration/seed/health integration tests, and the Docker smoke flow that executes the demo lifecycle."
+    },
+    {
+      "pattern": "backend/src/cli/migrate.ts",
+      "reason": "This top-level framework bootstrap only dispatches by parsed database mode; PGlite migration integration tests and the Docker migration service verify both delegated release paths."
+    },
+    {
+      "pattern": "backend/src/cli/seed.ts",
+      "reason": "This top-level framework bootstrap delegates policy enforcement to environment contract tests and persistence to seed integration tests plus the Docker seed/smoke services."
+    }
+  ]
+}

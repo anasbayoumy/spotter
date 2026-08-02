@@ -8,6 +8,7 @@ export const checkInDraftSchema = z
   .object({
     body: z.string().max(limits.longText),
     idempotencyKey: z.string().min(8).max(128),
+    payloadFingerprint: z.string().nullable().default(null),
     readiness: z.number().int().min(1).max(5).nullable(),
     respondedAt: z.string().nullable(),
   })
@@ -22,6 +23,7 @@ export function createCheckInDraft(clientId: string): CheckInDraft {
   return {
     body: "",
     idempotencyKey: createIdempotencyKey("check-in", clientId),
+    payloadFingerprint: null,
     readiness: null,
     respondedAt: null,
   };

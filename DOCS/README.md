@@ -9,9 +9,8 @@ This directory is the canonical source of truth for implementation and verificat
 3. Architecture Decision Records for deliberate refinements.
 4. Code and generated artifacts.
 
-The original discovery documents in `/Users/anas/franz-agents/DOCS` were read-only inputs. Their
-intended behavior is normalized here so contributors do not have to resolve contradictory drafts
-independently.
+The original discovery documents were read-only inputs. Their intended behavior is normalized here
+so contributors do not have to resolve contradictory drafts independently.
 
 ## Canonical sections
 

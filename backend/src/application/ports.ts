@@ -2,6 +2,7 @@ import type {
   AccountabilityModelOutput,
   Adjustment,
   AdjustmentModelOutput,
+  AdjustmentOperation,
   AdjustmentTrigger,
   CheckIn,
   ClientDetail,
@@ -147,8 +148,16 @@ export interface AdjustmentPort {
     readonly context: ExecutionContext;
   }): Promise<Adjustment>;
   get(adjustmentId: string): Promise<Adjustment | undefined>;
+  edit(input: {
+    readonly adjustmentId: string;
+    readonly expectedVersion: number;
+    readonly operations: readonly AdjustmentOperation[];
+    readonly reason: string | undefined;
+    readonly context: ExecutionContext;
+  }): Promise<Adjustment>;
   approve(input: {
     readonly adjustmentId: string;
+    readonly approval: "standard" | "override";
     readonly expectedVersion: number;
     readonly reason: string | undefined;
     readonly context: ExecutionContext;

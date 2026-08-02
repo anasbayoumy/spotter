@@ -1,5 +1,6 @@
 import {
   adjustmentModelOutputSchema,
+  editAdjustmentRequestSchema,
   adjustmentSchema,
   gateResultSchema,
   judgeResultSchema,
@@ -135,7 +136,7 @@ export class GenerateAdjustment {
   }
 }
 
-export class ApproveAdjustment {
+export class EditAdjustmentProposal {
   public constructor(
     private readonly adjustments: AdjustmentPort,
     private readonly idempotent: IdempotentDependencies,
@@ -143,33 +144,105 @@ export class ApproveAdjustment {
 
   public async execute(
     adjustmentId: string,
-    input: { readonly expectedVersion: number; readonly reason?: string },
+    input: z.infer<typeof editAdjustmentRequestSchema>,
     context: ExecutionContext,
-  ): Promise<Programme> {
-    const current = await this.adjustments.get(adjustmentId);
-    if (current === undefined)
-      throw new ApplicationError("not_found", "Adjustment does not exist.");
-    if (current.version !== input.expectedVersion)
-      throw new ApplicationError("version_conflict", "Adjustment version changed.");
-    if (current.status !== "queued")
-      throw new ApplicationError(
-        "invalid_state_transition",
-        "Only queued adjustments can be approved.",
-      );
+  ): Promise<Adjustment> {
+    const parsed = editAdjustmentRequestSchema.parse(input);
     const result = await executeIdempotently(
       this.idempotent,
       context,
-      "adjustment.approve",
-      { adjustmentId, ...input },
+      "adjustment.edit",
+      { adjustmentId, ...parsed },
       () =>
-        this.adjustments.approve({
+        this.adjustments.edit({
           adjustmentId,
-          expectedVersion: input.expectedVersion,
-          reason: input.reason,
+          expectedVersion: parsed.expectedVersion,
+          operations: parsed.operations,
+          reason: parsed.reason,
           context,
         }),
     );
+    return adjustmentSchema.parse(result);
+  }
+}
+
+export class ApproveAdjustment {
+  public constructor(
+    protected readonly adjustments: AdjustmentPort,
+    protected readonly idempotent: IdempotentDependencies,
+  ) {}
+
+  public async execute(
+    adjustmentId: string,
+    input: { readonly expectedVersion: number; readonly reason?: string },
+    context: ExecutionContext,
+  ): Promise<Programme> {
+    return this.publish("standard", adjustmentId, input, context);
+  }
+
+  protected async publish(
+    approval: "standard" | "override",
+    adjustmentId: string,
+    input: { readonly expectedVersion: number; readonly reason?: string },
+    context: ExecutionContext,
+  ): Promise<Programme> {
+    const reason = input.reason?.trim();
+    if (approval === "override") {
+      if (reason === undefined || reason.length === 0) {
+        throw new ApplicationError(
+          "override_reason_required",
+          "Adjustment override requires a reason.",
+        );
+      }
+    }
+    const result = await executeIdempotently(
+      this.idempotent,
+      context,
+      `adjustment.${approval}`,
+      { adjustmentId, approval, expectedVersion: input.expectedVersion, reason },
+      async () => {
+        const current = await this.adjustments.get(adjustmentId);
+        if (current === undefined)
+          throw new ApplicationError("not_found", "Adjustment does not exist.");
+        if (current.version !== input.expectedVersion)
+          throw new ApplicationError("version_conflict", "Adjustment version changed.");
+        if (current.status !== "queued")
+          throw new ApplicationError(
+            "invalid_state_transition",
+            "Only queued adjustments can be approved.",
+          );
+        if (approval === "standard" && current.reviewBand === "blocked") {
+          throw new ApplicationError(
+            "blocked_requires_override",
+            "Blocked adjustment requires an override.",
+          );
+        }
+        if (approval === "override" && current.reviewBand !== "blocked") {
+          throw new ApplicationError(
+            "invalid_state_transition",
+            "Only blocked adjustments can be overridden.",
+          );
+        }
+        return this.adjustments.approve({
+          adjustmentId,
+          approval,
+          expectedVersion: input.expectedVersion,
+          reason,
+          context,
+        });
+      },
+    );
     return programmeSchema.parse(result);
+  }
+}
+
+export class OverrideBlockedAdjustment extends ApproveAdjustment {
+  public executeOverride(
+    adjustmentId: string,
+    input: { readonly expectedVersion: number; readonly reason: string },
+    context: ExecutionContext,
+  ): Promise<Programme> {
+    return this.publish("override", adjustmentId, input, context);
   }
 }
 

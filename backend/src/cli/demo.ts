@@ -1,6 +1,6 @@
 import { parseServerEnvironment } from "@spotter/config";
 
-import { demoSeedDataset } from "../../../fixtures/demo/index.js";
+import { demoSeedDataset } from "../../resources/demo/index.js";
 import {
   PgliteDatabaseAdapter,
   migratePgliteDatabase,

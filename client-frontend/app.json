@@ -6,8 +6,16 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "plugins": ["expo-router"],
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "asyncRoutes": {
+            "web": "production"
+          }
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     },

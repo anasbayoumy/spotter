@@ -3,13 +3,15 @@ import { fileURLToPath } from "node:url";
 
 import { parseServerEnvironment, type ServerEnvironment } from "@spotter/config";
 import { z } from "zod";
-import pino, { type Logger } from "pino";
+import pino, { type DestinationStream, type Logger, type LoggerOptions } from "pino";
 
-import { demoSeedDataset } from "../../../fixtures/demo/index";
+import { demoSeedDataset } from "../../resources/demo/index";
 import { RunAccountabilityForClient } from "../application/accountability";
 import {
   ApproveAdjustment,
+  EditAdjustmentProposal,
   GenerateAdjustment,
+  OverrideBlockedAdjustment,
   RejectAdjustment,
 } from "../application/adjustments";
 import {
@@ -90,27 +92,43 @@ export interface CreateBackendOptions {
   readonly seed?: boolean;
 }
 
-function defaultLogger(environment: ServerEnvironment): Logger {
-  return pino({
+export function createApplicationLogger(
+  environment: ServerEnvironment,
+  destination?: DestinationStream,
+): Logger {
+  const options: LoggerOptions = {
+    base: null,
     level: environment.LOG_LEVEL,
     redact: {
       censor: "[REDACTED]",
       paths: [
+        "AI_API_KEY",
+        "CRON_SECRET",
+        "DATABASE_URL",
+        "apiKey",
         "authorization",
         "cronSecret",
+        "databaseUrl",
+        "headers.authorization",
+        "headers.cookie",
+        "headers['x-cron-secret']",
         "request.headers.authorization",
         "request.headers.cookie",
+        "request.headers['x-cron-secret']",
+        "responseBody",
+        "providerResponse",
         "checkInText",
         "notes",
         "prompt",
       ],
     },
-  });
+  };
+  return destination === undefined ? pino(options) : pino(options, destination);
 }
 
 async function recordingsFromDisk(): Promise<readonly unknown[]> {
   const location = fileURLToPath(
-    new URL("../../../fixtures/recordings/recordings.json", import.meta.url),
+    new URL("../../resources/recordings/recordings.json", import.meta.url),
   );
   const parsed = recordingFileSchema.parse(JSON.parse(await readFile(location, "utf8")));
   return parsed.recordings;
@@ -130,7 +148,7 @@ async function createAdapter(
 
 export async function createBackend(options: CreateBackendOptions = {}): Promise<BackendRuntime> {
   const environment = options.environment ?? parseServerEnvironment(process.env);
-  const logger = options.logger ?? defaultLogger(environment);
+  const logger = options.logger ?? createApplicationLogger(environment);
   const migrationsFolder = options.migrationsFolder ?? environment.MIGRATIONS_DIR;
   const adapter = options.adapter ?? (await createAdapter(environment, migrationsFolder));
   if (options.adapter !== undefined) {
@@ -225,6 +243,7 @@ export async function createBackend(options: CreateBackendOptions = {}): Promise
       runAccountability,
       jobs,
     ),
+    editAdjustment: new EditAdjustmentProposal(adjustments, { fingerprint, idempotency }),
     editProgramme: new EditProgrammeProposal({ evaluation, programmes, traces }),
     generateAdjustment: new GenerateAdjustment(adjustmentDependencies),
     generateProgramme,
@@ -242,6 +261,7 @@ export async function createBackend(options: CreateBackendOptions = {}): Promise
     listSessions: new ListSessions(sessions),
     logSession: new LogSessionWork(sessions, { fingerprint, idempotency }),
     overrideProgramme: new OverrideBlockedProgramme(programmes, { fingerprint, idempotency }),
+    overrideAdjustment: new OverrideBlockedAdjustment(adjustments, { fingerprint, idempotency }),
     rejectAdjustment: new RejectAdjustment(adjustments, { fingerprint, idempotency }),
     rejectProgramme: new RejectProgramme(programmes, { fingerprint, idempotency }),
     runAccountability,

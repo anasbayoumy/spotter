@@ -21,6 +21,7 @@ import {
 } from "../../features/session-logging/draft";
 import { clientApi } from "../../lib/api/client";
 import { ApiClientError, isStaleConflict } from "../../lib/api/errors";
+import { bindKeyToPayload } from "../../lib/api/idempotency";
 import { queryClient } from "../../lib/query/client";
 import { sharedStyles, theme } from "../../theme";
 
@@ -32,7 +33,7 @@ function firstParam(value: string | readonly string[] | undefined): string | nul
 export default function SessionRoute(): ReactElement {
   const params = useLocalSearchParams<{ sessionId?: string | string[] }>();
   const sessionId = firstParam(params.sessionId);
-  const { clientId } = useClientSelection();
+  const { clientId, loading: selectionLoading } = useClientSelection();
   const [draft, setDraft] = useState<SessionDraft | null>(null);
   const [draftReady, setDraftReady] = useState(false);
   const [storageError, setStorageError] = useState<string | null>(null);
@@ -82,6 +83,13 @@ export default function SessionRoute(): ReactElement {
     };
   }, [draft, draftReady, sessionId]);
 
+  if (selectionLoading) {
+    return (
+      <Screen title="Log session">
+        <Notice live title="Loading client selection" />
+      </Screen>
+    );
+  }
   if (clientId === null) return <Redirect href="/select-client" />;
   const session = sessionQuery.data;
   const belongsToSelection = session === undefined || session.clientId === clientId;
@@ -131,12 +139,40 @@ export default function SessionRoute(): ReactElement {
     setSubmitError(null);
     setSubmitting(true);
     try {
-      const logged = await clientApi.logSession(sessionId, validation.data.log, stableDraft.logKey);
-      await clientApi.completeSession(
+      const logKey = bindKeyToPayload(
+        stableDraft.logKey,
+        stableDraft.logPayloadFingerprint,
+        "session-log",
         sessionId,
-        { ...validation.data.completion, expectedVersion: logged.version },
-        stableDraft.completeKey,
+        validation.data.log,
       );
+      let attemptedDraft = {
+        ...stableDraft,
+        logKey: logKey.key,
+        logPayloadFingerprint: logKey.fingerprint,
+      };
+      setDraft(attemptedDraft);
+      await saveSessionDraft(sessionId, attemptedDraft);
+      const logged = await clientApi.logSession(sessionId, validation.data.log, logKey.key);
+      const completionInput = {
+        ...validation.data.completion,
+        expectedVersion: logged.version,
+      };
+      const completeKey = bindKeyToPayload(
+        attemptedDraft.completeKey,
+        attemptedDraft.completePayloadFingerprint,
+        "session-complete",
+        sessionId,
+        completionInput,
+      );
+      attemptedDraft = {
+        ...attemptedDraft,
+        completeKey: completeKey.key,
+        completePayloadFingerprint: completeKey.fingerprint,
+      };
+      setDraft(attemptedDraft);
+      await saveSessionDraft(sessionId, attemptedDraft);
+      await clientApi.completeSession(sessionId, completionInput, completeKey.key);
       setCompleted(true);
       try {
         await clearSessionDraft(sessionId);
@@ -206,14 +242,18 @@ export default function SessionRoute(): ReactElement {
           {Object.values(validationErrors).slice(0, 3).join(" ")}
         </Notice>
       )}
-      {session === undefined || draft === null || !belongsToSelection || completed ? null : (
+      {session === undefined ||
+      draft === null ||
+      !belongsToSelection ||
+      completed ||
+      session.status === "completed" ? null : (
         <>
           {session.planned.map((planned, exerciseIndex) => {
             const exerciseDraft = draft.exercises[exerciseIndex];
             if (exerciseDraft === undefined) return null;
             return (
               <Card
-                eyebrow={`${String(planned.sets)} sets · planned RPE ${String(planned.rpe)}`}
+                eyebrow={`${String(planned.sets)} sets · planned RPE ${String(planned.rpe)}${planned.loadKg === undefined || planned.loadKg === null ? "" : ` · ${String(planned.loadKg)} kg prescribed`}`}
                 key={planned.id}
                 title={planned.name}
               >
@@ -223,6 +263,12 @@ export default function SessionRoute(): ReactElement {
                     ? String(planned.reps)
                     : `${String(planned.reps.min)}–${String(planned.reps.max)}`}
                 </Text>
+                {planned.loadKg === undefined || planned.loadKg === null ? null : (
+                  <Text style={sharedStyles.caption}>
+                    Prescribed load: {String(planned.loadKg)} kg. Record the load actually used
+                    below.
+                  </Text>
+                )}
                 {exerciseDraft.sets.map((set, setIndex) => (
                   <View key={set.setIndex} style={styles.setCard}>
                     <View style={styles.setHeading}>

@@ -1,7 +1,6 @@
 # Spotter V1 Product Requirements
 
-This directory is the canonical product contract for the implementation under
-`/Users/anas/franz-agents/app`.
+This directory is the canonical product contract for the implementation at the repository root.
 
 ## Authority
 

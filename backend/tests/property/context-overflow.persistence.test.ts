@@ -1,7 +1,7 @@
 import { and, count, desc, eq, gt } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { DEMO_ANCHOR, demoSeedDataset } from "../../../fixtures/demo/index";
+import { DEMO_ANCHOR, demoSeedDataset } from "../../resources/demo/index";
 import { GenerateProgramme } from "../../src/application/programmes";
 import type {
   AgentAuditPort,

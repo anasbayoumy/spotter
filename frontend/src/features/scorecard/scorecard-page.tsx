@@ -60,11 +60,17 @@ function Distribution({
         <strong>{formatLabel(name)}</strong>
         <span>{total} scores</span>
       </div>
-      <div aria-label={`${formatLabel(name)} score distribution`} className="distribution__bars">
+      <div
+        aria-label={`${formatLabel(name)} score distribution: ${values
+          .map((value, index) => `rating ${String(index + 1)}, ${String(value)} scores`)
+          .join("; ")}`}
+        className="distribution__bars"
+        role="img"
+      >
         {values.map((value, index) => (
           <div key={`${name}:${String(index + 1)}`}>
             <span
-              aria-label={`${String(value)} scores rated ${String(index + 1)}`}
+              aria-hidden="true"
               style={{
                 height: `${String(value === 0 ? 0 : Math.max(5, Math.round((value / max) * 100)))}%`,
               }}
@@ -156,7 +162,21 @@ export function ScorecardPage(): React.JSX.Element {
                           : `${String(Math.round(metric.value * 100))}%`}
                       </span>
                     </div>
-                    <div aria-label={`${formatLabel(name)} pass rate`} className="metric-track">
+                    <div
+                      aria-label={`${formatLabel(name)} pass rate`}
+                      aria-valuemax={100}
+                      aria-valuemin={0}
+                      aria-valuenow={
+                        metric.value === null ? undefined : Math.round(metric.value * 100)
+                      }
+                      aria-valuetext={
+                        metric.value === null
+                          ? "Unavailable"
+                          : `${String(Math.round(metric.value * 100))} percent`
+                      }
+                      className="metric-track"
+                      role="progressbar"
+                    >
                       <span
                         style={{
                           width: `${String(metric.value === null ? 0 : Math.round(metric.value * 100))}%`,

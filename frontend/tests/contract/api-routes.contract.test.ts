@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import { apiContracts, apiResponseSchema, type ProgrammePayload } from "@spotter/contracts";
 import { z } from "zod";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
@@ -9,6 +11,8 @@ import { GET as getAccountability } from "../../src/app/api/v1/accountability/[c
 import { POST as runAccountability } from "../../src/app/api/v1/accountability/run/route";
 import { POST as approveAdjustment } from "../../src/app/api/v1/adjustments/[adjustmentId]/approve/route";
 import { POST as rejectAdjustment } from "../../src/app/api/v1/adjustments/[adjustmentId]/reject/route";
+import { POST as overrideAdjustment } from "../../src/app/api/v1/adjustments/[adjustmentId]/override/route";
+import { PATCH as editAdjustment } from "../../src/app/api/v1/adjustments/[adjustmentId]/route";
 import { POST as generateAdjustment } from "../../src/app/api/v1/adjustments/generate/route";
 import { GET as listAdjustments } from "../../src/app/api/v1/adjustments/route";
 import { POST as createCheckIn } from "../../src/app/api/v1/check-ins/route";
@@ -36,7 +40,6 @@ import { GET as getTrace } from "../../src/app/api/v1/traces/[traceId]/route";
 
 const clientHealthy = "00000000-0000-4000-8000-000000000101";
 const clientConstrained = "00000000-0000-4000-8000-000000000102";
-const clientExpired = "00000000-0000-4000-8000-000000000103";
 const clientSparse = "00000000-0000-4000-8000-000000000105";
 const clientDisengaged = "00000000-0000-4000-8000-000000000106";
 const clientAdjustment = "00000000-0000-4000-8000-000000000107";
@@ -45,6 +48,7 @@ const programmeBlocked = "00000000-0000-4000-8000-000000000602";
 const programmeSparse = "00000000-0000-4000-8000-000000000606";
 const sessionHealthy = "00000000-0000-4000-8000-000000000701";
 const adjustmentQueued = "00000000-0000-4000-8000-000000001001";
+const adjustmentBlocked = "00000000-0000-4000-8000-000000001002";
 const traceHealthy = "00000000-0000-4000-8000-000000000201";
 const exerciseId = "00000000-0000-4000-8000-000000000301";
 
@@ -83,7 +87,7 @@ describe.sequential("the complete REST route inventory", () => {
       CRON_SECRET: "contract-cron-secret",
       DATABASE_MODE: "pglite",
       DATA_POLICY: "synthetic_only",
-      MIGRATIONS_DIR: "../backend/migrations",
+      MIGRATIONS_DIR: path.resolve(import.meta.dirname, "../../../backend/migrations"),
       PGLITE_DATA_DIR: "memory://",
     });
   });
@@ -124,6 +128,8 @@ describe.sequential("the complete REST route inventory", () => {
       ).json(),
     );
     expect(today.error).toBeNull();
+    if (today.error !== null) throw new Error(today.error.message);
+    expect(today.data.nextSession).toMatchObject({ id: sessionHealthy, status: "scheduled" });
 
     const messages = apiContracts.clients.messages.output.parse(
       await (
@@ -162,6 +168,12 @@ describe.sequential("the complete REST route inventory", () => {
       ).json(),
     );
     expect(sessions.error).toBeNull();
+    if (sessions.error !== null) throw new Error(sessions.error.message);
+    expect(sessions.data).toHaveLength(2);
+    expect(sessions.data.map((item) => [item.id, item.status])).toEqual([
+      ["00000000-0000-4000-8000-000000000708", "missed"],
+      [sessionHealthy, "scheduled"],
+    ]);
 
     const session = apiContracts.sessions.detail.output.parse(
       await (
@@ -191,6 +203,17 @@ describe.sequential("the complete REST route inventory", () => {
       ).json(),
     );
     expect(accountability.error).toBeNull();
+    if (accountability.error !== null) throw new Error(accountability.error.message);
+    expect(accountability.data.state).toMatchObject({
+      automationPaused: true,
+      owner: "coach",
+      tier: 3,
+    });
+    expect(
+      accountability.data.messages.some(
+        (message) => message.actor === "agent" && message.status === "sent",
+      ),
+    ).toBe(false);
 
     const trace = apiContracts.traces.detail.output.parse(
       await (
@@ -379,7 +402,7 @@ describe.sequential("the complete REST route inventory", () => {
     expect(apiContracts.programmes.reject.output.parse(await rejected.json()).error).toBeNull();
 
     const generatedRequest = {
-      clientId: clientExpired,
+      clientId: clientHealthy,
       targetWeekStart: "2026-08-10",
     };
     const generatedResponse = await generateProgramme(
@@ -436,17 +459,99 @@ describe.sequential("the complete REST route inventory", () => {
     expect(rejected.status).toBe(200);
     expect(apiContracts.adjustments.reject.output.parse(await rejected.json()).error).toBeNull();
 
+    const editedResponse = await editAdjustment(
+      jsonRequest(
+        `/api/v1/adjustments/${adjustmentQueued}`,
+        "PATCH",
+        {
+          expectedVersion: 1,
+          operations: [
+            {
+              exerciseId,
+              percent: 25,
+              rationale: "Retain the synthetic session with less prescribed load.",
+              type: "reduce_load",
+            },
+          ],
+          reason: "Coach selected a smaller synthetic session.",
+        },
+        "adjustment-edit-001",
+      ),
+      routeContext("adjustmentId", adjustmentQueued),
+    );
+    expect(editedResponse.status).toBe(200);
+    const edited = apiContracts.adjustments.edit.output.parse(await editedResponse.json());
+    expect(edited.error).toBeNull();
+    if (edited.error !== null) throw new Error(edited.error.message);
+    expect(edited.data).toMatchObject({
+      appliedProgrammeId: null,
+      status: "queued",
+      version: 2,
+    });
+
     const applied = await approveAdjustment(
       jsonRequest(
         `/api/v1/adjustments/${adjustmentQueued}/approve`,
         "POST",
-        { expectedVersion: 1, reason: "Synthetic readiness reduction." },
+        { expectedVersion: edited.data.version, reason: "Synthetic readiness reduction." },
         "adjustment-approve-001",
       ),
       routeContext("adjustmentId", adjustmentQueued),
     );
     expect(applied.status).toBe(200);
-    expect(apiContracts.adjustments.approve.output.parse(await applied.json()).error).toBeNull();
+    const appliedEnvelope = apiContracts.adjustments.approve.output.parse(await applied.json());
+    expect(appliedEnvelope.error).toBeNull();
+    if (appliedEnvelope.error !== null) throw new Error(appliedEnvelope.error.message);
+    expect(appliedEnvelope.data.payload.days[0]?.exercises[0]).toMatchObject({
+      loadKg: 30,
+      rpe: 7,
+      sets: 4,
+    });
+  });
+
+  it("fails closed on blocked adjustment approval and publishes only by reasoned override", async () => {
+    const blocked = await approveAdjustment(
+      jsonRequest(
+        `/api/v1/adjustments/${adjustmentBlocked}/approve`,
+        "POST",
+        { expectedVersion: 1, reason: "Ordinary approval must not bypass the band." },
+        "adjustment-blocked-standard-001",
+      ),
+      routeContext("adjustmentId", adjustmentBlocked),
+    );
+    expect(blocked.status).toBe(422);
+    expect(apiContracts.adjustments.approve.output.parse(await blocked.json()).error?.code).toBe(
+      "blocked_requires_override",
+    );
+
+    const overrideRequest = jsonRequest(
+      `/api/v1/adjustments/${adjustmentBlocked}/override`,
+      "POST",
+      { expectedVersion: 1, reason: "Coach accepts the documented blocked finding." },
+      "adjustment-blocked-override-001",
+    );
+    const overridden = await overrideAdjustment(
+      overrideRequest.clone(),
+      routeContext("adjustmentId", adjustmentBlocked),
+    );
+    expect(overridden.status).toBe(200);
+    const envelope = apiContracts.adjustments.override.output.parse(await overridden.json());
+    expect(envelope.error).toBeNull();
+    if (envelope.error !== null) throw new Error(envelope.error.message);
+    expect(envelope.data.payload.days[0]?.exercises[0]).toMatchObject({
+      loadKg: 40,
+      rpe: 7,
+      sets: 3,
+    });
+
+    const replayed = await overrideAdjustment(
+      overrideRequest,
+      routeContext("adjustmentId", adjustmentBlocked),
+    );
+    const replayedEnvelope = apiContracts.adjustments.override.output.parse(await replayed.json());
+    expect(replayedEnvelope.error).toBeNull();
+    if (replayedEnvelope.error !== null) throw new Error(replayedEnvelope.error.message);
+    expect(replayedEnvelope.data.id).toBe(envelope.data.id);
   });
 
   it("runs accountability and both protected scheduled jobs", async () => {
@@ -459,9 +564,54 @@ describe.sequential("the complete REST route inventory", () => {
       ),
     );
     expect(accountabilityResponse.status).toBe(200);
+    const firstAccountability = apiContracts.accountability.run.output.parse(
+      await accountabilityResponse.json(),
+    );
+    expect(firstAccountability.error).toBeNull();
+    if (firstAccountability.error !== null) throw new Error(firstAccountability.error.message);
+    expect(firstAccountability.data.state).toMatchObject({ owner: "automation", tier: 1 });
     expect(
-      apiContracts.accountability.run.output.parse(await accountabilityResponse.json()).error,
-    ).toBeNull();
+      firstAccountability.data.messages.filter((message) => message.status === "sent"),
+    ).toHaveLength(1);
+
+    const replay = await runAccountability(
+      jsonRequest(
+        "/api/v1/accountability/run",
+        "POST",
+        { clientId: clientHealthy, effectiveAt: "2026-08-03T09:00:00.000Z" },
+        "accountability-run-001",
+      ),
+    );
+    const replayedAccountability = apiContracts.accountability.run.output.parse(
+      await replay.json(),
+    );
+    expect(replayedAccountability.data).toEqual(firstAccountability.data);
+    if (replayedAccountability.error !== null)
+      throw new Error(replayedAccountability.error.message);
+    expect(
+      replayedAccountability.data.messages.filter((message) => message.status === "sent"),
+    ).toHaveLength(1);
+
+    const freshRetry = await runAccountability(
+      jsonRequest(
+        "/api/v1/accountability/run",
+        "POST",
+        { clientId: clientHealthy, effectiveAt: "2026-08-03T09:00:00.000Z" },
+        "accountability-run-002",
+      ),
+    );
+    const suppressedAccountability = apiContracts.accountability.run.output.parse(
+      await freshRetry.json(),
+    );
+    expect(suppressedAccountability.error).toBeNull();
+    if (suppressedAccountability.error !== null)
+      throw new Error(suppressedAccountability.error.message);
+    expect(
+      suppressedAccountability.data.messages.filter((message) => message.status === "sent"),
+    ).toHaveLength(1);
+    expect(
+      suppressedAccountability.data.messages.filter((message) => message.status === "suppressed"),
+    ).toHaveLength(1);
 
     const weeklyResponse = await runWeeklyJob(
       jsonRequest(
@@ -573,7 +723,12 @@ describe.sequential("the complete REST route inventory", () => {
         method: "POST",
       }),
     );
-    expect(oversized.status).toBe(400);
+    expect(oversized.status).toBe(413);
+    const oversizedEnvelope = apiContracts.checkIns.create.output.parse(await oversized.json());
+    expect(oversizedEnvelope.error).toMatchObject({
+      code: "validation_failed",
+      message: "Request body exceeds the configured limit.",
+    });
   });
 
   it("returns 404 for well-formed unknown resources", async () => {

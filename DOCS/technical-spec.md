@@ -33,7 +33,7 @@ and maps the typed result to HTTP. It contains no coaching policy, SQL, model in
 transaction management.
 
 The Expo application and browser code never import backend internals. Their only shared executable
-boundary is `packages/contracts`.
+boundary is `backend/packages/contracts`.
 
 ## Required workspaces
 
@@ -41,12 +41,13 @@ boundary is `packages/contracts`.
 frontend/
 backend/
 client-frontend/
-packages/contracts/
-packages/config/
-packages/design-tokens/
-packages/testkit/
-fixtures/
-tests/
+backend/packages/contracts/
+backend/packages/config/
+backend/packages/design-tokens/
+backend/packages/testkit/
+backend/resources/
+backend/infra/
+backend/tooling/
 ```
 
 ### Backend layers

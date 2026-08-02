@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { NavigationLink } from "./navigation-link";
 
-const baselineClientId = "00000000-0000-0000-0000-000000000101";
+const baselineClientId = "00000000-0000-4000-8000-000000000101";
 
 export function CoachShell({ children }: { readonly children: ReactNode }): React.JSX.Element {
   return (

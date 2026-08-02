@@ -58,17 +58,20 @@ published programme version. Completion may not be moved backward by an ordinary
 
 ### Adjustments and accountability
 
-| Endpoint                                         | Backend use case             | Product result                                                          |
-| ------------------------------------------------ | ---------------------------- | ----------------------------------------------------------------------- |
-| `POST /api/v1/adjustments/generate`              | `GenerateAdjustment`         | Idempotently draft/evaluate a proposal against current context.         |
-| `GET /api/v1/adjustments?clientId=&status=`      | `ListAdjustments`            | Bounded proposal/history query.                                         |
-| `POST /api/v1/adjustments/:adjustmentId/approve` | `ApproveAdjustment`          | Publish a safe new coach-approved programme version.                    |
-| `POST /api/v1/adjustments/:adjustmentId/reject`  | `RejectAdjustment`           | Record rejection without changing the current programme.                |
-| `GET /api/v1/accountability/:clientId`           | `GetAccountabilityState`     | Latest score evidence, tier, owner, messages/tasks, history summary.    |
-| `POST /api/v1/accountability/run`                | `RunAccountabilityForClient` | Idempotently score, transition, suppress/send/draft as policy requires. |
+| Endpoint                                          | Backend use case             | Product result                                                           |
+| ------------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------ |
+| `POST /api/v1/adjustments/generate`               | `GenerateAdjustment`         | Idempotently draft/evaluate a proposal against current context.          |
+| `GET /api/v1/adjustments?clientId=&status=`       | `ListAdjustments`            | Bounded proposal/history query.                                          |
+| `PATCH /api/v1/adjustments/:adjustmentId`         | `EditAdjustmentProposal`     | Version and audit an allowed pending operation list without applying it. |
+| `POST /api/v1/adjustments/:adjustmentId/approve`  | `ApproveAdjustment`          | Publish a safe new coach-approved programme version.                     |
+| `POST /api/v1/adjustments/:adjustmentId/override` | `OverrideBlockedAdjustment`  | Require a reason and publish only an explicitly blocked adjustment.      |
+| `POST /api/v1/adjustments/:adjustmentId/reject`   | `RejectAdjustment`           | Record rejection without changing the current programme.                 |
+| `GET /api/v1/accountability/:clientId`            | `GetAccountabilityState`     | Latest score evidence, tier, owner, messages/tasks, history summary.     |
+| `POST /api/v1/accountability/run`                 | `RunAccountabilityForClient` | Idempotently score, transition, suppress/send/draft as policy requires.  |
 
-Approval fails if the adjustment was generated from a programme that is no longer current. There is
-no `autoApply` input or endpoint in V1.
+Approval fails if the adjustment was generated from a programme that is no longer current. Ordinary
+approval also fails closed for a blocked review band; only the explicit reasoned override endpoint
+may publish it. There is no `autoApply` input or endpoint in V1.
 
 ### Traces and jobs
 

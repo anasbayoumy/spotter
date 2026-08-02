@@ -232,7 +232,7 @@ Every client is explicitly classified `synthetic | non_synthetic`; the safe data
 - startup requires `ALLOW_NO_AUTH_SYNTHETIC_DEMO=true` and `DATA_POLICY=synthetic_only`;
 - bootstrap scans/rejects any active non-synthetic client;
 - client/coach queries and jobs include the synthetic scope as defense in depth; and
-- fixtures/recordings/traces are scanned for prohibited identity fields.
+- deterministic resources, recordings, and traces are scanned for prohibited identity fields.
 
 The system fails closed rather than hiding individual rows after a mixed-data database is detected
 (`PRV-002`, `PRV-003`).

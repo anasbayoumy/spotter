@@ -19,10 +19,11 @@ import {
 } from "../../features/check-in/draft";
 import { useClientSelection } from "../../features/client-selector/SelectionProvider";
 import { clientApi } from "../../lib/api/client";
+import { bindKeyToPayload } from "../../lib/api/idempotency";
 import { theme } from "../../theme";
 
 export default function CheckInRoute(): ReactElement {
-  const { clientId } = useClientSelection();
+  const { clientId, loading: selectionLoading } = useClientSelection();
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState<CheckInDraft | null>(null);
   const [draftReady, setDraftReady] = useState(false);
@@ -66,6 +67,13 @@ export default function CheckInRoute(): ReactElement {
     };
   }, [clientId, draft, draftReady]);
 
+  if (selectionLoading) {
+    return (
+      <Screen title="Check-in">
+        <Notice live title="Loading client selection" />
+      </Screen>
+    );
+  }
   if (clientId === null) return <Redirect href="/select-client" />;
 
   const submit = async (): Promise<void> => {
@@ -88,11 +96,30 @@ export default function CheckInRoute(): ReactElement {
       );
       return;
     }
+    const submissionKey = bindKeyToPayload(
+      stableDraft.idempotencyKey,
+      stableDraft.payloadFingerprint,
+      "check-in",
+      clientId,
+      validation.data,
+    );
+    const submittedDraft = {
+      ...stableDraft,
+      idempotencyKey: submissionKey.key,
+      payloadFingerprint: submissionKey.fingerprint,
+    };
+    setDraft(submittedDraft);
+    try {
+      await saveCheckInDraft(clientId, submittedDraft);
+    } catch (error) {
+      setStorageError(error instanceof Error ? error.message : "Draft could not be saved.");
+      return;
+    }
     setValidationError(null);
     setSubmitError(null);
     setSubmitting(true);
     try {
-      const response = await clientApi.checkIn(validation.data, stableDraft.idempotencyKey);
+      const response = await clientApi.checkIn(validation.data, submissionKey.key);
       setSuccess({ humanReview: response.requiresHumanEscalation });
       setDraft(createCheckInDraft(clientId));
       try {
@@ -157,6 +184,7 @@ export default function CheckInRoute(): ReactElement {
               const selected = draft.readiness === readiness;
               return (
                 <Pressable
+                  aria-checked={selected}
                   accessibilityLabel={`Readiness ${String(readiness)} of 5`}
                   accessibilityRole="radio"
                   accessibilityState={{ checked: selected }}

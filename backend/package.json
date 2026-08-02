@@ -17,7 +17,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test:unit": "vitest run --config vitest.unit.config.ts src/domain src/agents src/application src/evals src/jobs tests/property tests/pglite/publish-programme.coverage.integration.test.ts",
+    "test:unit": "vitest run --config vitest.unit.config.ts src/domain src/agents src/application src/evals src/jobs src/composition/backend-facade.coverage.test.ts src/infrastructure/database/database-error.test.ts tests/property tests/pglite/publish-programme.coverage.integration.test.ts && node --test src/infrastructure/database/database-error.runtime.test.mjs",
     "test:integration:pglite": "vitest run tests/pglite",
     "test:integration": "vitest run tests/postgres",
     "test:concurrency": "vitest run tests/concurrency",
@@ -35,10 +35,11 @@
     "drizzle-orm": "0.45.2",
     "pino": "10.3.1",
     "postgres": "3.4.9",
+    "server-only": "0.0.1",
+    "tsx": "4.23.1",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "tsx": "4.23.1",
     "typescript": "catalog:",
     "vitest": "4.0.8"
   }

@@ -5,14 +5,14 @@ testing specification may add broader coverage.
 
 ## System and deployment
 
-| ID        | Requirement                                                                                                                                 | Verification                                             |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `SYS-001` | All implementation, tests, infrastructure, fixtures, and canonical implementation documentation live under `/Users/anas/franz-agents/app`.  | Repository boundary test and CI working-directory check. |
-| `SYS-002` | The only top-level application folders are `frontend/`, `backend/`, and `client-frontend/`.                                                 | Repository structure test.                               |
-| `SYS-003` | `frontend/` is the single server deployable. It contains the coach console and `/api/v1` Next.js route adapters.                            | Build manifest and Docker topology test.                 |
-| `SYS-004` | `backend/` is a server-only modular workspace package imported by Next.js route adapters; it exposes no listener and starts no HTTP server. | Dependency test and absence-of-listener test.            |
-| `SYS-005` | `client-frontend/` is an Expo application that uses the same versioned JSON REST API as the coach console.                                  | Contract and mobile E2E tests.                           |
-| `SYS-006` | V1 uses one PostgreSQL database and introduces no Redis, message broker, or independent worker service.                                     | Compose configuration test.                              |
+| ID        | Requirement                                                                                                                                    | Verification                                             |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `SYS-001` | All implementation, tests, infrastructure, deterministic resources, and canonical implementation documentation live under the repository root. | Repository boundary test and CI working-directory check. |
+| `SYS-002` | The only top-level application folders are `frontend/`, `backend/`, and `client-frontend/`.                                                    | Repository structure test.                               |
+| `SYS-003` | `frontend/` is the single server deployable. It contains the coach console and `/api/v1` Next.js route adapters.                               | Build manifest and Docker topology test.                 |
+| `SYS-004` | `backend/` is a server-only modular workspace package imported by Next.js route adapters; it exposes no listener and starts no HTTP server.    | Dependency test and absence-of-listener test.            |
+| `SYS-005` | `client-frontend/` is an Expo application that uses the same versioned JSON REST API as the coach console.                                     | Contract and mobile E2E tests.                           |
+| `SYS-006` | V1 uses one PostgreSQL database and introduces no Redis, message broker, or independent worker service.                                        | Compose configuration test.                              |
 
 ## Boundaries and contracts
 

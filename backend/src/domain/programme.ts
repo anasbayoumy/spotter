@@ -8,6 +8,7 @@ export interface ProgrammeExercise {
   readonly name: string;
   readonly family: string;
   readonly sets: number;
+  readonly loadKg?: number | null;
   readonly rpe: number;
 }
 
@@ -71,6 +72,11 @@ function copyPayload(payload: ProgrammePayload): ProgrammePayload {
           !Number.isInteger(exercise.sets) ||
           exercise.sets < 1 ||
           exercise.sets > 20 ||
+          (exercise.loadKg !== undefined &&
+            exercise.loadKg !== null &&
+            (!Number.isFinite(exercise.loadKg) ||
+              exercise.loadKg < 0 ||
+              exercise.loadKg > 2_000)) ||
           exercise.rpe < 1 ||
           exercise.rpe > 10
         ) {

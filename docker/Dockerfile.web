@@ -11,35 +11,47 @@ WORKDIR /workspace
 
 FROM toolchain AS dependencies
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY .npmrc package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY frontend/package.json frontend/package.json
 COPY backend/package.json backend/package.json
 COPY client-frontend/package.json client-frontend/package.json
-COPY packages/contracts/package.json packages/contracts/package.json
-COPY packages/config/package.json packages/config/package.json
-COPY packages/design-tokens/package.json packages/design-tokens/package.json
-COPY packages/testkit/package.json packages/testkit/package.json
+COPY backend/packages/contracts/package.json backend/packages/contracts/package.json
+COPY backend/packages/config/package.json backend/packages/config/package.json
+COPY backend/packages/design-tokens/package.json backend/packages/design-tokens/package.json
+COPY backend/packages/testkit/package.json backend/packages/testkit/package.json
+COPY backend/tooling/assert-toolchain.mjs backend/tooling/assert-toolchain.mjs
 
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=spotter-pnpm-store,target=/pnpm/store,sharing=locked \
+  pnpm install --filter @spotter/frontend... --frozen-lockfile
 
 FROM dependencies AS build
 
 COPY . .
+RUN pnpm --filter @spotter/contracts build \
+  && pnpm --filter @spotter/design-tokens build
+RUN test -s backend/packages/contracts/dist/index.js \
+  && test -s backend/packages/design-tokens/dist/index.js \
+  && test -e frontend/node_modules/@spotter/contracts \
+  && test -e frontend/node_modules/@spotter/design-tokens
 RUN pnpm --filter @spotter/frontend build
 
-FROM node:24.11.1-bookworm-slim AS runtime
+FROM gcr.io/distroless/nodejs24-debian13:nonroot@sha256:af85d11ce7ef10172855a6e3649e3e8125b1b9e3ca41849ec2918036f05cb212 AS runtime
 
 ENV HOSTNAME=0.0.0.0
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV SPOTTER_WEB_WORKERS=2
 
 WORKDIR /app
 
 COPY --from=build --chown=node:node /workspace/frontend/.next/standalone ./
 COPY --from=build --chown=node:node /workspace/frontend/.next/static ./frontend/.next/static
-COPY --from=build --chown=node:node /workspace/frontend/public ./frontend/public
+COPY --from=build --chown=node:node /workspace/frontend/src/server/deployment-admission.mjs ./frontend/src/server/deployment-admission.mjs
+COPY --from=build --chown=node:node /workspace/docker/web-cluster.mjs ./docker/web-cluster.mjs
+COPY --from=build --chown=node:node /workspace/docker/web-worker.mjs ./docker/spotter-worker.mjs
+COPY --from=build --chown=node:node /workspace/docker/web-resource-snapshot.mjs ./docker/web-resource-snapshot.mjs
 
-USER node
+USER nonroot
 EXPOSE 3000
 
-CMD ["node", "frontend/server.js"]
+CMD ["docker/web-cluster.mjs"]

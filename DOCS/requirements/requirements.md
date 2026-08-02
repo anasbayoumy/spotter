@@ -6,7 +6,7 @@ acceptance tests or the traceability matrix.
 
 ## Scope and architecture
 
-- **SCP-001** — The implementation must live entirely under `/Users/anas/franz-agents/app`.
+- **SCP-001** — The implementation must live entirely under the repository root.
 - **SCP-002** — V1 must provide `frontend`, server-only modular `backend`, and `client-frontend`
   boundaries in one pnpm TypeScript workspace.
 - **SCP-003** — V1 must have no login, signup, user session, password, role, permission,

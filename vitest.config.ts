@@ -6,6 +6,7 @@ export default defineConfig({
     clearMocks: true,
     coverage: {
       exclude: [
+        "**/.stryker-tmp/**",
         "**/*.d.ts",
         "**/*.config.*",
         "**/generated/**",
@@ -30,7 +31,13 @@ export default defineConfig({
       },
     },
     environment: "node",
-    exclude: ["**/node_modules/**", "**/dist/**", "**/.next/**", "tests/e2e-*/**"],
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.next/**",
+      "**/.stryker-tmp/**",
+      "tests/e2e-*/**",
+    ],
     hookTimeout: 15_000,
     include: ["**/*.{test,spec}.{ts,tsx}"],
     mockReset: true,

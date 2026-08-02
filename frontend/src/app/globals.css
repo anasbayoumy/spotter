@@ -1180,7 +1180,7 @@ details.queue-group:not([open]) .queue-group__empty {
   border-radius: 8px;
   display: grid;
   gap: 12px;
-  grid-template-columns: minmax(0, 1fr) 80px 80px;
+  grid-template-columns: minmax(0, 1fr) 80px 100px 80px;
   padding: 10px;
 }
 
@@ -1376,6 +1376,17 @@ details.queue-group:not([open]) .queue-group__empty {
   font-size: 9px;
 }
 
+.confirmation-backdrop {
+  align-items: center;
+  background: rgb(15 26 22 / 0.46);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 20px;
+  position: fixed;
+  z-index: 100;
+}
+
 .confirmation-panel {
   align-items: flex-start;
   background: white;
@@ -1384,9 +1395,10 @@ details.queue-group:not([open]) .queue-group__empty {
   display: grid;
   gap: 12px;
   grid-template-columns: 20px minmax(0, 1fr);
-  margin: 16px 0;
+  margin: 0;
   max-width: 720px;
   padding: 16px;
+  width: min(720px, 100%);
 }
 
 .confirmation-panel--approve {
@@ -1415,6 +1427,43 @@ details.queue-group:not([open]) .queue-group__empty {
 
 .confirmation-panel .field {
   color: var(--ink);
+}
+
+.adjustment-operations {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.adjustment-operations li {
+  background: var(--surface-subtle);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.adjustment-operations strong,
+.adjustment-operations code {
+  display: block;
+}
+
+.adjustment-operations p {
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.adjustment-operations code {
+  color: var(--ink-muted);
+  font-size: 9px;
+  overflow-wrap: anywhere;
+}
+
+.adjustment-operation-editor {
+  display: grid;
+  gap: 12px;
 }
 
 .trace-layout {
@@ -1886,6 +1935,16 @@ details.queue-group:not([open]) .queue-group__empty {
     padding-top: 34px;
   }
 
+  .content-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .client-actions,
+  .review-sidebar,
+  .trace-sidebar {
+    position: static;
+  }
+
   .scorecard-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1938,18 +1997,6 @@ details.queue-group:not([open]) .queue-group__empty {
 
   .queue-row__meta code {
     display: none;
-  }
-
-  .client-actions {
-    position: static;
-  }
-
-  .review-sidebar {
-    position: static;
-  }
-
-  .trace-sidebar {
-    position: static;
   }
 
   .editor-exercise {

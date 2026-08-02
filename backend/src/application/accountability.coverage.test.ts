@@ -321,6 +321,14 @@ describe("critical accountability orchestration", () => {
     const setup = dependencies({ inputs: inputsByTier[tier] });
     await setup.useCase.execute(ids.client, context);
     expect(setup.recordSuccess).toHaveBeenCalled();
+    expect(setup.recordSuccess).toHaveBeenCalledWith({
+      kind: "accountability",
+      traceId: ids.trace,
+      output: output(tier),
+      gates: [passingGate],
+      judges: [judge],
+      context,
+    });
     expect(setup.assemble).toHaveBeenCalledWith({
       kind: "accountability",
       clientId: ids.client,
@@ -373,6 +381,19 @@ describe("critical accountability orchestration", () => {
     ];
     const setup = dependencies({ current: current(0, messages), inputs: inputsByTier[1] });
     await setup.useCase.execute(ids.client, context);
+    expect(setup.commitDecision).toHaveBeenCalledWith(
+      expect.objectContaining({ automatedSendAllowed: true }),
+    );
+  });
+
+  it("does not treat an unsent message as a 1970 send before the Unix epoch", async () => {
+    const effectiveAt = new Date("1969-12-30T00:00:00.000Z");
+    const preEpochContext: ExecutionContext = { ...context, effectiveAt };
+    const setup = dependencies({
+      current: current(0, [message(ids.message1, { sentAt: null })]),
+      inputs: inputsByTier[1],
+    });
+    await setup.useCase.execute(ids.client, preEpochContext);
     expect(setup.commitDecision).toHaveBeenCalledWith(
       expect.objectContaining({ automatedSendAllowed: true }),
     );

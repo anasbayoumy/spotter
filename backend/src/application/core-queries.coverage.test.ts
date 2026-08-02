@@ -366,6 +366,7 @@ function adjustmentPort(overrides: Partial<AdjustmentPort> = {}): AdjustmentPort
     resolveGenerationInput: () => Promise.resolve(undefined),
     queueGenerated: () => Promise.resolve(adjustment),
     get: () => Promise.resolve(adjustment),
+    edit: () => Promise.resolve(adjustment),
     approve: () => Promise.resolve(programme),
     reject: () => Promise.resolve(adjustment),
     ...overrides,

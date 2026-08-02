@@ -8,6 +8,7 @@ import type {
   contextTraceSchema,
   createCheckInRequestSchema,
   dailyAccountabilityJobRequestSchema,
+  editAdjustmentRequestSchema,
   editProgrammeRequestSchema,
   generateAdjustmentRequestSchema,
   generateProgrammeRequestSchema,
@@ -21,6 +22,7 @@ import type {
   listSessionsQuerySchema,
   logSessionRequestSchema,
   overrideProgrammeRequestSchema,
+  overrideAdjustmentRequestSchema,
   programmeReviewSchema,
   programmeSchema,
   reviewAdjustmentRequestSchema,
@@ -37,7 +39,9 @@ import { AgentRuntimeError } from "../agents/errors";
 import { type RunAccountabilityForClient } from "../application/accountability";
 import {
   type ApproveAdjustment,
+  type EditAdjustmentProposal,
   type GenerateAdjustment,
+  type OverrideBlockedAdjustment,
   type RejectAdjustment,
 } from "../application/adjustments";
 import { ApplicationError, type ExecutionContext } from "../application/core";
@@ -68,7 +72,10 @@ import {
   type LogSessionWork,
 } from "../application/sessions";
 import { DomainError } from "../domain/index";
-import { DatabaseInvariantError } from "../infrastructure/database/database-error";
+import {
+  DatabaseInvariantError,
+  isDatabaseDependencyUnavailable,
+} from "../infrastructure/database/database-error";
 import { type RunDailyAccountabilityJob } from "../jobs/daily-accountability";
 import { type RunWeeklyPlanJob } from "../jobs/weekly-plan";
 
@@ -90,6 +97,8 @@ type LogSessionInput = z.infer<typeof logSessionRequestSchema>;
 type CompleteSessionInput = z.infer<typeof completeSessionRequestSchema>;
 type CreateCheckInInput = z.infer<typeof createCheckInRequestSchema>;
 type GenerateAdjustmentInput = z.infer<typeof generateAdjustmentRequestSchema>;
+type EditAdjustmentInput = z.infer<typeof editAdjustmentRequestSchema>;
+type OverrideAdjustmentInput = z.infer<typeof overrideAdjustmentRequestSchema>;
 type ListAdjustmentsInput = z.infer<typeof listAdjustmentsQuerySchema>;
 type ReviewAdjustmentInput = z.infer<typeof reviewAdjustmentRequestSchema>;
 type RunAccountabilityInput = z.infer<typeof runAccountabilityRequestSchema>;
@@ -182,9 +191,19 @@ export interface BackendFacade {
       input: ListAdjustmentsInput,
       context: BackendRequestContext,
     ): Promise<z.infer<typeof adjustmentSchema>[]>;
+    edit(
+      adjustmentId: string,
+      input: EditAdjustmentInput,
+      context: BackendRequestContext,
+    ): Promise<z.infer<typeof adjustmentSchema>>;
     approve(
       adjustmentId: string,
       input: ReviewAdjustmentInput,
+      context: BackendRequestContext,
+    ): Promise<z.infer<typeof programmeSchema>>;
+    override(
+      adjustmentId: string,
+      input: OverrideAdjustmentInput,
       context: BackendRequestContext,
     ): Promise<z.infer<typeof programmeSchema>>;
     reject(
@@ -242,8 +261,10 @@ export interface BackendUseCases {
   readonly completeSession: CompleteSession;
   readonly createCheckIn: CreateCheckIn;
   readonly generateAdjustment: GenerateAdjustment;
+  readonly editAdjustment: EditAdjustmentProposal;
   readonly listAdjustments: ListAdjustments;
   readonly approveAdjustment: ApproveAdjustment;
+  readonly overrideAdjustment: OverrideBlockedAdjustment;
   readonly rejectAdjustment: RejectAdjustment;
   readonly getAccountability: GetAccountabilityState;
   readonly runAccountability: RunAccountabilityForClient;
@@ -274,6 +295,14 @@ function applicationError(error: unknown): ApplicationError | undefined {
   if (error instanceof AgentRuntimeError) {
     const code = error.code === "recording_prompt_mismatch" ? "recording_not_found" : error.code;
     return new ApplicationError(code, error.message, {}, { cause: error });
+  }
+  if (isDatabaseDependencyUnavailable(error)) {
+    return new ApplicationError(
+      "dependency_unavailable",
+      "A required service is temporarily unavailable.",
+      {},
+      { cause: error },
+    );
   }
   return undefined;
 }
@@ -408,6 +437,10 @@ export class ProductionBackendFacade implements BackendFacade {
             ...(input.status === undefined ? {} : { status: input.status }),
           })),
         ]),
+      edit: (adjustmentId, input, context) =>
+        this.invoke(context, () =>
+          this.useCases.editAdjustment.execute(adjustmentId, input, this.executionContext(context)),
+        ),
       approve: (adjustmentId, input, context) =>
         this.invoke(context, () =>
           this.useCases.approveAdjustment.execute(
@@ -416,6 +449,14 @@ export class ProductionBackendFacade implements BackendFacade {
               expectedVersion: input.expectedVersion,
               ...(input.reason === undefined ? {} : { reason: input.reason }),
             },
+            this.executionContext(context),
+          ),
+        ),
+      override: (adjustmentId, input, context) =>
+        this.invoke(context, () =>
+          this.useCases.overrideAdjustment.executeOverride(
+            adjustmentId,
+            input,
             this.executionContext(context),
           ),
         ),

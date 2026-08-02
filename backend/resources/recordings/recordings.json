@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "recordings": [
+    {
+      "schemaVersion": 1,
+      "id": "programme-baseline-v1",
+      "key": "programme.baseline",
+      "intent": "programme",
+      "promptVersion": "sha256:8d817f307e4b3f0f9e2f039084fdf769610cdd77c81ae39e0babf2c92fb7c679",
+      "model": "spotter-recorded-generator-v1",
+      "output": {
+        "payload": {
+          "summary": "Three sessions balance race preparation with the documented weekly schedule.",
+          "days": [
+            {
+              "dayIndex": 1,
+              "scheduledDate": "2026-08-03",
+              "focus": "Aerobic intervals",
+              "exercises": [
+                {
+                  "id": "00000000-0000-4000-8000-000000000301",
+                  "name": "Row ergometer intervals",
+                  "family": "horizontal_pull",
+                  "muscleGroups": ["back"],
+                  "sets": 4,
+                  "reps": 8,
+                  "rpe": 7,
+                  "restSeconds": 90,
+                  "notes": "Use the available row ergometer."
+                }
+              ]
+            }
+          ]
+        },
+        "citations": [
+          {
+            "sectionId": "ctx-02-goal-profile-equipment-schedule",
+            "recordIds": ["00000000-0000-4000-8000-000000000202"],
+            "claim": "The plan fits the documented goal, equipment, and weekly schedule."
+          }
+        ]
+      },
+      "usage": { "inputTokens": 420, "outputTokens": 180, "costUsd": 0 }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "adjustment-low-readiness-v1",
+      "key": "adjustment.low-readiness",
+      "intent": "adjustment",
+      "promptVersion": "sha256:5b852567148fd2d6a83ec856c8505fabea12f421f461d283993a60147f35f172",
+      "model": "spotter-recorded-generator-v1",
+      "output": {
+        "operations": [
+          {
+            "type": "reduce_volume",
+            "exerciseId": "00000000-0000-4000-8000-000000000301",
+            "setsToRemove": 1,
+            "rationale": "Readiness is below the configured adjustment threshold."
+          }
+        ],
+        "citations": [
+          {
+            "sectionId": "ctx-05-check-ins-metrics",
+            "recordIds": ["00000000-0000-4000-8000-000000000205"],
+            "claim": "The latest readiness check-in is low."
+          }
+        ]
+      },
+      "usage": { "inputTokens": 310, "outputTokens": 90, "costUsd": 0 }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "accountability-tier-1-v1",
+      "key": "accountability.tier-1",
+      "intent": "accountability",
+      "promptVersion": "sha256:6e6c9f7574d09d69054ce4f60389056602a1754b486a635166f932abd1807532",
+      "model": "spotter-recorded-generator-v1",
+      "output": {
+        "kind": "client_nudge",
+        "tier": 1,
+        "body": "You missed Tuesday's interval session. A short session today still supports your race goal.",
+        "citations": [
+          {
+            "sectionId": "ctx-04-recent-sessions-adherence",
+            "recordIds": ["00000000-0000-4000-8000-000000000204"],
+            "claim": "The scheduled interval session was missed."
+          }
+        ]
+      },
+      "usage": { "inputTokens": 260, "outputTokens": 70, "costUsd": 0 }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "accountability-tier-2-v1",
+      "key": "accountability.tier-2",
+      "intent": "accountability",
+      "promptVersion": "sha256:6e6c9f7574d09d69054ce4f60389056602a1754b486a635166f932abd1807532",
+      "model": "spotter-recorded-generator-v1",
+      "output": {
+        "kind": "reduced_plan_offer",
+        "tier": 2,
+        "body": "Two planned sessions were missed. The coach can review a reduced week that preserves the primary goal.",
+        "citations": [
+          {
+            "sectionId": "ctx-04-recent-sessions-adherence",
+            "recordIds": ["00000000-0000-4000-8000-000000000204"],
+            "claim": "Two due sessions were missed in the current window."
+          }
+        ]
+      },
+      "usage": { "inputTokens": 275, "outputTokens": 76, "costUsd": 0 }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "accountability-tier-3-v1",
+      "key": "accountability.tier-3",
+      "intent": "accountability",
+      "promptVersion": "sha256:6e6c9f7574d09d69054ce4f60389056602a1754b486a635166f932abd1807532",
+      "model": "spotter-recorded-generator-v1",
+      "output": {
+        "kind": "coach_context_brief",
+        "tier": 3,
+        "body": "Adherence is below half over fourteen days. Automated contact must remain paused while the coach follows up.",
+        "citations": [
+          {
+            "sectionId": "ctx-04-recent-sessions-adherence",
+            "recordIds": ["00000000-0000-4000-8000-000000000204"],
+            "claim": "Fourteen-day adherence is below the tier-three threshold."
+          }
+        ]
+      },
+      "usage": { "inputTokens": 290, "outputTokens": 82, "costUsd": 0 }
+    }
+  ]
+}

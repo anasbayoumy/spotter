@@ -13,5 +13,12 @@
     "strict": true,
     "types": ["vitest/globals"]
   },
-  "include": ["expo-env.d.ts", "src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"]
+  "include": [
+    "expo-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    "vitest.coverage.config.ts"
+  ]
 }

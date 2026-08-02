@@ -141,6 +141,7 @@ describe("overflow ordering across application workflows", () => {
     let queueCalls = 0;
     const adjustments: AdjustmentPort = {
       approve: () => Promise.reject(new Error("unused")),
+      edit: () => Promise.reject(new Error("unused")),
       get: () => Promise.resolve(undefined),
       list: () => Promise.resolve([]),
       queueGenerated: () => {

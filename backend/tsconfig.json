@@ -8,8 +8,9 @@
   "include": [
     "src/**/*.ts",
     "tests/**/*.ts",
+    "vitest.coverage.config.ts",
     "vitest.unit.config.ts",
     "vitest.mutation.config.ts",
-    "../fixtures/demo/**/*.ts"
+    "resources/demo/**/*.ts"
   ]
 }

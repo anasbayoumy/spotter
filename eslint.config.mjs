@@ -7,6 +7,7 @@ export default tseslint.config(
   {
     ignores: [
       "**/.next/**",
+      "**/.cache/**",
       "**/.expo/**",
       "**/.stryker-tmp/**",
       "**/.turbo/**",
@@ -14,6 +15,7 @@ export default tseslint.config(
       "**/build/**",
       "**/coverage/**",
       "**/dist/**",
+      "**/DOCS/release/evidence/**",
       "**/node_modules/**",
       "**/playwright-report/**",
       "**/test-results/**",
@@ -79,7 +81,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["backend/**/*.ts", "packages/**/*.ts", "tests/**/*.ts"],
+    files: ["backend/**/*.ts", "tests/**/*.ts"],
     languageOptions: {
       globals: { ...globals.node, ...globals.es2024 },
     },

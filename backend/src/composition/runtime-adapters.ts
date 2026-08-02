@@ -158,6 +158,7 @@ export class DatabaseContextAssembler implements ContextAssemblerPort {
             id: checkIn.id,
             source: "check_in",
             value: {
+              body: checkIn.body,
               latencyHours: checkIn.latencyHours,
               readiness: checkIn.readiness,
               respondedAt: checkIn.respondedAt.toISOString(),

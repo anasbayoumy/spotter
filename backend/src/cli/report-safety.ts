@@ -16,7 +16,7 @@ import {
 } from "../evals/safety/movement-taxonomy.js";
 
 const applicationRoot = fileURLToPath(new URL("../../../", import.meta.url));
-const manifestPath = path.join(applicationRoot, "fixtures/golden/safety/manifest.json");
+const manifestPath = path.join(applicationRoot, "backend/resources/golden/safety/manifest.json");
 const rawManifest = await readFile(manifestPath, "utf8");
 const manifest = goldenManifestSchema.parse(JSON.parse(rawManifest) as unknown);
 const generatedAt = new Date();

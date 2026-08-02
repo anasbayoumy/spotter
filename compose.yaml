@@ -17,6 +17,9 @@ x-app-environment: &app-environment
   DEMO_CLIENT_ID: ${DEMO_CLIENT_ID:-00000000-0000-4000-8000-000000000101}
   DEMO_COACH_ID: ${DEMO_COACH_ID:-00000000-0000-4000-8000-000000000001}
   LOG_LEVEL: ${LOG_LEVEL:-info}
+  SPOTTER_QA_PROJECT: ${SPOTTER_QA_PROJECT:-}
+  SPOTTER_QA_RUN_ID: ${SPOTTER_QA_RUN_ID:-}
+  SPOTTER_RATE_LIMIT_PROFILE: ${SPOTTER_RATE_LIMIT_PROFILE:-default}
 
 services:
   postgres:
@@ -26,7 +29,7 @@ services:
       - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - spotter-postgres:/var/lib/postgresql/data
-      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./backend/infra/postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d spotter"]
       interval: 2s
@@ -40,13 +43,16 @@ services:
   test-postgres:
     image: pgvector/pgvector:pg16
     profiles: ["test"]
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
     environment: *postgres-environment
     ports:
       - "127.0.0.1:${POSTGRES_TEST_PORT:-5433}:5432"
-    tmpfs:
-      - /var/lib/postgresql/data
     volumes:
-      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+      - spotter-test-postgres:/var/lib/postgresql/data
+      - ./backend/infra/postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d spotter"]
       interval: 1s
@@ -66,6 +72,11 @@ services:
       postgres:
         condition: service_healthy
     restart: "no"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    cap_drop:
+      - ALL
     security_opt:
       - no-new-privileges:true
 
@@ -79,6 +90,11 @@ services:
       migrate:
         condition: service_completed_successfully
     restart: "no"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    cap_drop:
+      - ALL
     security_opt:
       - no-new-privileges:true
 
@@ -89,6 +105,9 @@ services:
     environment:
       <<: *app-environment
       HOSTNAME: 0.0.0.0
+      NODE_OPTIONS: >-
+        --report-on-signal --report-directory=/tmp --report-filename=spotter-process-report.json
+        --report-exclude-env
       PORT: 3000
     depends_on:
       migrate:
@@ -98,9 +117,10 @@ services:
     healthcheck:
       test:
         [
-          "CMD-SHELL",
-          'node -e
-          "fetch(''http://127.0.0.1:3000/health/ready'').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"',
+          "CMD",
+          "/nodejs/bin/node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
         ]
       interval: 5s
       timeout: 3s
@@ -109,10 +129,16 @@ services:
     init: true
     restart: unless-stopped
     read_only: true
+    mem_limit: 1g
+    cpus: 2
+    stop_grace_period: 20s
     tmpfs:
-      - /tmp
+      - /tmp:rw,noexec,nosuid,size=128m
+    cap_drop:
+      - ALL
     security_opt:
       - no-new-privileges:true
 
 volumes:
   spotter-postgres:
+  spotter-test-postgres:

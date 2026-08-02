@@ -2,10 +2,10 @@
 
 ## Fixture contract
 
-`fixtures/golden/safety/manifest.json` is the machine-readable source for these cases. Each fixture
-has immutable `id`, `schemaVersion`, `asOf`, `clientTimezone`, input records, recorded agent output
-or event, expected selected record IDs, expected gate results, expected review band/outcome, and an
-explanation. Runtime-generated personas are prohibited: fixtures are committed and reviewed.
+`backend/resources/golden/safety/manifest.json` is the machine-readable source for these cases. Each
+fixture has immutable `id`, `schemaVersion`, `asOf`, `clientTimezone`, input records, recorded agent
+output or event, expected selected record IDs, expected gate results, expected review band/outcome,
+and an explanation. Runtime-generated personas are prohibited: fixtures are committed and reviewed.
 
 The runner validates the fixture itself before running production code. Every case executes with a
 frozen UTC clock and stable IDs. When a fixture expects unsafe output, success means the named gate
